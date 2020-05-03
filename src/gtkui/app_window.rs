@@ -38,13 +38,13 @@ pub struct AppState {
     max_spinner: SpinButton,
 
     // Model members
-    thermogram: XenicsThermogram,
+    thermogram: FlirThermogram,
     render_sender: SyncSender<(Bytes, usize, usize, f64)>,
     //rx: glib::Receiver<glib::Bytes>,
 }
 
 impl AppState {
-    pub fn new(application: &Application, thermogram: XenicsThermogram) -> AppState {
+    pub fn new(application: &Application, thermogram: FlirThermogram) -> AppState {
         // Load application
         let builder = Builder::new_from_file("src/gtkui/app_window.ui");
         builder.set_application(application);

@@ -15,8 +15,9 @@ use gtk::*;
 pub fn main() {
     // Access CLI arg
     let args: Vec<String> = env::args().collect();
-    println!("{:?}", &args[1]);
-    let fp = Path::new(&args[1]);
+    //println!("{:?}", &args[1]);
+    //let fp = Path::new(&args[1]);
+    let fp = Path::new("/home/anieuwland/Afbeeldingen/FLIR9139.jpg");
 
     // Load thermogram and render to pixbuf
     let thermogram = load_thermogram(&fp);
@@ -31,8 +32,8 @@ pub fn main() {
     application.run(&[]);
 }
 
-fn load_thermogram(fp: &Path) -> XenicsThermogram {
-    let thermogram = XenicsThermogram::new_from_path(fp).unwrap();
+fn load_thermogram(fp: &Path) -> FlirThermogram {
+    let thermogram = FlirThermogram::new_from_path(fp).unwrap();
     println!();
     println!("Identifier: {:?}", thermogram.identifier());
     println!("Thermal shape: {:?}", thermogram.thermal_shape());
