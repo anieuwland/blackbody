@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.22.2 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkImage" id="fullscreen_img">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">emblem-symbolic-link</property>
+    <property name="use_fallback">True</property>
+  </object>
+  <object class="GtkImage" id="hamburger_menu_img">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">format-justify-fill</property>
+    <property name="use_fallback">True</property>
+  </object>
+  <object class="GtkAdjustment" id="max_temp_adjustment">
+    <property name="lower">-99.900000000000006</property>
+    <property name="upper">99.900000000000006</property>
+    <property name="step_increment">0.5</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="min_temp_adjustment">
+    <property name="lower">-99.900000000000006</property>
+    <property name="upper">99.900000000000006</property>
+    <property name="step_increment">0.5</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="zoom_adjustment">
+    <property name="upper">2000</property>
+    <property name="value">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkApplicationWindow" id="fikkie_window">
+    <property name="can_focus">False</property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="headerbar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="title" translatable="yes">Warmtebeeldweergave</property>
+        <property name="show_close_button">True</property>
+        <child>
+          <object class="GtkSpinButton" id="min_temp_spinner">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="max_length">5</property>
+            <property name="width_chars">5</property>
+            <property name="max_width_chars">5</property>
+            <property name="text" translatable="yes">°C</property>
+            <property name="xalign">1</property>
+            <property name="caps_lock_warning">False</property>
+            <property name="input_purpose">digits</property>
+            <property name="adjustment">min_temp_adjustment</property>
+            <property name="climb_rate">0.5</property>
+            <property name="digits">1</property>
+            <property name="numeric">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="max_temp_spinner">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="max_length">5</property>
+            <property name="width_chars">5</property>
+            <property name="max_width_chars">5</property>
+            <property name="xalign">1</property>
+            <property name="caps_lock_warning">False</property>
+            <property name="input_purpose">digits</property>
+            <property name="adjustment">max_temp_adjustment</property>
+            <property name="climb_rate">0.5</property>
+            <property name="digits">1</property>
+            <property name="numeric">True</property>
+            <signal name="value-changed" handler="test" swapped="no"/>
+          </object>
+          <packing>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">hamburger_menu_img</property>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="maximize_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="image">fullscreen_img</property>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="zoom_spinner">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="max_length">6</property>
+            <property name="width_chars">6</property>
+            <property name="max_width_chars">6</property>
+            <property name="xalign">1</property>
+            <property name="adjustment">zoom_adjustment</property>
+            <property name="value">100</property>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="shadow_type">in</property>
+        <child>
+          <object class="GtkViewport">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkEventBox" id="viewed_image_events">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="events">GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK</property>
+                <child>
+                  <object class="GtkImage" id="viewed_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-missing-image</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
