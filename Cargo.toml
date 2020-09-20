@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 tiff = { git = 'https://github.com/image-rs/image-tiff/' }
+byteorder = "*"
 ndarray = "0.13.0"
 ndarray-stats = "0.3.0"
 

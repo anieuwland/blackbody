@@ -14,7 +14,7 @@ use gtk::*;
 
 pub fn main() {
     // Access CLI arg
-    let args: Vec<String> = env::args().collect();
+    let _args: Vec<String> = env::args().collect();
     //println!("{:?}", &args[1]);
     //let fp = Path::new(&args[1]);
     let fp = Path::new("/home/anieuwland/Afbeeldingen/FLIR9139.jpg");

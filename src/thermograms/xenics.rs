@@ -15,8 +15,8 @@ pub struct XenicsThermogram {
 }
 
 impl XenicsThermogram {
-    pub fn new_from_path(file_path: &Path) -> Option<XenicsThermogram> {
-        let thermal = XenicsThermogram::read_thermal(file_path).unwrap();
+    pub fn _new_from_path(file_path: &Path) -> Option<XenicsThermogram> {
+        let thermal = XenicsThermogram::_read_thermal(file_path).unwrap();
 
         Some(XenicsThermogram {
             thermal: thermal,
@@ -24,7 +24,7 @@ impl XenicsThermogram {
         })
     }
 
-    fn read_thermal(file_path: &Path) -> Option<Array<f32, Ix2>> {
+    fn _read_thermal(file_path: &Path) -> Option<Array<f32, Ix2>> {
         return XenicsThermogram::_read_thermal_libtiff(file_path);
     }
 
