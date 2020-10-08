@@ -9,6 +9,7 @@ tiff = { git = 'https://github.com/image-rs/image-tiff/' }
 byteorder = "*"
 ndarray = "0.13.0"
 ndarray-stats = "0.3.0"
+binread = "1.1.1"
 
 [dependencies.gtk]
 version = "0.8.1"
