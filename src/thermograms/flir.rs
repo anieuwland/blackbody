@@ -10,15 +10,16 @@
 
 
 use std::io;
-use std::fs::File;
-use std::io::Read;
-use std::io::Seek;
+use std::io::SeekFrom;
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
 
 use ndarray::*;
-use byteorder::{BigEndian, ReadBytesExt};
 use binread::*;
+use binread::io::Read;
+use binread::io::Seek;
+use image::load_from_memory;
+use image::guess_format;
 
 use super::thermogram::Thermogram;
 
@@ -68,17 +69,16 @@ impl Thermogram for FlirThermogram {
 
 
 fn try_read_thermal(file_path: &Path) -> Result<Array<f32, Ix2>, io::Error> {
-    let mut stream = File::open(file_path)?;
-    read_flir_jpeg_stream(&mut stream)
+    let bytes = std::fs::read(file_path)?;
+    read_flir_jpeg_stream(&mut bytes.as_slice())
 }
 
 
-fn read_flir_jpeg_stream(stream: &mut File) -> Result<Array<f32, Ix2>, io::Error> {
-    let mut magic_bytes = [0; 2];
-    stream.read(&mut magic_bytes)?;
+fn read_flir_jpeg_stream(bytes: &[u8]) -> Result<Array<f32, Ix2>, io::Error> {
+    let magic_bytes = &bytes[0..2];
     println!("MAGIC BYTES {:?}", magic_bytes);
 
-    let app1 = extract_flir_app1(stream)?;
+    let app1 = extract_flir_app1(bytes)?;
     println!("APP1 LENGTH! {:?}", app1.len());
 
     Ok(arr2(&[[1.,2.,3.], [4.,5.,6.]]))
@@ -173,14 +173,12 @@ struct FlirRawData {
     raw_thermal_image: Vec<u8>,
 }
 
-fn extract_flir_app1(file: &mut File) -> Result<Vec<u8>, io::Error> {
+fn extract_flir_app1(bytes: &[u8]) -> Result<Vec<u8>, io::Error> {
     // TODO rewrite stream variable to actually be a stream, not a File
     // TODO handle unwrap
-    let mut bytes: Vec<u8> = Vec::with_capacity(file.metadata().unwrap().len() as usize);
-    file.read_to_end(&mut bytes)?;
     let mut flir_app1_bytes = Vec::new();
 
-    for (idx, byte) in bytes.iter().enumerate() {
+    for (idx, byte) in bytes.into_iter().enumerate() {
         if byte != &b'\xff' { continue }
 
         let mut c = Cursor::new(&bytes[idx..]);
@@ -201,11 +199,13 @@ fn extract_flir_app1(file: &mut File) -> Result<Vec<u8>, io::Error> {
     while let Ok(record) = c.read_be::<FlirRecord>() {
         println!("RECORD OFFSET {:?}, NUM ENTRIES {:?}", record.offset_record, record.num_record_entries);
         let mut cursor = Cursor::new(&flir_app1_bytes);
-        cursor.seek(SeekFrom::Current(record.offset_record as i64));
+        cursor.seek(SeekFrom::Current(record.offset_record as i64))?;
 
-        let mut dir_bytes_buf = vec![];
-        let mut dir_bytes_take = cursor.take(32u64 * record.num_record_entries as u64);
-        dir_bytes_take.read_to_end(&mut dir_bytes_buf);
+        let capacity = 32usize * record.num_record_entries as usize;
+        let mut dir_bytes_buf = vec![0u8; capacity];
+        println!("{:?}", dir_bytes_buf);
+        cursor.read(dir_bytes_buf.as_mut_slice())?;
+        println!("{:?}", dir_bytes_buf);
         let mut dir_bytes = Cursor::new(&dir_bytes_buf);
         while let Ok(e_entry_md) = dir_bytes.read_be::<FlirRecordEntryMetadata>() {
             match e_entry_md.record_type {
@@ -225,6 +225,7 @@ fn extract_flir_app1(file: &mut File) -> Result<Vec<u8>, io::Error> {
                                 e_entry_md.length,
                                 raw_data.raw_thermal_image.len(),
                             );
+                            println!("IMG: {:?}", guess_format(raw_data.raw_thermal_image.as_slice()));
                         },
                         _ => continue
                     }
@@ -234,8 +235,8 @@ fn extract_flir_app1(file: &mut File) -> Result<Vec<u8>, io::Error> {
                     let start = (e_entry_md.offset + 32) as usize;
                     //let end = e_entry_md.length as usize;
                     //let camera_info_slice = &flir_app1_bytes[start..end];
-                    c.seek(SeekFrom::Start(start as u64));
-                    let e_camera_info: FlirCameraInfo = c.read_be().unwrap();
+                    c.seek(SeekFrom::Start(start as u64))?;
+                    let _e_camera_info: FlirCameraInfo = c.read_be().unwrap();
                     // println!("{:?}", e_camera_info);
                 },
                 _ => println!("UNKNOWN RECORD TYPE"),
@@ -247,57 +248,16 @@ fn extract_flir_app1(file: &mut File) -> Result<Vec<u8>, io::Error> {
     Ok(flir_app1_bytes)
 }
 
-
-fn parse_flir_chunk(bytes: &[u8]) -> Result<(u8, &[u8]), std::io::Error> {
-    // TODO handle inconsistencies between array length and read bytes length
-    let app1_marker = b"\xe1";
-    let magic_flir = b"FLIR\x00";
-    let chunk_metadata_length = 11;  //1+2+5+1+1+1
-
-    let mut potential_app1_marker = [0; 1];
-    let mut chunk_length_buf = [0; 2];
-    let mut potential_magic_flir = [0; 5];
-
-    let mut stream = bytes;
-    stream.read(&mut potential_app1_marker)?;
-    stream.read(&mut chunk_length_buf)?;
-    stream.read(&mut potential_magic_flir)?;
-
-    if potential_app1_marker != *app1_marker || potential_magic_flir != *magic_flir {
-        return Err(io::Error::new(io::ErrorKind::Other, "Chunk header invalid"));
+fn raw_thermal_parser<R: Read + Seek>(reader: &mut R, _ro: &ReadOptions, _: ()) -> BinResult<Vec<u8>> {
+    let mut buf = [0; 1]; // TODO Make buf a larger, more reasonable size and truncate when smaller
+    let mut raw_thermal = Vec::new();
+    while let Ok(read_length) = reader.read(&mut buf) {
+        if read_length != buf.len() {
+           println!("Read amount different from specified! {:?} != {:?}", read_length, buf.len());
+           break;
+        }
+        raw_thermal.push(buf[0]);
     }
-
-    // Read a single byte to skip. We don't care about the data in there
-    stream.read(&mut potential_app1_marker)?;
-
-    // Read chunk details: which chunk it is, how many there are in total and
-    // check whether that matches with what we know so far
-    let mut chunk_num = [0; 1];
-    let mut chunks_count = [0; 1];
-    stream.read(&mut chunk_num)?;
-    stream.read(&mut chunks_count)?;  // TODO use
-
-    // TODO keep track of chunks_count
-    // let mut o_chunks_count = Some(chunks_count[0]);
-    // if _chunks_count == &mut None {
-    //     println!("No chunk count known!");
-    //     _chunks_count = &mut o_chunks_count;
-    // }
-    // else if _chunks_count != &mut o_chunks_count {
-    //     return Err(io::Error::new(io::ErrorKind::Other, "Inconsistent total chunks count"));
-    // }
-
-    // let mut chunk_bytes = Vec::with_capacity(chunk_length as usize);
-    let chunk_length = chunk_length_buf.as_ref().read_u16::<BigEndian>().unwrap() - chunk_metadata_length;
-    let chunk_bytes = &stream[..chunk_length.into()];
-    println!("READ CHUNK NO {:?}/{:?} OF LENGTH {:?} =? {:?}",
-        chunk_num[0], chunks_count[0], chunk_length as usize, chunk_bytes.len());
-
-    return Ok((chunk_num[0], chunk_bytes))
+    Ok(raw_thermal)
 }
 
-fn raw_thermal_parser<R>(reader: &mut R, ro: &ReadOptions, _: ()) -> BinResult<Vec<u8>>
-where R: Read + Seek {
-    let mut vec = Vec::new();
-    Ok(vec)
-}
