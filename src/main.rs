@@ -33,7 +33,7 @@ pub fn main() {
 }
 
 fn load_thermogram(fp: &Path) -> FlirThermogram {
-    let thermogram = FlirThermogram::new_from_path(fp).unwrap();
+    let thermogram = FlirThermogram::from_file(fp).unwrap();
     println!();
     println!("Identifier: {:?}", thermogram.identifier());
     println!("Thermal shape: {:?}", thermogram.thermal_shape());
