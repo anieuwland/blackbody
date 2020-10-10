@@ -11,9 +11,9 @@ pub struct FlirThermogram {
     file_path: PathBuf,
 }
 
+#[allow(dead_code)]
 impl FlirThermogram {
     pub fn from_file(file_path: &Path) -> Option<FlirThermogram> {
-        println!("Reading {:?}", file_path);
         let thermogram = FlirThermogram::read_thermal(file_path);
         thermogram
     }

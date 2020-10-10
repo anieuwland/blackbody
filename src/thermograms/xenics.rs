@@ -11,6 +11,7 @@ pub struct XenicsThermogram {
     file_path: PathBuf,
 }
 
+#[allow(dead_code)]
 impl XenicsThermogram {
     pub fn from_file(file_path: &Path) -> Option<XenicsThermogram> {
         let thermal = XenicsThermogram::_read_thermal(file_path).unwrap();

@@ -28,7 +28,6 @@ pub fn try_parse_flir(file_path: &Path) -> Result<Array<f32, Ix2>, io::Error> {
 
 
 fn read_flir_jpeg_stream(bytes: &[u8]) -> Result<Array<f32, Ix2>, io::Error> {
-    let magic_bytes = &bytes[0..2];
     let app1 = extract_flir_app1(bytes)?;
     let record_directory = parse_record_directory(&app1.as_slice())?;
 
@@ -146,8 +145,8 @@ fn parse_thermal(raw_data: &FlirRawData, cam_info: &FlirCameraInfo) -> Result<Ar
             let arr = arr.map(|x| (x >> 8) + ((x & 0x00FF) << 8));
 
             let shape = (
-                raw_data.raw_thermal_image_width.into(),
                 raw_data.raw_thermal_image_height.into(),
+                raw_data.raw_thermal_image_width.into(),
             );
             let arr = arr.into_shape(shape).unwrap(); // FIXME unwrap
             let arr = translate_raw2kelvin(arr, cam_info);
@@ -264,6 +263,7 @@ fn raw_thermal_parser<R: Read + Seek>(reader: &mut R, _ro: &ReadOptions, _: ()) 
 }
 
 
+#[allow(dead_code)]
 #[derive(BinRead)]
 #[br(magic = b"\xff\xe1", assert(&magic_flir == b"FLIR\x00"))]
 struct FlirApp1Chunk {
@@ -276,6 +276,7 @@ struct FlirApp1Chunk {
     data: Vec<u8>,
 }
 
+#[allow(dead_code)]
 #[derive(BinRead)]
 #[br(magic = b"FFF\0")]
 struct FlirRecord {
@@ -290,6 +291,7 @@ struct FlirRecord {
     checksum: u32,
 }
 
+#[allow(dead_code)]
 #[derive(BinRead)]
 struct FlirRecordEntryMetadata {
     record_type: u16,
@@ -331,13 +333,14 @@ struct FlirCameraInfo {
     planck_r2: f32,
 }
 
+#[allow(dead_code)]
 #[derive(BinRead)]
 struct FlirRawData {
     #[br(pad_before = 2)]
     #[br(little)]
-    raw_thermal_image_height: u16,
-    #[br(little)]
     raw_thermal_image_width: u16,
+    #[br(little)]
+    raw_thermal_image_height: u16,
     raw_thermal_image_type: u16,
     #[br(pad_before = 24)]
     #[br(parse_with = raw_thermal_parser)]

@@ -105,6 +105,7 @@ impl AppState {
             this.headerbar.set_title(Some(&this.thermogram.identifier()));
             app.add_window(&this.window);
 
+            #[allow(unused)]
             this.min_spinner.connect_output(
                 clone!(@strong this => move |min_spinner| {
                     min_spinner.set_text(&format!("{:?} °C", min_spinner.get_value()));
