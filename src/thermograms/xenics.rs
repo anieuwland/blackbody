@@ -1,12 +1,9 @@
 use std::fs::File;
 use std::path::{Path, PathBuf};
-
 use ndarray::*;
-//use image::GenericImageView;
-//use opencv::imgcodecs::imread;
-//use opencv::prelude::*;
 
-use super::thermogram::Thermogram;
+use crate::thermogram::Thermogram;
+
 
 #[derive(Debug, Clone)]
 pub struct XenicsThermogram {
@@ -27,55 +24,6 @@ impl XenicsThermogram {
     fn _read_thermal(file_path: &Path) -> Option<Array<f32, Ix2>> {
         return XenicsThermogram::_read_thermal_libtiff(file_path);
     }
-
-//    fn _read_thermal_libimage(file_path: &Path) -> Option<Array<f32, Ix2>> {
-//        let img = image::open(file_path).unwrap(); // FIXME
-//        let dims = img.dimensions();
-
-//        let values: Vec<f32> = img
-//            .as_flat_samples_u16()?
-//            .to_vec()
-//            .samples
-//            .into_iter()
-//            .map(|integer| integer as f32)
-//            .collect();
-
-//        let thermal = ndarray::ArrayBase::from(values);
-//        let thermal = thermal
-//            .into_shape((dims.1 as usize, dims.0 as usize))
-//            .unwrap();
-
-//        let thermal = thermal - 27315.0;
-//        let thermal = thermal / 100.0;
-
-//        Some(thermal)
-//    }
-
-//    fn _read_thermal_libcv(file_path: &Path) -> Option<Array<f32, Ix2>> {
-//        let path_str = file_path.to_str().unwrap();
-//        let data = imread(path_str, 2).unwrap();
-//        println!(
-//            "Reading Xenics file: {:?} dims, {:?}×{:?}",
-//            data.dims(),
-//            data.cols(),
-//            data.rows()
-//        );
-
-//        let dim = Dim([data.rows() as usize, data.cols() as usize]);
-//        let mut thermal: Array<f32, Ix2> = Array::ones(dim);
-
-//        for y in 0..data.rows() {
-//            for x in 0..data.cols() {
-//                let val = data.at_2d::<u16>(y, x).unwrap();
-//                thermal[[y as usize, x as usize]] = (*val) as f32;
-//            }
-//        }
-
-//        let thermal = thermal - 27315.0;
-//        let thermal = thermal / 100.0;
-
-//        Some(thermal)
-//    }
 
     fn _read_thermal_libtiff(file_path: &Path) -> Option<Array<f32, Ix2>> {
         let file = File::open(file_path).unwrap();

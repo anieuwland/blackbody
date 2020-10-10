@@ -8,165 +8,20 @@
 // https://crates.io/crates/implex
 // https://github.com/vadixidav/exifsd https://docs.rs/exifsd/0.1.0/exifsd/
 
-
-use std::io;
-use std::io::SeekFrom;
-use std::io::Cursor;
-use std::path::{Path, PathBuf};
-use std::collections::HashMap;
-
 use ndarray::*;
 use binread::*;
 use binread::io::Read;
 use binread::io::Seek;
 
-use super::thermogram::Thermogram;
+
+use std::io;
+use std::io::SeekFrom;
+use std::io::Cursor;
+use std::path::Path;
+use std::collections::HashMap;
 
 
-#[derive(Debug, Clone)]
-pub struct FlirThermogram {
-    thermal: Array<f32, Ix2>,
-    file_path: PathBuf,
-}
-
-impl FlirThermogram {
-    pub fn from_file(file_path: &Path) -> Option<FlirThermogram> {
-        println!("Reading {:?}", file_path);
-        let thermogram = FlirThermogram::read_thermal(file_path);
-        thermogram
-    }
-
-    fn read_thermal(file_path: &Path) -> Option<FlirThermogram> {
-        let r_kelvin = try_read_thermal(file_path);
-        match r_kelvin {
-            Ok(kelvin) => Some(FlirThermogram {
-                thermal: kelvin - 275.15,
-                file_path: (*file_path).to_path_buf(),
-            }),
-            _ => None,
-        }
-    }
-
-    fn celsius(&self) -> Array<f32, Ix2> {
-        self.thermal.clone()
-    }
-
-    fn kelvin(&self) -> Array<f32, Ix2> {
-        self.thermal.clone() + 273.15
-    }
-}
-
-impl Thermogram for FlirThermogram {
-    fn identifier(&self) -> String {
-        // FIXME unwraps
-        //self.file_path.file_name().unwrap().to_str().unwrap().to_string();
-        let file_name = self.file_path.file_name();
-        file_name.unwrap().to_os_string().into_string().unwrap()
-    }
-
-    fn thermal(&self) -> &Array<f32, Ix2> {
-        &self.thermal
-    }
-
-    fn optical(&self) -> Option<&Array<u8, Ix3>> {
-        None
-    }
-}
-
-impl From<&FlirThermogram> for Array<f32, Ix2> {
-    fn from(thermogram: &FlirThermogram) -> Array<f32, Ix2> {
-        thermogram.celsius()
-    }
-}
-
-impl From<FlirThermogram> for Array<f32, Ix2> {
-    fn from(thermogram: FlirThermogram) -> Array<f32, Ix2> {
-        thermogram.celsius()
-    }
-}
-
-#[derive(BinRead)]
-#[br(magic = b"\xff\xe1", assert(&magic_flir == b"FLIR\x00"))]
-struct FlirApp1Chunk {
-    length: u16,
-    magic_flir: [u8; 5],
-    skip_byte: u8,
-    chunk_idx: u8,
-    num_chunks: u8,
-    #[br(big, count = length - 10)]
-    data: Vec<u8>,
-}
-
-#[derive(BinRead)]
-#[br(magic = b"FFF\0")]
-struct FlirRecord {
-    creator: [u8; 16],
-    file_format_version: u32,
-    offset_record: u32,
-    num_record_entries: u32,
-    next_free_idx: u32,
-    swap_pattern: u16,
-    spares: [u16; 7],
-    reserved: [u32; 2],
-    checksum: u32,
-}
-
-#[derive(BinRead)]
-struct FlirRecordEntryMetadata {
-    record_type: u16,
-    record_subtype: u16,
-    record_version: u32,
-    index_id: u32,
-    offset: u32,
-    length: u32,
-    parent: u32,
-    object_number: u32,
-    checksum: u32,
-}
-
-#[derive(Debug)]
-#[derive(BinRead)]
-#[br(little)]
-struct FlirCameraInfo {
-    #[br(pad_before = 32)]
-    emissivity: f32,
-    object_distance: f32,
-    reflected_apparant_temperature: f32,
-    atmospheric_temperature: f32,
-    ir_window_temperature: f32,
-    ir_window_transmission: f32,
-    #[br(pad_before = 4)]
-    relative_humidity: f32,
-    #[br(pad_before = 24)]
-    planck_r1: f32,
-    planck_b: f32,
-    planck_f: f32,
-    #[br(pad_before = 12)]
-    atmospheric_trans_alpha1: f32,
-    atmospheric_trans_alpha2: f32,
-    atmospheric_trans_beta1: f32,
-    atmospheric_trans_beta2: f32,
-    atmospheric_trans_x: f32,
-    #[br(pad_before = 644)]
-    planck_o: i32,  // TODO CHECK
-    planck_r2: f32,
-}
-
-#[derive(BinRead)]
-struct FlirRawData {
-    #[br(pad_before = 2)]
-    #[br(little)]
-    raw_thermal_image_height: u16,
-    #[br(little)]
-    raw_thermal_image_width: u16,
-    raw_thermal_image_type: u16,
-    #[br(pad_before = 24)]
-    #[br(parse_with = raw_thermal_parser)]
-    raw_thermal_image: Vec<u8>,
-}
-
-
-fn try_read_thermal(file_path: &Path) -> Result<Array<f32, Ix2>, io::Error> {
+pub fn try_parse_flir(file_path: &Path) -> Result<Array<f32, Ix2>, io::Error> {
     let bytes = std::fs::read(file_path)?;
     read_flir_jpeg_stream(&mut bytes.as_slice())
 }
@@ -174,13 +29,8 @@ fn try_read_thermal(file_path: &Path) -> Result<Array<f32, Ix2>, io::Error> {
 
 fn read_flir_jpeg_stream(bytes: &[u8]) -> Result<Array<f32, Ix2>, io::Error> {
     let magic_bytes = &bytes[0..2];
-    println!("MAGIC BYTES {:?}", magic_bytes);
-
     let app1 = extract_flir_app1(bytes)?;
-    println!("APP1 LENGTH! {:?}", app1.len());
-
     let record_directory = parse_record_directory(&app1.as_slice())?;
-    println!("PARSING RECORD DIRECTORY");
 
     let dir_entries = parse_dir_entries(&app1.as_slice(), &record_directory);
     let o_enum_raw_data = dir_entries.get(&1);
@@ -203,11 +53,8 @@ fn extract_flir_app1(bytes: &[u8]) -> Result<Vec<u8>, io::Error> {
 
         let mut c = Cursor::new(&bytes[idx..]);
         match c.read_be::<FlirApp1Chunk>() {
-            Ok(chunk) => {
-                println!("CHUNK {:?} {:?} {:?}", chunk.length, chunk.chunk_idx, chunk.num_chunks);
-                flir_app1_bytes.extend(chunk.data);
-            }
-            _ => continue,
+            Ok(chunk) => flir_app1_bytes.extend(chunk.data),
+            _ => (),
         }
     }
 
@@ -218,7 +65,6 @@ fn parse_record_directory(bytes: &[u8]) -> Result<Vec<FlirRecordEntryMetadata>, 
     let mut c = Cursor::new(&bytes);
     let mut record_directory = Vec::with_capacity(10);
     while let Ok(record) = c.read_be::<FlirRecord>() {
-        println!("RECORD OFFSET {:?}, NUM ENTRIES {:?}", record.offset_record, record.num_record_entries);
         let mut cursor = Cursor::new(&bytes);
         cursor.seek(SeekFrom::Current(record.offset_record as i64))?;
 
@@ -261,7 +107,6 @@ fn parse_dir_entry(bytes: &[u8], metadata: &FlirRecordEntryMetadata) -> Result<F
 }
 
 fn parse_raw_data(bytes: &[u8], metadata: &FlirRecordEntryMetadata) -> Result<FlirRawData, io::Error> { // Array<f32, Ix2>
-    println!("PROCESSING RAW DATA");
     let start = metadata.offset as usize;
     let end = start + metadata.length as usize;
     let raw_data_bytes = &bytes[start..end];  // flir_app1_bytes
@@ -281,7 +126,6 @@ fn parse_raw_data(bytes: &[u8], metadata: &FlirRecordEntryMetadata) -> Result<Fl
 fn parse_camera_info(
     bytes: &[u8], metadata: &FlirRecordEntryMetadata
 ) -> Result<FlirCameraInfo, io::Error> {
-    println!("PROCESSING CAMERA INFO");
     let start = metadata.offset as usize;
     let end = metadata.length as usize;
     let camera_info_bytes = &bytes[start..end];
@@ -300,8 +144,6 @@ fn parse_thermal(raw_data: &FlirRawData, cam_info: &FlirCameraInfo) -> Result<Ar
             }
             let arr = Array::from(vals);
             let arr = arr.map(|x| (x >> 8) + ((x & 0x00FF) << 8));
-
-            println!("{:?} {:?} {:?} {:?}", arr, arr.ndim(), arr.len(), arr.shape());
 
             let shape = (
                 raw_data.raw_thermal_image_width.into(),
@@ -421,3 +263,83 @@ fn raw_thermal_parser<R: Read + Seek>(reader: &mut R, _ro: &ReadOptions, _: ()) 
     Ok(raw_thermal)
 }
 
+
+#[derive(BinRead)]
+#[br(magic = b"\xff\xe1", assert(&magic_flir == b"FLIR\x00"))]
+struct FlirApp1Chunk {
+    length: u16,
+    magic_flir: [u8; 5],
+    skip_byte: u8,
+    chunk_idx: u8,
+    num_chunks: u8,
+    #[br(big, count = length - 10)]
+    data: Vec<u8>,
+}
+
+#[derive(BinRead)]
+#[br(magic = b"FFF\0")]
+struct FlirRecord {
+    creator: [u8; 16],
+    file_format_version: u32,
+    offset_record: u32,
+    num_record_entries: u32,
+    next_free_idx: u32,
+    swap_pattern: u16,
+    spares: [u16; 7],
+    reserved: [u32; 2],
+    checksum: u32,
+}
+
+#[derive(BinRead)]
+struct FlirRecordEntryMetadata {
+    record_type: u16,
+    record_subtype: u16,
+    record_version: u32,
+    index_id: u32,
+    offset: u32,
+    length: u32,
+    parent: u32,
+    object_number: u32,
+    checksum: u32,
+}
+
+#[derive(Debug)]
+#[derive(BinRead)]
+#[br(little)]
+struct FlirCameraInfo {
+    #[br(pad_before = 32)]
+    emissivity: f32,
+    object_distance: f32,
+    reflected_apparant_temperature: f32,
+    atmospheric_temperature: f32,
+    ir_window_temperature: f32,
+    ir_window_transmission: f32,
+    #[br(pad_before = 4)]
+    relative_humidity: f32,
+    #[br(pad_before = 24)]
+    planck_r1: f32,
+    planck_b: f32,
+    planck_f: f32,
+    #[br(pad_before = 12)]
+    atmospheric_trans_alpha1: f32,
+    atmospheric_trans_alpha2: f32,
+    atmospheric_trans_beta1: f32,
+    atmospheric_trans_beta2: f32,
+    atmospheric_trans_x: f32,
+    #[br(pad_before = 644)]
+    planck_o: i32,  // TODO CHECK
+    planck_r2: f32,
+}
+
+#[derive(BinRead)]
+struct FlirRawData {
+    #[br(pad_before = 2)]
+    #[br(little)]
+    raw_thermal_image_height: u16,
+    #[br(little)]
+    raw_thermal_image_width: u16,
+    raw_thermal_image_type: u16,
+    #[br(pad_before = 24)]
+    #[br(parse_with = raw_thermal_parser)]
+    raw_thermal_image: Vec<u8>,
+}
