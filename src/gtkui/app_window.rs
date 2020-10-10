@@ -149,6 +149,8 @@ impl AppState {
                 }),
             );
 
+            this.draw_render_threaded();
+            this.window.set_default_size(680, 520);
             this.window.show_all();
         }));
     }
