@@ -1,7 +1,7 @@
 use ndarray::*;
 use std::path::{Path, PathBuf};
 
-use crate::thermogram::Thermogram;
+use crate::thermograms::ThermogramTrait;
 use crate::thermograms::flir::parser::try_parse_flir;
 
 #[derive(Debug, Clone)]
@@ -37,7 +37,7 @@ impl FlirThermogram {
     }
 }
 
-impl Thermogram for FlirThermogram {
+impl ThermogramTrait for FlirThermogram {
     fn identifier(&self) -> String {
         // FIXME unwraps
         //self.file_path.file_name().unwrap().to_str().unwrap().to_string();

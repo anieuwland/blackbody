@@ -40,7 +40,7 @@ pub struct AppState {
     app_menu_button: MenuButton,
 
     // Model members
-    thermogram: RefCell<Option<FlirThermogram>>,
+    thermogram: RefCell<Option<Thermogram>>,
     render_sender: SyncSender<(Bytes, usize, usize, f64)>,
     //rx: glib::Receiver<glib::Bytes>,
 }
@@ -48,7 +48,7 @@ pub struct AppState {
 impl AppState {
     pub fn new(
         application: &Application,
-        thermogram: Option<FlirThermogram>,
+        thermogram: Option<Thermogram>,
     ) -> Rc<RefCell<AppState>> {
         // Create application from builder
         let builder = Builder::new_from_file("src/gtkui/app_window.ui");
@@ -128,7 +128,7 @@ impl AppState {
         }
     }
 
-    fn set_thermogram(&self, o_thermogram: Option<FlirThermogram>) {
+    fn set_thermogram(&self, o_thermogram: Option<Thermogram>) {
         match o_thermogram {
             Some(thermogram) => {  // Update controls and draw thermogram
                 self.headerbar.set_title(Some(&thermogram.identifier()));
@@ -185,7 +185,7 @@ impl AppState {
         match chooser.get_filename() {
             Some(filepath) => {
                 println!("Opening {:?}", filepath);
-                let o_thermogram = FlirThermogram::from_file(&filepath);
+                let o_thermogram = Thermogram::from_file(&filepath);
                 match o_thermogram {
                     Some(thermogram) => {
                         self.set_thermogram(Some(thermogram));

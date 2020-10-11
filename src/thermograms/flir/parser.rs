@@ -132,7 +132,7 @@ fn parse_raw_data(
     // println!("IMG: {:?}", image::guess_format(raw_data.raw_thermal_image.as_slice()));
     match Cursor::new(raw_data_bytes).read_be::<FlirRawData>() {
         Ok(raw_data) => Ok(raw_data),
-        Error => io::Error::new("Failed reading FLIR image's raw data"),
+        _ => Err(io::Error::new(io::ErrorKind::InvalidData, "Failed reading FLIR image's raw data")),
     }
 }
 
@@ -147,7 +147,7 @@ fn parse_camera_info(
 
     match Cursor::new(camera_info_bytes).read_be::<FlirCameraInfo>() {
         Ok(camera_info) => Ok(camera_info),
-        Error => io::Error::new("Failed reading FLIR image's camera info"),
+        _ => Err(io::Error::new(io::ErrorKind::InvalidData, "Failed reading FLIR image's camera info")),
     }
 }
 

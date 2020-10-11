@@ -1,101 +1,82 @@
-use std::collections::HashMap;
-
 use ndarray::*;
-use ndarray_stats::*;
+use std::fs::File;
+use std::path::Path;
+use std::io::Read;
 
-pub trait Thermogram {
-    fn thermal(&self) -> &Array<f32, Ix2>;
-    fn optical(&self) -> Option<&Array<u8, Ix3>>;
-    fn identifier(&self) -> String;
+use crate::thermograms::*;
 
-    fn render_defaults(&self) -> Array<u8, Ix3> {
-        self.render(1.8f32, 8.2f32)
-    }
+#[derive(Clone)]
+pub enum Thermogram {
+    Flir(FlirThermogram),
+    Tiff(TiffThermogram),
+}
 
-    fn render_clip_percentiles(&self, _min_p: u8, _max_p: u8) -> Array<u8, Ix3> {
-        self.render(self.min_temp(), self.max_temp())
-    }
+impl Thermogram {
+    pub fn from_file(path: &Path) -> Option<Self> {
+        match File::open(path) {
+            Ok(mut file) => {
+                let mut magic_numbers = [0u8; 4];
+                let read_success = file.read(&mut magic_numbers);
 
-    fn render(&self, min_temp: f32, max_temp: f32) -> Array<u8, Ix3> {
-        let clipped = self.thermal().mapv(|v| {
-            if v < min_temp {
-                0
-            } else if v > max_temp {
-                255
-            } else {
-                ((v - min_temp) / (max_temp - min_temp) * 255f32) as u8
+                match read_success {
+                    Ok(count) => {
+                        if magic_numbers.len() != count {
+                            println!("Read insufficient bytes to determine type of {:?}", path);
+                            return None;
+                        }
+
+                        // TODO JPG: Other magic numbers
+                        if magic_numbers[..3] == [255, 216, 255] {
+                            match FlirThermogram::from_file(path) {
+                                Some(flir) => return Some(Thermogram::Flir(flir)),
+                                _ => return None,
+                            }
+                        }
+
+                        let tiff = &magic_numbers[..4];
+                        if tiff == [73, 73, 42, 0] || tiff == [77, 77, 0, 42] {
+                            match TiffThermogram::from_file(path) {
+                                Some(tiff) => return Some(Thermogram::Tiff(tiff)),
+                                _ => return None,
+                            }
+                        }
+
+                        println!("Thermogram format not recognized: {:x?}=={:?}", magic_numbers, magic_numbers);
+                        return None;
+                    }
+                    _ => {
+                        println!("Failed reading file {:?}", path);
+                        return None;
+                    }
+                }
             }
-        });
+            _ => {
+                println!("Failed opening file {:?}", path);
+                return None;
+            }
+        }
+    }
+}
 
-        let grayscale = clipped.insert_axis(Axis(2));
-
-        stack(
-            Axis(2),
-            &[grayscale.view(), grayscale.view(), grayscale.view()],
-        )
-        .unwrap()
+impl ThermogramTrait for Thermogram {
+    fn thermal(&self) -> &Array<f32, Ix2> {
+        match self {
+            Thermogram::Flir(t) => t.thermal(),
+            Thermogram::Tiff(t) => t.thermal(),
+        }
     }
 
-    fn thermal_shape(&self) -> [usize; 2] {
-        // FIXME copies whole array
-        let thermal = self.thermal();
-        [thermal.nrows(), thermal.ncols()]
+    fn optical(&self) -> Option<&Array<u8, Ix3>> {
+        match self {
+            Thermogram::Flir(t) => t.optical(),
+            Thermogram::Tiff(t) => t.optical(),
+        }
     }
 
-    fn metadata(&self) -> HashMap<String, String> {
-        HashMap::new() // TODO
-    }
-
-    fn as_base64(&self) -> String {
-        "".to_string() // TODO
-    }
-
-    fn positionally_annotated(&self) -> bool {
-        false // TODO
-    }
-
-    fn position(&self) -> [f32; 2] {
-        [0.0, 0.0] // TODO
-    }
-
-    fn direction(&self) -> f32 {
-        0.0 // TODO
-    }
-
-    fn angle(&self) -> f32 {
-        0.0 // TODO
-    }
-
-    fn time_stamp(&self) -> u8 {
-        0 // TODO
-    }
-
-    fn path(&self) -> Option<String> {
-        None // TODO
-    }
-
-    fn has_optical(&self) -> bool {
-        self.optical() == None // TODO
-    }
-
-    fn thermal_preprocessed_simple(&self) -> Array<f32, Ix2> {
-        //let mut thermal = self.normalized();
-        //thermal.mapv_inplace(|v| (v - 0.5) * 255f32);
-        let thermal = self.normalized();
-        let thermal = (thermal - 0.5) * 255f32;
-        thermal
-    }
-
-    fn min_temp(&self) -> f32 {
-        *self.thermal().min_skipnan()
-    }
-
-    fn max_temp(&self) -> f32 {
-        *self.thermal().max_skipnan()
-    }
-
-    fn normalized(&self) -> Array<f32, Ix2> {
-        let thermal = self.thermal();
-        (thermal - self.min_temp()) / (self.max_temp() + 0.001)
+    fn identifier(&self) -> String {
+        match self {
+            Thermogram::Flir(t) => t.identifier(),
+            Thermogram::Tiff(t) => t.identifier(),
+        }
     }
 }

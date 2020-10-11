@@ -3,7 +3,6 @@
 
 mod gtkui;
 mod thermograms;
-use crate::thermograms::*;
 use gtkui::app_window::*;
 
 use gio::prelude::*;
