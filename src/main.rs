@@ -22,20 +22,3 @@ pub fn main() {
     AppState::new(&application, None);
     application.run(&[]);
 }
-
-fn load_thermogram(fp: &Path) -> FlirThermogram {
-    let thermogram = FlirThermogram::from_file(fp).unwrap();
-    println!();
-    println!("Identifier: {:?}", thermogram.identifier());
-    println!("Thermal shape: {:?}", thermogram.thermal_shape());
-    let thermal = thermogram.thermal();
-    println!(
-        "Stats: min: {:?}; avg: {:?}; max: {:?}",
-        thermogram.min_temp(),
-        thermal.sum() / thermal.len() as f32,
-        thermogram.max_temp(),
-    );
-    println!("{:?}\n", thermogram);
-
-    thermogram
-}
