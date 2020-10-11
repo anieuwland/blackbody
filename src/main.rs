@@ -1,8 +1,8 @@
 //extern crate image;
 //use image::{GenericImage, GenericImageView, ImageBuffer, RgbImage};
 
-mod thermograms;
 mod gtkui;
+mod thermograms;
 use crate::thermograms::*;
 use gtkui::app_window::*;
 
@@ -11,10 +11,7 @@ use gtk::*;
 
 pub fn main() {
     // Load application
-    let application = Application::new(
-            Some("eu.nimmerfort.fikkie"),
-            Default::default()
-        )
+    let application = Application::new(Some("eu.nimmerfort.fikkie"), Default::default())
         .expect("failed to initialize GTK application");
     AppState::new(&application, None);
     application.run(&[]);

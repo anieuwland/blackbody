@@ -12,9 +12,7 @@ pub trait Thermogram {
         self.render(1.8f32, 8.2f32)
     }
 
-    fn render_clip_percentiles(
-        &self, _min_p: u8, _max_p: u8
-    ) -> Array<u8, Ix3> {
+    fn render_clip_percentiles(&self, _min_p: u8, _max_p: u8) -> Array<u8, Ix3> {
         self.render(self.min_temp(), self.max_temp())
     }
 

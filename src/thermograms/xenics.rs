@@ -1,9 +1,8 @@
+use ndarray::*;
 use std::fs::File;
 use std::path::{Path, PathBuf};
-use ndarray::*;
 
 use crate::thermogram::Thermogram;
-
 
 #[derive(Debug, Clone)]
 pub struct XenicsThermogram {

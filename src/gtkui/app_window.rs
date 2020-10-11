@@ -13,17 +13,16 @@
 // https://stackoverflow.com/questions/45424802/how-to-embed-an-sdl-surface-into-gtk
 // https://www.bassi.io/articles/2015/02/17/using-opengl-with-gtk/
 
-
-use std::thread;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::thread;
 
-use gtk::*;
-use gio::SimpleAction;
 use gdk_pixbuf::Pixbuf;
 use gio::prelude::*;
+use gio::SimpleAction;
+use glib::{Bytes, MainContext, SyncSender};
 use gtk::prelude::*;
-use glib::{SyncSender, Bytes, MainContext};
+use gtk::*;
 
 use crate::thermograms::*;
 
@@ -47,15 +46,16 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(application: &Application, thermogram: Option<FlirThermogram>) -> Rc<RefCell<AppState>> {
-        // Load application
+    pub fn new(
+        application: &Application,
+        thermogram: Option<FlirThermogram>,
+    ) -> Rc<RefCell<AppState>> {
+        // Create application from builder
         let builder = Builder::new_from_file("src/gtkui/app_window.ui");
         builder.set_application(application);
-        let (render_s, render_r) = MainContext::sync_channel(
-            glib::PRIORITY_DEFAULT, 256
-        );
+        let (render_s, render_r) = MainContext::sync_channel(glib::PRIORITY_DEFAULT, 256);
 
-        let state = AppState {
+        let state = AppState {  // Application's state struct
             window: builder.get_object("fikkie_window").unwrap(),
             headerbar: builder.get_object("headerbar").unwrap(),
             image: builder.get_object("viewed_image").unwrap(),
@@ -70,81 +70,19 @@ impl AppState {
             render_sender: render_s,
         };
 
-        let img = state.image.clone();
-        render_r.attach(None, move |(glib_bytes, width, height, zoom)| {
-            let pixbuf = Pixbuf::new_from_bytes(
-                &glib_bytes,
-                gdk_pixbuf::Colorspace::Rgb,
-                false,
-                8,
-                width as i32,
-                height as i32,
-                3 * width as i32,
-            );
-
-            let width = (pixbuf.get_width() as f64 * zoom) as i32;
-            let height = (pixbuf.get_height() as f64 * zoom) as i32;
-            let pixbuf_new = pixbuf.scale_simple(
-                width, height, gdk_pixbuf::InterpType::Bilinear
-            );
-
-            img.set_from_pixbuf(pixbuf_new.as_ref());
-            glib::Continue(true)
-        });
+        // Set up cross-thread channel for rendering thermogram on separate thread, but
+        // actually drawing in the window on the main thread. Helps against blocking UI.
+        let mut img = state.image.clone();
+        render_r.attach(None, move |args| AppState::connect_channel(&mut img, args));
 
         // Create an object containing the state that can be used in callbacks
         // and set up those callbacks.
         let this = Rc::new(RefCell::new(state));
         AppState::connect_signals(&this, application);
+
+        // If given, set initial thermogram, then return final constructed app
         this.clone().borrow().set_thermogram(thermogram);
-
         this
-    }
-
-    fn show_thermogram_chooser(&self) -> Option<FlirThermogram> {
-        let parent = &self.window;
-        let chooser = FileChooserNative::new(
-            Some("Open warmtebeeld"), Some(parent), FileChooserAction::Open, None, None
-        );
-
-        // TODO Filter image types
-        let response = chooser.run();
-        if response != ResponseType::Accept {
-            return None;
-        }
-
-        match chooser.get_filename() {
-            Some(filepath) => {
-                println!("Opening {:?}", filepath);
-                let o_thermogram = FlirThermogram::from_file(&filepath);
-                match o_thermogram {
-                    Some(thermogram) => {
-                        let thermogram_clone = thermogram.clone();
-                        self.set_thermogram(Some(thermogram));
-                        self.draw_render_threaded();
-                        return Some(thermogram_clone)
-                    },
-                    _ => {
-                        println!("Failed opening thermogram {:?}", filepath);
-                        return None;
-                    },
-                }
-            }
-            _ => None,
-        }
-    }
-
-    fn set_thermogram(&self, o_thermogram: Option<FlirThermogram>) {
-        match o_thermogram{
-            None => { self.thermogram.replace(None); },
-            Some(thermogram) => {
-                self.headerbar.set_title(Some(&thermogram.identifier()));
-                self.min_spinner.set_value(thermogram.min_temp() as f64);
-                self.max_spinner.set_value(thermogram.max_temp() as f64);
-                self.thermogram.replace(Some(thermogram));
-                self.draw_render_threaded();
-            },
-        }
     }
 
     fn connect_signals(this: &Rc<RefCell<Self>>, application: &Application) {
@@ -161,37 +99,104 @@ impl AppState {
             let open = SimpleAction::new("open", None);
             let menu = that.borrow().app_menu.clone();
             that.borrow().app_menu_button.set_popover(Some(&menu));
-            open.connect_activate(move |_, _| { that.borrow().show_thermogram_chooser(); });
+            open.connect_activate(move |_, _| that.borrow().show_thermogram_chooser());
             application.add_action(&open);
         }
         {   // Zoom spinner: redraw thermogram when changed
             let that = this.clone();
-            this.borrow().zoom_spinner.connect_value_changed(
-                move |_| that.borrow().draw_render_threaded()
-            );
+            this.borrow()
+                .zoom_spinner
+                .connect_value_changed(move |_| that.borrow().draw_render_threaded());
         }
         {   // Zoom spinner: update zoom factor with scroll wheel and redraw
             let that = this.clone();
-            this.borrow().image_events.connect_scroll_event(move |_, event| {
-                let (_, y) = event.get_scroll_deltas().unwrap();
-                let delta = if y < 0.0 { 5.0 }
-                            else if y > 0.0 { -5.0 }
-                            else { 0.0 };
-                that.borrow().update_zoom_factor(delta);
-                glib::signal::Inhibit(true)
-            });
+            this.borrow()
+                .image_events
+                .connect_scroll_event(move |_, event| that.borrow().zoom_from_scroll(event));
         }
         {   // Lower bound spinner: redraw when changed
             let that = this.clone();
-            this.borrow().min_spinner.connect_value_changed(
-                move |_| that.borrow().draw_render_threaded()
-            );
+            this.borrow()
+                .min_spinner
+                .connect_value_changed(move |_| that.borrow().draw_render_threaded());
         }
         {   // Upper bound spinner: redraw when changed
             let that = this.clone();
-            this.borrow().max_spinner.connect_value_changed(
-                move |_| that.borrow().draw_render_threaded()
-            );
+            this.borrow()
+                .max_spinner
+                .connect_value_changed(move |_| that.borrow().draw_render_threaded());
+        }
+    }
+
+    fn set_thermogram(&self, o_thermogram: Option<FlirThermogram>) {
+        match o_thermogram {
+            Some(thermogram) => {  // Update controls and draw thermogram
+                self.headerbar.set_title(Some(&thermogram.identifier()));
+                self.min_spinner.set_value(thermogram.min_temp().into());
+                self.max_spinner.set_value(thermogram.max_temp().into());
+                self.thermogram.replace(Some(thermogram));
+                self.draw_render_threaded();
+            }
+            None => {  // Set to empty
+                self.thermogram.replace(None);
+            }
+        }
+    }
+
+    fn connect_channel(img: &mut Image, args: (Bytes, usize, usize, f64)) -> glib::Continue {
+        let (glib_bytes, width, height, zoom) = args;
+        let pixbuf = Pixbuf::new_from_bytes(
+            &glib_bytes,
+            gdk_pixbuf::Colorspace::Rgb,
+            false,
+            8,
+            width as i32,
+            height as i32,
+            3 * width as i32,
+        );
+
+        let width = (pixbuf.get_width() as f64 * zoom) as i32;
+        let height = (pixbuf.get_height() as f64 * zoom) as i32;
+        let pixbuf_new = pixbuf.scale_simple(width, height, gdk_pixbuf::InterpType::Bilinear);
+
+        img.set_from_pixbuf(pixbuf_new.as_ref());
+        glib::Continue(true)
+    }
+
+    fn show_thermogram_chooser(&self) {
+        // Prepare file chooser dialog window
+        // TODO Filter image types
+        let parent = &self.window;
+        let chooser = FileChooserNative::new(
+            Some("Open warmtebeeld"),
+            Some(parent),
+            FileChooserAction::Open,
+            None,
+            None,
+        );
+
+        // Show dialog and return if nothing chosen
+        let response = chooser.run();
+        if response != ResponseType::Accept {
+            return;
+        }
+
+        // Handle opening a thermogram
+        match chooser.get_filename() {
+            Some(filepath) => {
+                println!("Opening {:?}", filepath);
+                let o_thermogram = FlirThermogram::from_file(&filepath);
+                match o_thermogram {
+                    Some(thermogram) => {
+                        self.set_thermogram(Some(thermogram));
+                        self.draw_render_threaded();
+                    }
+                    _ => {
+                        println!("Failed opening thermogram {:?}", filepath);
+                    }
+                }
+            }
+            _ => ()
         }
     }
 
@@ -203,7 +208,6 @@ impl AppState {
         let sender_local = self.render_sender.clone();
 
         match o_thermogram {
-            None => println!("No thermogram set"),
             Some(thermogram) => {
                 thread::spawn(move || {
                     let render = thermogram.render(min_temp, max_temp);
@@ -214,12 +218,27 @@ impl AppState {
                     );
 
                     let glib_bytes = Bytes::from(bytes);
-                    sender_local.send((glib_bytes, width, height, zoom))
-                                .expect("Failed sending rendered bytes!");
+                    sender_local
+                        .send((glib_bytes, width, height, zoom))
+                        .expect("Failed sending rendered bytes!");
                 });
             }
+            None => ()
         }
+    }
 
+    fn zoom_from_scroll(&self, event: &gdk::EventScroll) -> glib::signal::Inhibit {
+        let (_, y) = event.get_scroll_deltas().unwrap();
+        let delta = if y < 0.0 {
+            5.0
+        } else if y > 0.0 {
+            -5.0
+        } else {
+            0.0
+        };
+
+        self.update_zoom_factor(delta);
+        glib::signal::Inhibit(true)
     }
 
     fn update_zoom_factor(&self, modifier: f64) {

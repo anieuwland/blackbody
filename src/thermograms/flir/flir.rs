@@ -4,7 +4,6 @@ use std::path::{Path, PathBuf};
 use crate::thermogram::Thermogram;
 use crate::thermograms::flir::parser::try_parse_flir;
 
-
 #[derive(Debug, Clone)]
 pub struct FlirThermogram {
     thermal: Array<f32, Ix2>,
