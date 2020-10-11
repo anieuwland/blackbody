@@ -254,7 +254,6 @@ fn raw_thermal_parser<R: Read + Seek>(reader: &mut R, _ro: &ReadOptions, _: ()) 
     let mut raw_thermal = Vec::new();
     while let Ok(read_length) = reader.read(&mut buf) {
         if read_length != buf.len() {
-           println!("Read amount different from specified! {:?} != {:?}", read_length, buf.len());
            break;
         }
         raw_thermal.push(buf[0]);
