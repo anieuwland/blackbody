@@ -13,22 +13,13 @@ use gio::prelude::*;
 use gtk::*;
 
 pub fn main() {
-    // Access CLI arg
-    let _args: Vec<String> = env::args().collect();
-    //println!("{:?}", &args[1]);
-    //let fp = Path::new(&args[1]);
-    let fp = Path::new("/home/anieuwland/Afbeeldingen/FLIR9139.jpg");
-
-    // Load thermogram and render to pixbuf
-    let thermogram = load_thermogram(&fp);
-
     // Load application
     let application = Application::new(
             Some("eu.nimmerfort.fikkie"),
             Default::default()
         )
         .expect("failed to initialize GTK application");
-    AppState::new(&application, thermogram);
+    AppState::new(&application, None);
     application.run(&[]);
 }
 

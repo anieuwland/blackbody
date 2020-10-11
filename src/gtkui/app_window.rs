@@ -18,15 +18,14 @@ use std::thread;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::thermograms::*;
-
-use gdk_pixbuf::Pixbuf;
-use gio::SimpleAction;
-use gio::prelude::*;
-use glib::{clone, SyncSender, Bytes, MainContext};
-use gtk::prelude::*;
 use gtk::*;
+use gio::SimpleAction;
+use gdk_pixbuf::Pixbuf;
+use gio::prelude::*;
+use gtk::prelude::*;
+use glib::{SyncSender, Bytes, MainContext};
 
+use crate::thermograms::*;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -42,13 +41,13 @@ pub struct AppState {
     app_menu_button: MenuButton,
 
     // Model members
-    thermogram: RefCell<FlirThermogram>,
+    thermogram: RefCell<Option<FlirThermogram>>,
     render_sender: SyncSender<(Bytes, usize, usize, f64)>,
     //rx: glib::Receiver<glib::Bytes>,
 }
 
 impl AppState {
-    pub fn new(application: &Application, thermogram: FlirThermogram) -> Rc<RefCell<AppState>> {
+    pub fn new(application: &Application, thermogram: Option<FlirThermogram>) -> Rc<RefCell<AppState>> {
         // Load application
         let builder = Builder::new_from_file("src/gtkui/app_window.ui");
         builder.set_application(application);
@@ -67,7 +66,7 @@ impl AppState {
             app_menu: builder.get_object("app_menu").unwrap(),
             app_menu_button: builder.get_object("app_menu_button").unwrap(),
 
-            thermogram: RefCell::new(thermogram),
+            thermogram: RefCell::new(None),
             render_sender: render_s,
         };
 
@@ -97,6 +96,7 @@ impl AppState {
         // and set up those callbacks.
         let this = Rc::new(RefCell::new(state));
         AppState::connect_signals(&this, application);
+        this.clone().borrow().set_thermogram(thermogram);
 
         this
     }
@@ -120,7 +120,7 @@ impl AppState {
                 match o_thermogram {
                     Some(thermogram) => {
                         let thermogram_clone = thermogram.clone();
-                        self.set_thermogram(thermogram);
+                        self.set_thermogram(Some(thermogram));
                         self.draw_render_threaded();
                         return Some(thermogram_clone)
                     },
@@ -134,22 +134,26 @@ impl AppState {
         }
     }
 
-    fn set_thermogram(&self, thermogram: FlirThermogram) {
-        self.thermogram.replace(thermogram);
+    fn set_thermogram(&self, o_thermogram: Option<FlirThermogram>) {
+        match o_thermogram{
+            None => { self.thermogram.replace(None); },
+            Some(thermogram) => {
+                self.headerbar.set_title(Some(&thermogram.identifier()));
+                self.min_spinner.set_value(thermogram.min_temp() as f64);
+                self.max_spinner.set_value(thermogram.max_temp() as f64);
+                self.thermogram.replace(Some(thermogram));
+                self.draw_render_threaded();
+            },
+        }
     }
 
     fn connect_signals(this: &Rc<RefCell<Self>>, application: &Application) {
         {   // Application activation: initial window size and other values
             let that = this.clone();
-            let that_too = this.clone();
             application.connect_activate(move |app| {
                 app.add_window(&that.borrow().window);
-                that.borrow().headerbar.set_title(Some(&that.borrow().thermogram.borrow().identifier()));
                 that.borrow().window.set_default_size(680, 520);
                 that.borrow().window.show_all();
-                that.borrow().min_spinner.set_value(that_too.borrow().thermogram.borrow().min_temp() as f64);
-                that.borrow().max_spinner.set_value(that_too.borrow().thermogram.borrow().max_temp() as f64);
-                that.borrow().draw_render_threaded();
             });
         }
         {   // Application menu: connecting buttons to actions
@@ -195,51 +199,27 @@ impl AppState {
         let min_temp = self.min_spinner.get_value() as f32;
         let max_temp = self.max_spinner.get_value() as f32;
         let zoom = self.zoom_spinner.get_value() / 100f64;
-        let thermogram = self.thermogram.clone();
+        let o_thermogram = self.thermogram.clone().into_inner();
         let sender_local = self.render_sender.clone();
 
-        thread::spawn(move || {
-            let render = thermogram.borrow_mut().render(min_temp, max_temp);
-            let (bytes, width, height) = (
-                render.as_slice().unwrap(),
-                render.shape()[1],
-                render.shape()[0],
-            );
+        match o_thermogram {
+            None => println!("No thermogram set"),
+            Some(thermogram) => {
+                thread::spawn(move || {
+                    let render = thermogram.render(min_temp, max_temp);
+                    let (bytes, width, height) = (
+                        render.as_slice().unwrap(),
+                        render.shape()[1],
+                        render.shape()[0],
+                    );
 
-            let glib_bytes = Bytes::from(bytes);
-            sender_local.send((glib_bytes, width, height, zoom))
-                        .expect("Failed sending rendered bytes!");
-        });
-    }
+                    let glib_bytes = Bytes::from(bytes);
+                    sender_local.send((glib_bytes, width, height, zoom))
+                                .expect("Failed sending rendered bytes!");
+                });
+            }
+        }
 
-    fn _draw_render(&self) {
-        let min_temp = self.min_spinner.get_value() as f32;
-        let max_temp = self.max_spinner.get_value() as f32;
-        let render = self._render_thermogram(min_temp, max_temp);
-        self.image.set_from_pixbuf(Some(&render));
-    }
-
-    fn _render_thermogram(&self, min_temp: f32, max_temp: f32) -> Pixbuf {
-        println!("Rendendering thermogram from scratch");
-        let render = self.thermogram.borrow().render(min_temp, max_temp);
-        let (bytes, width, height) = (
-            render.as_slice().unwrap(),
-            render.shape()[1],
-            render.shape()[0],
-        );
-
-        let glib_bytes = Bytes::from(bytes);
-        let pixbuf = Pixbuf::new_from_bytes(
-            &glib_bytes,
-            gdk_pixbuf::Colorspace::Rgb,
-            false,
-            8,
-            width as i32,
-            height as i32,
-            3 * width as i32,
-        );
-
-        pixbuf
     }
 
     fn update_zoom_factor(&self, modifier: f64) {
