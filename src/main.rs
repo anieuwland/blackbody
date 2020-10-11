@@ -1,9 +1,6 @@
 //extern crate image;
 //use image::{GenericImage, GenericImageView, ImageBuffer, RgbImage};
 
-use std::env;
-use std::path::Path;
-
 mod thermograms;
 mod gtkui;
 use crate::thermograms::*;
