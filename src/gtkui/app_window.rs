@@ -122,12 +122,14 @@ impl AppState {
         }
         {   // Lower bound spinner: redraw when changed
             let that = this.clone();
+            this.borrow().min_spinner.set_increments(0.5, 5.0);
             this.borrow()
                 .min_spinner
                 .connect_value_changed(move |_| that.borrow().draw_render_threaded());
         }
         {   // Upper bound spinner: redraw when changed
             let that = this.clone();
+            this.borrow().max_spinner.set_increments(0.5, 5.0);
             this.borrow()
                 .max_spinner
                 .connect_value_changed(move |_| that.borrow().draw_render_threaded());
@@ -244,12 +246,17 @@ impl AppState {
             0.0
         };
 
+
         self.update_zoom_factor(delta);
         glib::signal::Inhibit(true)
     }
 
     fn update_zoom_factor(&self, modifier: f64) {
-        self.zoom_spinner
-            .set_value(self.zoom_spinner.get_value() + modifier);
+        let adj_zoom = self.zoom_spinner.get_value() as f64 + modifier;
+        let (min_zoom, max_zoom) = self.zoom_spinner.get_range();
+        if adj_zoom >= min_zoom && adj_zoom <= max_zoom {
+            self.zoom_spinner
+                .set_value(self.zoom_spinner.get_value() + modifier);
+        }
     }
 }
