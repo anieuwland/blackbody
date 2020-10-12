@@ -24,7 +24,7 @@ use glib::{Bytes, MainContext, SyncSender};
 use gtk::prelude::*;
 use gtk::*;
 
-use crate::thermograms::*;
+use libblackbody::*;
 
 #[derive(Clone)]
 pub struct AppState {

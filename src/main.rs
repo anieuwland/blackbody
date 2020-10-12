@@ -2,7 +2,6 @@
 //use image::{GenericImage, GenericImageView, ImageBuffer, RgbImage};
 
 mod gtkui;
-mod thermograms;
 use gtkui::app_window::*;
 
 use gio::prelude::*;

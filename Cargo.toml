@@ -5,12 +5,7 @@ authors = ["Arthur Nieuwland <anieuwland@nimmerfort.eu>"]
 edition = "2018"
 
 [dependencies]
-tiff = { git = 'https://github.com/image-rs/image-tiff/' }
-byteorder = "*"
-ndarray = "0.13.0"
-ndarray-stats = "0.3.0"
-binread = "1.1.1"
-image = "0.23.10"
+libblackbody = "0.1.0"
 
 [dependencies.gtk]
 version = "0.8.1"
