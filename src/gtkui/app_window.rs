@@ -50,6 +50,12 @@ impl AppState {
         application: &Application,
         thermogram: Option<Thermogram>,
     ) -> Rc<RefCell<AppState>> {
+        // Set dark theme for image viewer
+        let settings = gtk::Settings::get_default().unwrap();
+        match settings.set_property("gtk-application-prefer-dark-theme", &true) {
+            _ => ()  // Silence the warning for unused return value
+        }
+
         // Create application from builder
         let builder = Builder::new_from_file("src/gtkui/app_window.ui");
         builder.set_application(application);
@@ -132,6 +138,7 @@ impl AppState {
         match o_thermogram {
             Some(thermogram) => {  // Update controls and draw thermogram
                 self.headerbar.set_title(Some(&thermogram.identifier()));
+                self.headerbar.set_subtitle(Some(&thermogram.identifier()));
                 self.min_spinner.set_value(thermogram.min_temp().into());
                 self.max_spinner.set_value(thermogram.max_temp().into());
                 self.thermogram.replace(Some(thermogram));
