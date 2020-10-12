@@ -140,7 +140,7 @@ impl AppState {
         match o_thermogram {
             Some(thermogram) => {  // Update controls and draw thermogram
                 self.headerbar.set_title(Some(&thermogram.identifier()));
-                self.headerbar.set_subtitle(Some(&thermogram.identifier()));
+                self.headerbar.set_subtitle(thermogram.path());
                 self.min_spinner.set_value(thermogram.min_temp().into());
                 self.max_spinner.set_value(thermogram.max_temp().into());
                 self.thermogram.replace(Some(thermogram));

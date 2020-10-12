@@ -5,7 +5,8 @@ authors = ["Arthur Nieuwland <anieuwland@nimmerfort.eu>"]
 edition = "2018"
 
 [dependencies]
-libblackbody = "0.1.0"
+libblackbody = "0.2.0"
+#libblackbody = { path = "../libblackbody" }
 
 [dependencies.gtk]
 version = "0.8.1"
