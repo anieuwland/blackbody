@@ -39,6 +39,7 @@ pub struct AppState {
     min_spinner: SpinButton,
     max_spinner: SpinButton,
     zoom_spinner: SpinButton,
+    about_dialog: AboutDialog,
 
     // Model members
     thermogram: RefCell<Option<Thermogram>>,
@@ -58,14 +59,14 @@ impl AppState {
         // Create application from builder
         let exe_path = std::env::current_exe().expect("Can't determine executable path");
         let exe_dir = exe_path.parent().expect("Can't determine executable's directory");
-        let ui_path = exe_dir.join("resources").join("eu.nimmerfort.blackbody.glade");
+        let ui_path = exe_dir.join("resources").join("eu.nimmerfort.blackbody.ui");
 
         let builder = Builder::new_from_file(ui_path);
         builder.set_application(application);
         let (render_s, render_r) = MainContext::sync_channel(glib::PRIORITY_DEFAULT, 256);
 
         let state = AppState {  // Application's state struct
-            window: builder.get_object("fikkie_window").unwrap(),
+            window: builder.get_object("blackbody_window").unwrap(),
             headerbar: builder.get_object("headerbar").unwrap(),
             app_menu: builder.get_object("app_menu").unwrap(),
             app_menu_button: builder.get_object("app_menu_button").unwrap(),
@@ -75,6 +76,7 @@ impl AppState {
             min_spinner: builder.get_object("min_temp_spinner").unwrap(),
             max_spinner: builder.get_object("max_temp_spinner").unwrap(),
             zoom_spinner: builder.get_object("zoom_spinner").unwrap(),
+            about_dialog: builder.get_object("about_dialog").unwrap(),
 
             thermogram: RefCell::new(None),
             render_sender: render_s,
@@ -111,6 +113,17 @@ impl AppState {
             that.borrow().app_menu_button.set_popover(Some(&menu));
             open.connect_activate(move |_, _| that.borrow().show_thermogram_chooser());
             application.add_action(&open);
+        }
+        {   // Show dialog window
+            let that = this.clone();
+            let about = SimpleAction::new("about", None);
+            let menu = that.borrow().app_menu.clone();
+            that.borrow().app_menu_button.set_popover(Some(&menu));
+            about.connect_activate(move |_, _| {
+                let _ = that.borrow().about_dialog.run();
+                that.borrow().about_dialog.hide();
+            });
+            application.add_action(&about);
         }
         {   // Zoom spinner: redraw thermogram when changed
             let that = this.clone();
