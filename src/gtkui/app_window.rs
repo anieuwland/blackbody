@@ -40,6 +40,8 @@ pub struct AppState {
     max_spinner: SpinButton,
     zoom_spinner: SpinButton,
     about_dialog: AboutDialog,
+    filter_thermograms: FileFilter,
+    filter_all_files: FileFilter,
 
     // Model members
     thermogram: RefCell<Option<Thermogram>>,
@@ -77,10 +79,16 @@ impl AppState {
             max_spinner: builder.get_object("max_temp_spinner").unwrap(),
             zoom_spinner: builder.get_object("zoom_spinner").unwrap(),
             about_dialog: builder.get_object("about_dialog").unwrap(),
+            filter_thermograms: builder.get_object("filter_thermograms").unwrap(),
+            filter_all_files: builder.get_object("filter_all_files").unwrap(),
 
             thermogram: RefCell::new(None),
             render_sender: render_s,
         };
+
+        // Some initial configuration
+        state.filter_thermograms.set_name(Some("Warmtebeelden: *.jpg (FLIR), *.tiff"));
+        state.filter_all_files.set_name(Some("Alle bestanden"));
 
         // Set up cross-thread channel for rendering thermogram on separate thread, but
         // actually drawing in the window on the main thread. Helps against blocking UI.
@@ -206,6 +214,8 @@ impl AppState {
             None,
             None,
         );
+        chooser.add_filter(&self.filter_thermograms);
+        chooser.add_filter(&self.filter_all_files);
 
         // Show dialog and return if nothing chosen
         let response = chooser.run();
@@ -216,7 +226,6 @@ impl AppState {
         // Handle opening a thermogram
         match chooser.get_filename() {
             Some(filepath) => {
-                println!("Opening {:?}", filepath);
                 let o_thermogram = Thermogram::from_file(&filepath);
                 match o_thermogram {
                     Some(thermogram) => {
