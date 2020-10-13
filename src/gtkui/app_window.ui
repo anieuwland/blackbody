@@ -70,10 +70,14 @@
                 <items>
                   <item id="0" translatable="yes">Turbo</item>
                   <item id="1" translatable="yes">Cividis</item>
-                  <item id="2" translatable="yes">Inferno</item>
-                  <item id="3" translatable="yes">Jet</item>
-                  <item id="4" translatable="yes">Magma</item>
-                  <item id="5" translatable="yes">Viridis</item>
+                  <item id="2" translatable="yes">Koper</item>
+                  <item id="3" translatable="yes">Grijs</item>
+                  <item id="4" translatable="yes">Heet</item>
+                  <item id="5" translatable="yes">Inferno</item>
+                  <item id="6" translatable="yes">Jet</item>
+                  <item id="7" translatable="yes">Koelwarm</item>
+                  <item id="8" translatable="yes">Magma</item>
+                  <item id="9" translatable="yes">Viridis</item>
                 </items>
               </object>
               <packing>
