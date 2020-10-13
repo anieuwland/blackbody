@@ -43,7 +43,7 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "file:///home/anieuwland/Ontwikkeling/Blackbody"
+                    "url" : "file:///home/anieuwland/Ontwikkeling/blackbody/Blackbody"
                 }
             ]
         }

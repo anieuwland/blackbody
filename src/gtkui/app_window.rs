@@ -50,15 +50,17 @@ impl AppState {
     pub fn new(
         application: &Application,
         thermogram: Option<Thermogram>,
-    ) -> Rc<RefCell<AppState>> {
+    ) -> Option<Rc<RefCell<AppState>>> {
         // Set dark theme for image viewer
         let settings = gtk::Settings::get_default().unwrap();
-        match settings.set_property("gtk-application-prefer-dark-theme", &true) {
-            _ => ()  // Silence the warning for unused return value
-        }
+        let _ = settings.set_property("gtk-application-prefer-dark-theme", &true);
 
         // Create application from builder
-        let builder = Builder::new_from_file("src/gtkui/app_window.ui");
+        let exe_path = std::env::current_exe().expect("Can't determine executable path");
+        let exe_dir = exe_path.parent().expect("Can't determine executable's directory");
+        let ui_path = exe_dir.join("resources").join("eu.nimmerfort.blackbody.glade");
+
+        let builder = Builder::new_from_file(ui_path);
         builder.set_application(application);
         let (render_s, render_r) = MainContext::sync_channel(glib::PRIORITY_DEFAULT, 256);
 
@@ -90,7 +92,7 @@ impl AppState {
 
         // If given, set initial thermogram, then return final constructed app
         this.clone().borrow().set_thermogram(thermogram);
-        this
+        Some(this)
     }
 
     fn connect_signals(this: &Rc<RefCell<Self>>, application: &Application) {

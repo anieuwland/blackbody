@@ -28,6 +28,8 @@ run_command(
 )
 
 sources = files(
+  'gtkui/app_window.rs',
+  'gtkui/mod.rs',
   'config.rs',
   'main.rs',
 )

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/eu/nimmerfort/blackbody">
-    <file>gtkui/app_window.ui</file>
+    <file>resources/eu.nimmerfort.blackbody.glade</file>
   </gresource>
 </gresources>
