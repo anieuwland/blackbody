@@ -31,13 +31,14 @@ pub struct AppState {
     // Controls
     window: ApplicationWindow,
     headerbar: HeaderBar,
-    image: Image,
-    image_events: EventBox,
-    zoom_spinner: SpinButton,
-    min_spinner: SpinButton,
-    max_spinner: SpinButton,
     app_menu: PopoverMenu,
     app_menu_button: MenuButton,
+    palette_chooser: ComboBoxText,
+    image: Image,
+    image_events: EventBox,
+    min_spinner: SpinButton,
+    max_spinner: SpinButton,
+    zoom_spinner: SpinButton,
 
     // Model members
     thermogram: RefCell<Option<Thermogram>>,
@@ -64,13 +65,14 @@ impl AppState {
         let state = AppState {  // Application's state struct
             window: builder.get_object("fikkie_window").unwrap(),
             headerbar: builder.get_object("headerbar").unwrap(),
-            image: builder.get_object("viewed_image").unwrap(),
-            image_events: builder.get_object("viewed_image_events").unwrap(),
-            zoom_spinner: builder.get_object("zoom_spinner").unwrap(),
-            min_spinner: builder.get_object("min_temp_spinner").unwrap(),
-            max_spinner: builder.get_object("max_temp_spinner").unwrap(),
             app_menu: builder.get_object("app_menu").unwrap(),
             app_menu_button: builder.get_object("app_menu_button").unwrap(),
+            palette_chooser: builder.get_object("palette_chooser").unwrap(),
+            image: builder.get_object("viewed_image").unwrap(),
+            image_events: builder.get_object("viewed_image_events").unwrap(),
+            min_spinner: builder.get_object("min_temp_spinner").unwrap(),
+            max_spinner: builder.get_object("max_temp_spinner").unwrap(),
+            zoom_spinner: builder.get_object("zoom_spinner").unwrap(),
 
             thermogram: RefCell::new(None),
             render_sender: render_s,
@@ -133,6 +135,12 @@ impl AppState {
             this.borrow()
                 .max_spinner
                 .connect_value_changed(move |_| that.borrow().draw_render_threaded());
+        }
+        {   // Redraw on palette change
+            let that = this.clone();
+            this.borrow()
+                .palette_chooser
+                .connect_changed(move |_| that.borrow().draw_render_threaded());
         }
     }
 
@@ -215,11 +223,16 @@ impl AppState {
         let zoom = self.zoom_spinner.get_value() / 100f64;
         let o_thermogram = self.thermogram.clone().into_inner();
         let sender_local = self.render_sender.clone();
+        let palette_idx: usize = match self.palette_chooser.get_active_id() {
+            Some(id) => id.as_str().as_bytes()[0] as usize - 48,
+            _ => 0,
+        };
 
         match o_thermogram {
             Some(thermogram) => {
                 thread::spawn(move || {
-                    let render = thermogram.render(min_temp, max_temp);
+                    let palette = PALETTES[palette_idx];
+                    let render = thermogram.render(min_temp, max_temp, palette);
                     let (bytes, width, height) = (
                         render.as_slice().unwrap(),
                         render.shape()[1],
@@ -260,3 +273,12 @@ impl AppState {
         }
     }
 }
+
+const PALETTES: [[[f32; 3]; 256]; 6] = [
+    palettes::TURBO,
+    palettes::CIVIDIS,
+    palettes::INFERNO,
+    palettes::JET,
+    palettes::MAGMA,
+    palettes::VIRIDIS,
+];
