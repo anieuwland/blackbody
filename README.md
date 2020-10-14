@@ -23,6 +23,6 @@ Compiling for Windows is more involved, but does work.
     3. `cp $GTK_INSTALL_PATH/bin/*.dll /wherever/release`
     4. `mkdir -p /wherever/release/share/glib-2.0/schemas && cp $GTK_INSTALL_PATH/share/glib-2.0/schemas/* /wherever/release/share/glib-2.0/schemas`
     5. `mkdir -p /wherever/release/share/glib-2.0/schemas && cp -r $GTK_INSTALL_PATH/share/icons/* /wherever/release/share/icons`
-4. Run with Wine or zip up the release dir and ru non Windows!
+4. Run with Wine or zip up the release dir and ru non Windows! Make sure `XDG_DATA_DIRS` is correctly set however: `XDG_DATA_DIRS=path/to/app/share blackbody.exe`
 
 Reference: [Cross-compiling Rust Linux -> Window](https://gtk-rs.org/docs-src/tutorial/cross)
