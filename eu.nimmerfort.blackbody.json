@@ -1,54 +1,54 @@
 {
-    "app-id" : "eu.nimmerfort.blackbody",
-    "runtime" : "org.gnome.Platform",
-    "runtime-version" : "3.34",
-    "sdk" : "org.gnome.Sdk",
-    "sdk-extensions" : [
-        "org.freedesktop.Sdk.Extension.rust-stable"
+  "app-id": "eu.nimmerfort.blackbody",
+  "build-options": {
+    "append-path": "/usr/lib/sdk/rust-stable/bin",
+    "build-args": [
+      "--share=network"
     ],
-    "command" : "blackbody",
-    "finish-args" : [
-        "--share=network",
-        "--share=ipc",
-        "--socket=fallback-x11",
-        "--socket=wayland",
-        "--socket=session-bus"
-    ],
-    "build-options" : {
-        "append-path" : "/usr/lib/sdk/rust-stable/bin",
-        "build-args" : [
-            "--share=network"
-        ],
-        "env" : {
-            "CARGO_HOME" : "/run/build/blackbody/cargo",
-            "RUST_BACKTRACE" : "1",
-            "RUST_LOG" : "blackbody=debug"
-        }
-    },
-    "cleanup" : [
-        "/include",
-        "/lib/pkgconfig",
-        "/man",
-        "/share/doc",
-        "/share/gtk-doc",
-        "/share/man",
-        "/share/pkgconfig",
-        "*.la",
-        "*.a"
-    ],
-    "modules" : [
+    "env": {
+      "CARGO_HOME": "/run/build/blackbody/cargo",
+      "RUST_BACKTRACE": "1",
+      "RUST_LOG": "blackbody=debug"
+    }
+  },
+  "cleanup": [
+    "/include",
+    "/lib/pkgconfig",
+    "/man",
+    "/share/doc",
+    "/share/gtk-doc",
+    "/share/man",
+    "/share/pkgconfig",
+    "*.la",
+    "*.a"
+  ],
+  "command": "blackbody",
+  "finish-args": [
+    "--share=network",
+    "--share=ipc",
+    "--socket=fallback-x11",
+    "--socket=wayland",
+    "--socket=session-bus"
+  ],
+  "modules": [
+    {
+      "builddir": true,
+      "buildsystem": "meson",
+      "name": "blackbody",
+      "sources": [
         {
-            "name" : "blackbody",
-            "builddir" : true,
-            "buildsystem" : "meson",
-            "sources" : [
-                {
-                    "type" : "git",
-                    "url" : "https://bitbucket.org/nimmerwoner/blackbody/src/master/",
-                    "tag" : "0.1.0",
-                    "commit" : "79c7d8a3ccf5f61220df84f1fd59beae4dcb4db8"
-                }
-            ]
+          "commit": "79c7d8a3ccf5f61220df84f1fd59beae4dcb4db8",
+          "tag": "0.1.0",
+          "type": "git",
+          "url": "https://bitbucket.org/nimmerwoner/blackbody/src/master/"
         }
-    ]
+      ]
+    }
+  ],
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "3.34",
+  "sdk": "org.gnome.Sdk",
+  "sdk-extensions": [
+    "org.freedesktop.Sdk.Extension.rust-stable"
+  ]
 }

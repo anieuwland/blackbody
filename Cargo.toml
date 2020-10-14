@@ -3,34 +3,33 @@ name = "blackbody"
 description = "Blackbody is an image viewer for thermograms."
 version = "0.2.0-dev"
 license = "EUPL-1.2"
-authors = ["Arthur Nieuwland <anieuwland@nimmerfort.eu>"]
+authors = [ "Arthur Nieuwland <anieuwland@nimmerfort.eu>",]
 edition = "2018"
 repository = "https://bitbucket.org/nimmerwoner/blackbody/"
 
 [dependencies]
 libblackbody = "0.3.0"
-#libblackbody = { path = "../libblackbody" }
 
 [dependencies.gtk]
 version = "0.8.1"
-features = ["v3_24"]
+features = [ "v3_24",]
 
 [dependencies.gdk]
 version = "0.12.1"
-features = ["v3_24"]
+features = [ "v3_24",]
 
 [dependencies.gdk-pixbuf]
 version = "0.8.0"
-features = ["v2_32"]
+features = [ "v2_32",]
 
 [dependencies.gio]
 version = "0.8.1"
-features = ["v2_60"]
+features = [ "v2_60",]
 
 [dependencies.glib]
 version = "0.9.2"
-features = ["v2_60"]
+features = [ "v2_60",]
 
 [dependencies.gettext-rs]
 version = "0.4.4"
-features = ["gettext-system"]
+features = [ "gettext-system",]

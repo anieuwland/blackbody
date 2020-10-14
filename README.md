@@ -8,7 +8,7 @@ cameras and single-banded TIFF files.
 ## Compile for Linux
 
 Either use GNOME Builder (easier) or do it manually. Using Builder it is a
-question of pressing the compile&run button. Doing it manually involves 
+question of pressing the compile&run button. Doing it manually involves
 `cargo build --release`, copying the compile gresource to the same directory as
 the binary, and then `cargo run --release`.
 

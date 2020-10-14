@@ -21,4 +21,3 @@ else
         "$MESON_SOURCE_ROOT"/Cargo.toml --verbose && \
         cp "$CARGO_TARGET_DIR"/debug/"$APP_BIN" "$OUTPUT"
 fi
-

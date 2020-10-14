@@ -65,7 +65,8 @@ impl AppState {
         builder.set_application(application);
         let (render_s, render_r) = MainContext::sync_channel(glib::PRIORITY_DEFAULT, 256);
 
-        let state = AppState {  // Application's state struct
+        let state = AppState {
+            // Application's state struct
             window: builder.get_object("blackbody_window").unwrap(),
             headerbar: builder.get_object("headerbar").unwrap(),
             app_menu: builder.get_object("app_menu").unwrap(),
@@ -110,22 +111,23 @@ impl AppState {
 
         // Load and register resource carrying the UI file
         let res = {
-                let pkg_dir = std::path::Path::new(config::PKGDATADIR);
-                let res_path = pkg_dir.join("blackbody.gresource");
-                gio::Resource::load(res_path)
-            }
-            .or_else(|_| {
-                let exe_path = std::env::current_exe().expect("Can't determine executable path");
-                let exe_dir = exe_path.parent().expect("Can't determine executable's directory");
-                let res_path = exe_dir.join("resources").join("blackbody.gresource");
-                gio::Resource::load(res_path)
-            })
-           .expect("Could find resource bundle");
+            let pkg_dir = std::path::Path::new(config::PKGDATADIR);
+            let res_path = pkg_dir.join("blackbody.gresource");
+            gio::Resource::load(res_path)
+        }
+        .or_else(|_| {
+            let exe_path = std::env::current_exe().expect("Can't determine executable path");
+            let exe_dir = exe_path.parent().expect("Can't determine executable's directory");
+            let res_path = exe_dir.join("resources").join("blackbody.gresource");
+            gio::Resource::load(res_path)
+        })
+        .expect("Could find resource bundle");
         gio::resources_register(&res);
     }
 
     fn connect_signals(this: &Rc<RefCell<Self>>, application: &Application) {
-        {   // Application activation: initial window size and other values
+        {
+            // Application activation: initial window size and other values
             let that = this.clone();
             application.connect_activate(move |app| {
                 app.add_window(&that.borrow().window);
@@ -133,7 +135,8 @@ impl AppState {
                 that.borrow().window.show_all();
             });
         }
-        {   // Application menu: connecting buttons to actions
+        {
+            // Application menu: connecting buttons to actions
             let that = this.clone();
             let open = SimpleAction::new("open", None);
             let menu = that.borrow().app_menu.clone();
@@ -141,7 +144,8 @@ impl AppState {
             open.connect_activate(move |_, _| that.borrow().show_thermogram_chooser());
             application.add_action(&open);
         }
-        {   // Show dialog window
+        {
+            // Show dialog window
             let that = this.clone();
             let about = SimpleAction::new("about", None);
             let menu = that.borrow().app_menu.clone();
@@ -152,33 +156,38 @@ impl AppState {
             });
             application.add_action(&about);
         }
-        {   // Zoom spinner: redraw thermogram when changed
+        {
+            // Zoom spinner: redraw thermogram when changed
             let that = this.clone();
             this.borrow()
                 .zoom_spinner
                 .connect_value_changed(move |_| that.borrow().draw_render_threaded());
         }
-        {   // Zoom spinner: update zoom factor with scroll wheel and redraw
+        {
+            // Zoom spinner: update zoom factor with scroll wheel and redraw
             let that = this.clone();
             this.borrow()
                 .image_events
                 .connect_scroll_event(move |_, event| that.borrow().zoom_from_scroll(event));
         }
-        {   // Lower bound spinner: redraw when changed
+        {
+            // Lower bound spinner: redraw when changed
             let that = this.clone();
             this.borrow().min_spinner.set_increments(0.5, 5.0);
             this.borrow()
                 .min_spinner
                 .connect_value_changed(move |_| that.borrow().draw_render_threaded());
         }
-        {   // Upper bound spinner: redraw when changed
+        {
+            // Upper bound spinner: redraw when changed
             let that = this.clone();
             this.borrow().max_spinner.set_increments(0.5, 5.0);
             this.borrow()
                 .max_spinner
                 .connect_value_changed(move |_| that.borrow().draw_render_threaded());
         }
-        {   // Redraw on palette change
+        {
+            // Redraw on palette change
             let that = this.clone();
             this.borrow()
                 .palette_chooser
@@ -188,7 +197,8 @@ impl AppState {
 
     fn set_thermogram(&self, o_thermogram: Option<Thermogram>) {
         match o_thermogram {
-            Some(thermogram) => {  // Update controls and draw thermogram
+            Some(thermogram) => {
+                // Update controls and draw thermogram
                 self.headerbar.set_title(Some(&thermogram.identifier()));
                 self.headerbar.set_subtitle(thermogram.path());
                 self.min_spinner.set_value(thermogram.min_temp().into());
@@ -196,7 +206,8 @@ impl AppState {
                 self.thermogram.replace(Some(thermogram));
                 self.draw_render_threaded();
             }
-            None => {  // Set to empty
+            None => {
+                // Set to empty
                 self.thermogram.replace(None);
             }
         }
@@ -256,7 +267,7 @@ impl AppState {
                     }
                 }
             }
-            _ => ()
+            _ => (),
         }
     }
 
@@ -276,11 +287,8 @@ impl AppState {
                 thread::spawn(move || {
                     let palette = PALETTES[palette_idx];
                     let render = thermogram.render(min_temp, max_temp, palette);
-                    let (bytes, width, height) = (
-                        render.as_slice().unwrap(),
-                        render.shape()[1],
-                        render.shape()[0],
-                    );
+                    let (bytes, width, height) =
+                        (render.as_slice().unwrap(), render.shape()[1], render.shape()[0]);
 
                     let glib_bytes = Bytes::from(bytes);
                     sender_local
@@ -288,7 +296,7 @@ impl AppState {
                         .expect("Failed sending rendered bytes!");
                 });
             }
-            None => ()
+            None => (),
         }
     }
 
@@ -302,7 +310,6 @@ impl AppState {
             0.0
         };
 
-
         self.update_zoom_factor(delta);
         glib::signal::Inhibit(true)
     }
@@ -311,8 +318,7 @@ impl AppState {
         let adj_zoom = self.zoom_spinner.get_value() as f64 + modifier;
         let (min_zoom, max_zoom) = self.zoom_spinner.get_range();
         if adj_zoom >= min_zoom && adj_zoom <= max_zoom {
-            self.zoom_spinner
-                .set_value(self.zoom_spinner.get_value() + modifier);
+            self.zoom_spinner.set_value(self.zoom_spinner.get_value() + modifier);
         }
     }
 }
