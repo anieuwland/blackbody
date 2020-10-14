@@ -44,7 +44,9 @@
             "sources" : [
                 {
                     "type" : "git",
-                    "url" : "file:///home/anieuwland/Ontwikkeling/blackbody/Blackbody"
+                    "url" : "https://bitbucket.org/nimmerwoner/blackbody/src/master/",
+                    "tag" : "0.1.0",
+                    "commit" : "79c7d8a3ccf5f61220df84f1fd59beae4dcb4db8"
                 }
             ]
         }

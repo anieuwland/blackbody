@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2020 Arthur Nieuwland -->
 <component type="desktop-application">
 	<id>eu.nimmerfort.blackbody</id>
   <launchable type="desktop-id">eu.nimmerfort.blackbody.desktop</launchable>
@@ -13,7 +14,7 @@
   <releases>
     <release version="0.1.0" date="2020-10-14" urgency="low" type="development">
       <description>
-        <p>First release of Blacbody: ready for use, although still in beta. The most important features are:</p>
+        <p>First release of Blackbody: ready for use, although still in beta. The most important features are:</p>
         <ul>
           <li>Loading FLIR thermograms from many cameras</li>
           <li>Loading single-band TIFFs assumed to be in °C</li>
