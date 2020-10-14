@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component type="desktop">
-	<id>eu.nimmerfort.blackbody.desktop</id>
+<component type="desktop-application">
+	<id>eu.nimmerfort.blackbody</id>
+  <launchable type="desktop-id">eu.nimmerfort.blackbody.desktop</launchable>
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>EUPL-1.2</project_license>
-	<description>
-	</description>
+  <name>Blackbody</name>
+	<summary>An image viewer for thermograms.</summary>
+  <url type="homepage">org.freedesktop.Sdk.Extension.rust-stable</url>
 </component>

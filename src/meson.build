@@ -6,6 +6,7 @@ gnome.compile_resources('blackbody',
   gresource_bundle: true,
   install: true,
   install_dir: pkgdatadir,
+  # install_dir: get_option('bindir'),
 )
 
 conf = configuration_data()

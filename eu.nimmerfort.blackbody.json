@@ -11,7 +11,8 @@
         "--share=network",
         "--share=ipc",
         "--socket=fallback-x11",
-        "--socket=wayland"
+        "--socket=wayland",
+        "--socket=session-bus"
     ],
     "build-options" : {
         "append-path" : "/usr/lib/sdk/rust-stable/bin",

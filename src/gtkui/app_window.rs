@@ -26,6 +26,8 @@ use gtk::*;
 
 use libblackbody::*;
 
+use crate::config;
+
 #[derive(Clone)]
 pub struct AppState {
     // Controls
@@ -59,13 +61,20 @@ impl AppState {
         let _ = settings.set_property("gtk-application-prefer-dark-theme", &true);
 
         // Create application from builder
-        let exe_path = std::env::current_exe().expect("Can't determine executable path");
-        let exe_dir = exe_path.parent().expect("Can't determine executable's directory");
-        let ui_path = exe_dir.join("resources").join("eu.nimmerfort.blackbody.ui");
+        let res = gio::Resource::load(config::PKGDATADIR.to_owned() + "/blackbody.gresource")
+           .expect("Could not load resources");
+        gio::resources_register(&res);
 
-        let builder = Builder::new_from_file(ui_path);
+        //let exe_path = std::env::current_exe().expect("Can't determine executable path");
+        //let exe_dir = exe_path.parent().expect("Can't determine executable's directory");
+        //let ui_path = exe_dir.join("resources").join("eu.nimmerfort.blackbody.ui");
+
+        let builder = Builder::new_from_resource("/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui");
+        println!("Loaded UI file");
         builder.set_application(application);
+        println!("Set application");
         let (render_s, render_r) = MainContext::sync_channel(glib::PRIORITY_DEFAULT, 256);
+        println!("Set up channel");
 
         let state = AppState {  // Application's state struct
             window: builder.get_object("blackbody_window").unwrap(),
@@ -85,6 +94,7 @@ impl AppState {
             thermogram: RefCell::new(None),
             render_sender: render_s,
         };
+        println!("Created state");
 
         // Some initial configuration
         state.filter_thermograms.set_name(Some("Warmtebeelden: *.jpg (FLIR), *.tiff"));
@@ -102,6 +112,7 @@ impl AppState {
 
         // If given, set initial thermogram, then return final constructed app
         this.clone().borrow().set_thermogram(thermogram);
+        println!("At end");
         Some(this)
     }
 
