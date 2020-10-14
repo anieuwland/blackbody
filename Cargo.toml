@@ -1,8 +1,11 @@
 [package]
 name = "blackbody"
+description = "Blackbody is an image viewer for thermograms."
 version = "0.1.0"
+license = "EUPL-1.2"
 authors = ["Arthur Nieuwland <anieuwland@nimmerfort.eu>"]
 edition = "2018"
+repository = "https://bitbucket.org/nimmerwoner/blackbody/"
 
 [dependencies]
 libblackbody = "0.3.0"
