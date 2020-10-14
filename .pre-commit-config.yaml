@@ -1,0 +1,28 @@
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.3.0
+  hooks:
+  - id: check-added-large-files
+  - id: check-merge-conflict
+  - id: check-case-conflict
+  - id: end-of-file-fixer
+  - id: mixed-line-ending
+  - id: trailing-whitespace
+  - id: check-yaml
+  - id: check-json
+  - id: check-toml
+  - id: check-xml
+  - id: pretty-format-json
+    args: [--autofix]
+- repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  rev: master
+  hooks:
+  - id: pretty-format-yaml
+    args: [--autofix]
+  - id: pretty-format-toml
+    args: [--autofix]
+- repo: http://github.com/doublify/pre-commit-rust
+  rev: master
+  hooks:
+  - id: fmt
+  - id: cargo-check
