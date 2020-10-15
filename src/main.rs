@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 //extern crate image;
 //use image::{GenericImage, GenericImageView, ImageBuffer, RgbImage};
 
@@ -10,7 +12,7 @@ use gtk::*;
 
 pub fn main() {
     // Load application
-    let application = Application::new(Some("eu.nimmerfort.fikkie"), Default::default())
+    let application = Application::new(Some("eu.nimmerfort.blackbody"), Default::default())
         .expect("failed to initialize GTK application");
     let ret = match AppState::new(&application, None) {
         Some(_) => application.run(&std::env::args().collect::<Vec<_>>()),
