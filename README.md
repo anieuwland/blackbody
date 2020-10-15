@@ -32,14 +32,16 @@ the binary, and then `cargo run --release`.
 Compiling for Windows is more involved, but does work.
 
 1. Install the necessary mingw packages
-2. Run the build command with cross-compilation flags set. On Fedora: `PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_PATH=/usr/x86_64-w64-mingw32/sys-root/mingw/lib/pkgconfig/ MINGW_PREFIX=/usr/x86_64-w64-mingw32/sys-root/mingw/ cargo build --target=x86_64-pc-windows-gnu --release`
+2. Run the build command with cross-compilation flags set. On Fedora: `PKG_CONFIG_ALLOW_CROSS=1 MINGW_PREFIX=/usr/x86_64-w64-mingw32/sys-root/mingw PKG_CONFIG_PATH=$MINGW_PREFIX/lib/pkgconfig cargo build --target=x86_64-pc-windows-gnu --release`
 3. Copy DLLs, icons, glib schemas and the gresource to the same directory with the binary.
-    1. `mkdir /wherever/release`
-    2. `cp target/x86_64-pc-windows-gnu/release/*.exe /wherever/release`
-    3. `cp $GTK_INSTALL_PATH/bin/*.dll /wherever/release`
-    4. `mkdir -p /wherever/release/share/glib-2.0/schemas && cp $GTK_INSTALL_PATH/share/glib-2.0/schemas/* /wherever/release/share/glib-2.0/schemas`
-    5. `cp -r $GTK_INSTALL_PATH/share/icons /wherever/release/share/`
-    6. Compile the gresource bundle and copy it to `/wherever/release`
-4. Run with Wine or zip up the release dir and ru non Windows! Make sure `XDG_DATA_DIRS` is correctly set however: `XDG_DATA_DIRS=path/to/app/share blackbody.exe`
+    1. `mkdir blackbody-windows`
+    2. `cp target/x86_64-pc-windows-gnu/release/*.exe blackbody-windows/`
+    3. `cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll blackbody-windows/`
+    4. `cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/gdbus.exe blackbody-windows/`
+    4. `mkdir -p blackbody-windows/share/glib-2.0/schemas`
+    5. `cp /usr/x86_64-w64-mingw32/sys-root/mingw/share/glib-2.0/schemas/gschemas.compiled blackbody-windows/share/glib-2.0/schemas/gschemas.compiled`
+    5. `cp -r /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons blackbody-windows/share/icons`
+    6. Compile the gresource bundle and copy it to `blackbody-windows`
+4. Run with Wine or zip up the release dir and ru non Windows! When using wine `XDG_DATA_DIRS` is correctly set however: `XDG_DATA_DIRS=blackbody-windows/share wine blackbody.exe`. In Windows it doesn't seem to matter.
 
-Reference: [Cross-compiling Rust Linux -> Window](https://gtk-rs.org/docs-src/tutorial/cross)
+Reference: [Cross-compiling Rust Linux -> Windows](https://gtk-rs.org/docs-src/tutorial/cross)
