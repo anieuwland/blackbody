@@ -1,6 +1,6 @@
 # Blackbody
 
-An image viewer specialized in rendering thermograms.
+An image viewer specialized in rendering thermograms. For an animated example, visit [here](PREVIEW.md) (warning: 7.5MB download). 
 
 ![Screenshot of the application](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-01.png)
 
