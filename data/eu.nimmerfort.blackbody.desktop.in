@@ -1,8 +1,6 @@
 [Desktop Entry]
 Name=Blackbody
-Comment=An image viewer for thermograms
-Comment[nl]=Een afbeeldingsviewer voor warmtebeelden
-Comment[en]=An image viewer for thermograms
+Comment=A thermogram viewer
 Exec=blackbody
 Terminal=false
 Type=Application

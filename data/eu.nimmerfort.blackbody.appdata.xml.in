@@ -1,15 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2020 Arthur Nieuwland -->
 <component type="desktop-application">
+  <name>Blackbody</name>
+	<summary>A thermogram viewer.</summary>
 	<id>eu.nimmerfort.blackbody</id>
   <launchable type="desktop-id">eu.nimmerfort.blackbody.desktop</launchable>
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>EUPL-1.2</project_license>
-  <name>Blackbody</name>
-	<summary>An image viewer for thermograms.</summary>
-  <description><p>An image viewer for viewing thermograms made by FLIR cameras or raw thermal data in TIFFs.</p>></description>
   <url type="homepage">https://bitbucket.org/nimmerwoner/blackbody/</url>
   <content_rating type="oars-1.1" />
+  <translation type="gettext">blackbody</translation>
+  <developer_name>Arthur Nieuwland</developer_name>
+  <update_contact>anieuwland@nimmerfort.eu</update_contact>
+
+  <description>
+    <p>Blackbody is a thermogram viewer. It renders temperature data to RGB images.</p>
+    <p>Features:</p>
+    <ul>
+      <li>Loading FLIR thermograms from many cameras</li>
+      <li>Loading single-band TIFFs assumed to be in °C</li>
+      <li>Rendering to many different colors palettes, including inferno and turbo</li>
+      <li>Specify the thermal range to render</li>
+      <li>Zoom in and out</li>
+      <li>Translated to multiple languages</li>
+      <li>Available for Linux and Windows</li>
+    </ul>
+  </description>
 
   <releases>
     <release version="0.1.0" date="2020-10-14" urgency="low" type="development">
