@@ -1,4 +1,4 @@
 data/eu.nimmerfort.blackbody.desktop.in
 data/eu.nimmerfort.blackbody.appdata.xml.in
 data/eu.nimmerfort.blackbody.gschema.xml
-src/window.ui
+src/resources/eu.nimmerfort.blackbody.ui

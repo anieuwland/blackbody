@@ -26,8 +26,6 @@ use gtk::*;
 
 use libblackbody::*;
 
-use crate::config;
-
 #[derive(Clone)]
 pub struct AppState {
     // Controls
@@ -55,10 +53,7 @@ impl AppState {
     pub fn new(
         application: &Application,
         thermogram: Option<Thermogram>,
-    ) -> Option<Rc<RefCell<AppState>>> {
-        // Ensure environment is correct for the app's theme and resource
-        AppState::init_env();
-
+    ) -> Rc<RefCell<AppState>> {
         // Create application from builder
         let ui = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui";
         let builder = Builder::new_from_resource(ui);
@@ -101,28 +96,7 @@ impl AppState {
 
         // If given, set initial thermogram, then return final constructed app
         this.clone().borrow().set_thermogram(thermogram);
-        Some(this)
-    }
-
-    fn init_env() {
-        // Set dark theme for image viewer
-        let settings = gtk::Settings::get_default().unwrap();
-        let _ = settings.set_property("gtk-application-prefer-dark-theme", &true);
-
-        // Load and register resource carrying the UI file
-        let res = {
-            let pkg_dir = std::path::Path::new(config::PKGDATADIR);
-            let res_path = pkg_dir.join("blackbody.gresource");
-            gio::Resource::load(res_path)
-        }
-        .or_else(|_| {
-            let exe_path = std::env::current_exe().expect("Can't determine executable path");
-            let exe_dir = exe_path.parent().expect("Can't determine executable's directory");
-            let res_path = exe_dir.join("resources").join("blackbody.gresource");
-            gio::Resource::load(res_path)
-        })
-        .expect("Could find resource bundle");
-        gio::resources_register(&res);
+        this
     }
 
     fn connect_signals(this: &Rc<RefCell<Self>>, application: &Application) {
