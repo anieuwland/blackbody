@@ -14,6 +14,7 @@
 // https://www.bassi.io/articles/2015/02/17/using-opengl-with-gtk/
 
 use std::cell::RefCell;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::thread;
 
@@ -169,6 +170,16 @@ impl AppState {
         }
     }
 
+    pub fn set_thermogram_from_path(&self, o_path: Option<&(dyn AsRef<Path>)>) {
+        let o_thermogram = match o_path {
+            Some(filepath) => Thermogram::from_file(&filepath.as_ref()),
+            _ => None,
+        };
+
+        self.set_thermogram(o_thermogram);
+        self.draw_render_threaded();
+    }
+
     fn set_thermogram(&self, o_thermogram: Option<Thermogram>) {
         match o_thermogram {
             Some(thermogram) => {
@@ -229,20 +240,9 @@ impl AppState {
 
         // Handle opening a thermogram
         match chooser.get_filename() {
-            Some(filepath) => {
-                let o_thermogram = Thermogram::from_file(&filepath);
-                match o_thermogram {
-                    Some(thermogram) => {
-                        self.set_thermogram(Some(thermogram));
-                        self.draw_render_threaded();
-                    }
-                    _ => {
-                        println!("Failed opening thermogram {:?}", filepath);
-                    }
-                }
-            }
-            _ => (),
-        }
+            Some(p) => self.set_thermogram_from_path(Some(&p)),
+            _ => self.set_thermogram_from_path(None),
+        };
     }
 
     fn draw_render_threaded(&self) {

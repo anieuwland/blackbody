@@ -3,6 +3,8 @@
 mod config;
 mod gtkui;
 
+use std::path::{Path, PathBuf};
+
 use gettextrs::*;
 use gio::prelude::*;
 use gtk::*;
@@ -11,14 +13,21 @@ use gtkui::app_window::*;
 
 
 pub fn main() {
+    // Get url of file if given
+    let o_thermogram_path = std::env::args().nth(1);
+
     // Ensure environment is correct for the app's theme and resource
     init_env();
 
     // Load application
     let application = Application::new(Some("eu.nimmerfort.blackbody"), Default::default())
         .expect("failed to initialize GTK application");
-    AppState::new(&application, None);
-    let ret = application.run(&std::env::args().collect::<Vec<_>>());
+    let state = AppState::new(&application, None);
+    match o_thermogram_path {
+        Some(p) => state.borrow().set_thermogram_from_path(Some(&p)),
+        _ => (),
+    }
+    let ret = application.run(&[]);
     std::process::exit(ret);
 }
 
