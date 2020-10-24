@@ -14,7 +14,7 @@
 // https://www.bassi.io/articles/2015/02/17/using-opengl-with-gtk/
 
 use std::cell::RefCell;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::rc::Rc;
 use std::thread;
 
@@ -170,12 +170,8 @@ impl AppState {
         }
     }
 
-    pub fn set_thermogram_from_path(&self, o_path: Option<&(dyn AsRef<Path>)>) {
-        let o_thermogram = match o_path {
-            Some(filepath) => Thermogram::from_file(&filepath.as_ref()),
-            _ => None,
-        };
-
+    pub fn set_thermogram_from_path(&self, o_path: Option<&Path>) {
+        let o_thermogram = o_path.and_then(Thermogram::from_file);
         self.set_thermogram(o_thermogram);
         self.draw_render_threaded();
     }
@@ -239,10 +235,9 @@ impl AppState {
         }
 
         // Handle opening a thermogram
-        match chooser.get_filename() {
-            Some(p) => self.set_thermogram_from_path(Some(&p)),
-            _ => self.set_thermogram_from_path(None),
-        };
+        let path = chooser.get_filename();
+        let path = path.as_ref().map(AsRef::as_ref);
+        self.set_thermogram_from_path(path);
     }
 
     fn draw_render_threaded(&self) {
@@ -256,22 +251,19 @@ impl AppState {
             _ => 0,
         };
 
-        match o_thermogram {
-            Some(thermogram) => {
-                thread::spawn(move || {
-                    let palette = PALETTES[palette_idx];
-                    let render = thermogram.render(min_temp, max_temp, palette);
-                    let (bytes, width, height) =
-                        (render.as_slice().unwrap(), render.shape()[1], render.shape()[0]);
+        o_thermogram.map(|thermogram| {
+            thread::spawn(move || {
+                let palette = PALETTES[palette_idx];
+                let render = thermogram.render(min_temp, max_temp, palette);
+                let (bytes, width, height) =
+                    (render.as_slice().unwrap(), render.shape()[1], render.shape()[0]);
 
-                    let glib_bytes = Bytes::from(bytes);
-                    sender_local
-                        .send((glib_bytes, width, height, zoom))
-                        .expect("Failed sending rendered bytes!");
-                });
-            }
-            None => (),
-        }
+                let glib_bytes = Bytes::from(bytes);
+                sender_local
+                    .send((glib_bytes, width, height, zoom))
+                    .expect("Failed sending rendered bytes!");
+            });
+        });
     }
 
     fn zoom_from_scroll(&self, event: &gdk::EventScroll) -> glib::signal::Inhibit {
