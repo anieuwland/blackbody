@@ -6,5 +6,5 @@ pipelines:
         name: "Building Blackbody"
         script:
           - apt update
-          - apt install -y libgtk3-dev
-          - echo "Build project"                    ; cargo build --release
+          - apt install -y libgtk-3-dev
+          - cargo build --release
