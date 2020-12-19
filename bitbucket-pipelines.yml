@@ -1,0 +1,10 @@
+image: rustlang/rust:nightly
+
+pipelines:
+  default:
+    - step:
+        name: "Building Blackbody"
+        script:
+          - apt update
+          - apt install -y libgtk3-dev
+          - echo "Build project"                    ; cargo build --release
