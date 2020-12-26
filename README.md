@@ -1,6 +1,6 @@
 # Blackbody
 
-An image viewer specialized in rendering thermograms. For an animated example, visit [here](PREVIEW.md) (warning: 7.5MB download). 
+An image viewer specialized in rendering thermograms. For an animated example, visit [here](PREVIEW.md) (loads a 7.5MB image). 
 
 ![Screenshot of the application](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-01.png)
 
@@ -11,7 +11,7 @@ An image viewer specialized in rendering thermograms. For an animated example, v
 * Renders to several different color palettes (grayscale, [turbo](https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html), inferno, and more)
 * Dynamically set minimum and maximum values for rendering
 * Zoom in and out
-* Written in Rust and therefore very fast
+* Written in Rust and therefore fast
 
 ## Download and use
 The [downloads](https://bitbucket.org/nimmerwoner/blackbody/downloads/) page
@@ -24,8 +24,8 @@ clicking `blackbody.exe`.
 ## Compile for Linux
 
 Either use GNOME Builder (easier) or do it manually. Using Builder it is a
-question of pressing the compile&run button. Doing it manually involves
-`cargo build --release`, copying the compile gresource to the same directory as
+matter of pressing the compile&run button. Doing it manually involves
+`cargo build --release`, copying the compiled gresource to the same directory as
 the binary, and then `cargo run --release`.
 
 ## Compile for Windows
