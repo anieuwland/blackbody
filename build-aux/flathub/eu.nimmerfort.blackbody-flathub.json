@@ -2,11 +2,10 @@
   "app-id": "eu.nimmerfort.blackbody",
   "build-options": {
     "append-path": "/usr/lib/sdk/rust-stable/bin",
-    "build-args": [
-    	"--share=network"
-    ],
+    "build-args": [],
     "env": {
-      "BLACKBODY_BUILDER": "default"
+      "CARGO_HOME": "/run/build/blackbody/cargo",
+      "BLACKBODY_BUILDER": "flathub"
     }
   },
   "cleanup": [
@@ -35,9 +34,12 @@
       	"--buildtype=release"
       ],
       "sources": [
+        "Cargo-sources.json",
         {
-          "type": "dir",
-          "path": "."
+          "type": "git",
+          "url": "https://bitbucket.org/nimmerwoner/blackbody/",
+          "tag": "1.0.0",
+          "commit": "79c7d8a3ccf5f61220df84f1fd59beae4dcb4db8"
         }
       ]
     }

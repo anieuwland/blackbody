@@ -3,9 +3,11 @@
   "build-options": {
     "append-path": "/usr/lib/sdk/rust-stable/bin",
     "build-args": [
-    	"--share=network"
+      "--share=network"
     ],
     "env": {
+      "RUST_BACKTRACE": "1",
+      "RUST_LOG": "blackbody=debug",
       "BLACKBODY_BUILDER": "default"
     }
   },
@@ -32,7 +34,7 @@
       "buildsystem": "meson",
       "name": "blackbody",
       "config-opts": [
-      	"--buildtype=release"
+      	"--buildtype=debug"
       ],
       "sources": [
         {
