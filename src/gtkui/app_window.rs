@@ -34,6 +34,8 @@ pub struct AppState {
     headerbar: HeaderBar,
     app_menu: PopoverMenu,
     app_menu_button: MenuButton,
+    app_menu_item_open: ModelButton,
+    app_menu_item_about: ModelButton,
     palette_chooser: ComboBoxText,
     image: Image,
     image_events: EventBox,
@@ -43,6 +45,7 @@ pub struct AppState {
     about_dialog: AboutDialog,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
+    accel_group: AccelGroup,
 
     // Model members
     thermogram: RefCell<Option<Thermogram>>,
@@ -67,6 +70,8 @@ impl AppState {
             headerbar: builder.get_object("headerbar").unwrap(),
             app_menu: builder.get_object("app_menu").unwrap(),
             app_menu_button: builder.get_object("app_menu_button").unwrap(),
+            app_menu_item_open: builder.get_object("app_menu_item_open").unwrap(),
+            app_menu_item_about: builder.get_object("app_menu_item_about").unwrap(),
             palette_chooser: builder.get_object("palette_chooser").unwrap(),
             image: builder.get_object("viewed_image").unwrap(),
             image_events: builder.get_object("viewed_image_events").unwrap(),
@@ -76,12 +81,14 @@ impl AppState {
             about_dialog: builder.get_object("about_dialog").unwrap(),
             filter_thermograms: builder.get_object("filter_thermograms").unwrap(),
             filter_all_files: builder.get_object("filter_all_files").unwrap(),
+            accel_group: builder.get_object("app_accel_group").unwrap(),
 
             thermogram: RefCell::new(None),
             render_sender: render_s,
         };
 
         // Some initial configuration
+        state.window.add_accel_group(&state.accel_group);
         state.filter_thermograms.set_name(Some("Warmtebeelden: *.jpg (FLIR), *.tiff"));
         state.filter_all_files.set_name(Some("Alle bestanden"));
 
@@ -114,17 +121,13 @@ impl AppState {
             // Application menu: connecting buttons to actions
             let that = this.clone();
             let open = SimpleAction::new("open", None);
-            let menu = that.borrow().app_menu.clone();
-            that.borrow().app_menu_button.set_popover(Some(&menu));
             open.connect_activate(move |_, _| that.borrow().show_thermogram_chooser());
             application.add_action(&open);
         }
         {
-            // Show dialog window
+            // Show about dialog window
             let that = this.clone();
             let about = SimpleAction::new("about", None);
-            let menu = that.borrow().app_menu.clone();
-            that.borrow().app_menu_button.set_popover(Some(&menu));
             about.connect_activate(move |_, _| {
                 let _ = that.borrow().about_dialog.run();
                 that.borrow().about_dialog.hide();

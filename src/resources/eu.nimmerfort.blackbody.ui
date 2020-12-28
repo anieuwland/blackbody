@@ -1,130 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.36.0 -->
 <interface>
-  <requires lib="gtk+" version="3.16"/>
-  <object class="GtkPopoverMenu" id="app_menu">
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkBox">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_start">6</property>
-        <property name="margin_end">6</property>
-        <property name="margin_top">6</property>
-        <property name="margin_bottom">6</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">3</property>
-        <child>
-          <object class="GtkModelButton">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="action_name">app.open</property>
-            <property name="text" translatable="yes">Open...</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="spacing">6</property>
-            <child>
-              <object class="GtkLabel">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_start">3</property>
-                <property name="margin_end">3</property>
-                <property name="label" translatable="yes">Palette</property>
-                <property name="xalign">0</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkComboBoxText" id="palette_chooser">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_start">3</property>
-                <property name="margin_end">3</property>
-                <property name="active">0</property>
-                <property name="active_id">0</property>
-                <items>
-                  <item id="0" translatable="yes">Turbo</item>
-                  <item id="1" translatable="yes">Cividis</item>
-                  <item id="2" translatable="yes">Copper</item>
-                  <item id="3" translatable="yes">Grayscale</item>
-                  <item id="4" translatable="yes">Hot</item>
-                  <item id="5" translatable="yes">Inferno</item>
-                  <item id="6" translatable="yes">Jet</item>
-                  <item id="7" translatable="yes">Coolwarm</item>
-                  <item id="8" translatable="yes">Magma</item>
-                  <item id="9" translatable="yes">Viridis</item>
-                </items>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSeparator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkModelButton" id="open_about_dialog">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="action_name">app.about</property>
-            <property name="text" translatable="yes">About Blackbody</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="submenu">main</property>
-        <property name="position">1</property>
-      </packing>
-    </child>
-  </object>
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkAccelGroup" id="app_accel_group"/>
   <object class="GtkFileFilter" id="filter_all_files">
     <patterns>
       <pattern>*</pattern>
@@ -178,120 +56,11 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkApplicationWindow" id="blackbody_window">
-    <property name="can_focus">False</property>
-    <child>
-      <object class="GtkScrolledWindow">
-        <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="shadow_type">in</property>
-        <child>
-          <object class="GtkViewport">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkEventBox" id="viewed_image_events">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="events">GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK</property>
-                <child>
-                  <object class="GtkImage" id="viewed_image">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-missing-image</property>
-                  </object>
-                </child>
-              </object>
-            </child>
-          </object>
-        </child>
-      </object>
-    </child>
-    <child type="titlebar">
-      <object class="GtkHeaderBar" id="headerbar">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="title" translatable="yes">Blackbody</property>
-        <property name="show_close_button">True</property>
-        <child>
-          <object class="GtkSpinButton" id="min_temp_spinner">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="max_length">5</property>
-            <property name="width_chars">5</property>
-            <property name="max_width_chars">5</property>
-            <property name="text" translatable="yes">°C</property>
-            <property name="xalign">1</property>
-            <property name="caps_lock_warning">False</property>
-            <property name="input_purpose">digits</property>
-            <property name="adjustment">min_temp_adjustment</property>
-            <property name="digits">1</property>
-            <property name="numeric">True</property>
-          </object>
-        </child>
-        <child>
-          <object class="GtkMenuButton" id="app_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">True</property>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">open-menu-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSpinButton" id="max_temp_spinner">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="max_length">5</property>
-            <property name="width_chars">5</property>
-            <property name="max_width_chars">5</property>
-            <property name="xalign">1</property>
-            <property name="caps_lock_warning">False</property>
-            <property name="input_purpose">digits</property>
-            <property name="adjustment">max_temp_adjustment</property>
-            <property name="digits">1</property>
-            <property name="numeric">True</property>
-            <signal name="value-changed" handler="test" swapped="no"/>
-          </object>
-          <packing>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkSpinButton" id="zoom_spinner">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="max_length">6</property>
-            <property name="width_chars">6</property>
-            <property name="max_width_chars">6</property>
-            <property name="xalign">1</property>
-            <property name="adjustment">zoom_adjustment</property>
-            <property name="numeric">True</property>
-            <property name="value">100</property>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
   <object class="GtkAboutDialog" id="about_dialog">
     <property name="can_focus">False</property>
     <property name="type_hint">dialog</property>
     <property name="transient_for">blackbody_window</property>
-    <property name="attached_to">open_about_dialog</property>
+    <property name="attached_to">app_menu_item_about</property>
     <property name="program_name">Blackbody</property>
     <property name="version">1.0.0</property>
     <property name="copyright" translatable="yes">This program is made available under the European Public License (EUPL-1.2).</property>
@@ -486,6 +255,247 @@ All other changes or additions to this Appendix require the production of a new 
     </child>
     <child type="titlebar">
       <placeholder/>
+    </child>
+  </object>
+  <object class="GtkPopoverMenu" id="app_menu">
+    <property name="can_focus">False</property>
+    <property name="relative_to">app_menu_button</property>
+    <property name="position">bottom</property>
+    <property name="constrain_to">none</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_start">6</property>
+        <property name="margin_end">6</property>
+        <property name="margin_top">6</property>
+        <property name="margin_bottom">6</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">3</property>
+        <child>
+          <object class="GtkModelButton" id="app_menu_item_open">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">app.open</property>
+            <property name="text" translatable="yes">Open...</property>
+            <accelerator key="o" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <property name="margin_start">3</property>
+                <property name="margin_end">3</property>
+                <property name="label" translatable="yes">Palette</property>
+                <property name="xalign">0</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="palette_chooser">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="margin_start">3</property>
+                <property name="margin_end">3</property>
+                <property name="active">0</property>
+                <property name="active_id">0</property>
+                <items>
+                  <item id="0" translatable="yes">Turbo</item>
+                  <item id="1" translatable="yes">Cividis</item>
+                  <item id="2" translatable="yes">Copper</item>
+                  <item id="3" translatable="yes">Grayscale</item>
+                  <item id="4" translatable="yes">Hot</item>
+                  <item id="5" translatable="yes">Inferno</item>
+                  <item id="6" translatable="yes">Jet</item>
+                  <item id="7" translatable="yes">Coolwarm</item>
+                  <item id="8" translatable="yes">Magma</item>
+                  <item id="9" translatable="yes">Viridis</item>
+                </items>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSeparator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="app_menu_item_about">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">app.about</property>
+            <property name="text" translatable="yes">About Blackbody</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="submenu">main</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <accessibility>
+      <relation type="subwindow-of" target="blackbody_window"/>
+    </accessibility>
+  </object>
+  <object class="GtkApplicationWindow" id="blackbody_window">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkScrolledWindow">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="shadow_type">in</property>
+        <child>
+          <object class="GtkViewport">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkEventBox" id="viewed_image_events">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="events">GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK</property>
+                <child>
+                  <object class="GtkImage" id="viewed_image">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="stock">gtk-missing-image</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="headerbar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="title" translatable="yes">Blackbody</property>
+        <property name="show_close_button">True</property>
+        <child>
+          <object class="GtkSpinButton" id="min_temp_spinner">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="max_length">5</property>
+            <property name="width_chars">5</property>
+            <property name="max_width_chars">5</property>
+            <property name="text" translatable="yes">°C</property>
+            <property name="xalign">1</property>
+            <property name="caps_lock_warning">False</property>
+            <property name="input_purpose">digits</property>
+            <property name="adjustment">min_temp_adjustment</property>
+            <property name="digits">1</property>
+            <property name="numeric">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkMenuButton" id="app_menu_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="receives_default">True</property>
+            <property name="popover">app_menu</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">open-menu-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="max_temp_spinner">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="max_length">5</property>
+            <property name="width_chars">5</property>
+            <property name="max_width_chars">5</property>
+            <property name="xalign">1</property>
+            <property name="caps_lock_warning">False</property>
+            <property name="input_purpose">digits</property>
+            <property name="adjustment">max_temp_adjustment</property>
+            <property name="digits">1</property>
+            <property name="numeric">True</property>
+            <signal name="value-changed" handler="test" swapped="no"/>
+          </object>
+          <packing>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="zoom_spinner">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="max_length">6</property>
+            <property name="width_chars">6</property>
+            <property name="max_width_chars">6</property>
+            <property name="xalign">1</property>
+            <property name="adjustment">zoom_adjustment</property>
+            <property name="numeric">True</property>
+            <property name="value">100</property>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
     </child>
   </object>
 </interface>
