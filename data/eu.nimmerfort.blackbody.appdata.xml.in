@@ -20,23 +20,25 @@
       <li>Loading FLIR thermograms from many cameras</li>
       <li>Loading single-band TIFFs assumed to be in °C</li>
       <li>Rendering to many different colors palettes, including inferno and turbo</li>
-      <li>Specify the thermal range to render</li>
-      <li>Zoom in and out</li>
+      <li>Specifying the thermal range to render</li>
+      <li>Zooming in and out</li>
       <li>Translated to multiple languages</li>
       <li>Available for Linux and Windows</li>
     </ul>
   </description>
 
   <releases>
-    <release version="0.1.0" date="2020-10-14" urgency="low" type="development">
+    <release version="1.0.0" date="2020-12-28" urgency="low" type="stable">
       <description>
-        <p>First release of Blackbody: ready for use, although still in beta. The most important features are:</p>
+        <p>First release of Blackbody. The most important features are:</p>
         <ul>
           <li>Loading FLIR thermograms from many cameras</li>
           <li>Loading single-band TIFFs assumed to be in °C</li>
           <li>Rendering to many different colors palettes, including inferno and turbo</li>
-          <li>Specify the thermal range to render</li>
-          <li>Zoom in and out</li>
+          <li>Specifying the thermal range to render</li>
+          <li>Zooming in and out</li>
+          <li>Translated to multiple languages</li>
+          <li>Available for Linux and Windows</li>
         </ul>
       </description>
     </release>
