@@ -1,0 +1,12 @@
+CHANGELOG
+---------
+# 1.0.0 (2020-12-28)
+First release of Blackbody. The most important features are:
+
+* Loading FLIR thermograms from many cameras
+* Loading single-band TIFFs assumed to be in °C
+* Rendering to many different colors palettes, including inferno and turbo
+* Specifying the thermal range to render
+* Zooming in and out
+* Translated to multiple languages (English, Dutch, French, German)
+* Available for Linux and Windows
