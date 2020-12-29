@@ -1,11 +1,13 @@
 CHANGELOG
 ---------
 # 1.1.0 (2020-12-29)
-Incremental release to Blackbody. Improvements
+A small, incremental update to Blackbody. Improvements:
+
 * An error message is shown if opening a thermogram fails
 * When opening fails, Blackbody doesn't unload any loaded thermograms anymore
 * Added logo's heat waves as a nicer placeholder when no thermogram is opened yet
 * Refined headerbar controls to only be sensitive when a thermogram is opened
+* Three more known-to-be-compatible cameras (FLIR C2, FLIR E5 and FLIR P60)
 
 # 1.0.0 (2020-12-28)
 First release of Blackbody. The most important features are:

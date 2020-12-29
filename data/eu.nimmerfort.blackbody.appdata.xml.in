@@ -25,9 +25,36 @@
       <li>Translated to multiple languages</li>
       <li>Available for Linux and Windows</li>
     </ul>
+    <p>Cameras known to work:</p>
+    <ul>
+      <li>FLIR C2</li>
+      <li>FLIR E4</li>
+      <li>FLIR E5</li>
+      <li>FLIR E6</li>
+      <li>FLIR E8</li>
+      <li>FLIR E8XT</li>
+      <li>FLIR E53</li>
+      <li>FLIR E75</li>
+      <li>FLIR P60 (PAL)</li>
+      <li>FLIR T630SC</li>
+      <li>FLIR T660</li>
+    </ul>
   </description>
 
   <releases>
+    <release version="1.1.0" date="2020-12-29" urgency="low" type="stable">
+      <description>
+        <p>A small, incremental update to Blackbody. Improvements:</p>
+        <ul>
+          <li>An error message is shown if opening a thermogram fails</li>
+          <li>When opening fails, Blackbody doesn't unload any loaded thermograms anymore</li>
+          <li>Added logo's heat waves as a nicer placeholder when no thermogram is opened yet</li>
+          <li>Refined headerbar controls to only be sensitive when a thermogram is opened</li>
+          <li>Three more known-to-be-compatible cameras (FLIR C2, FLIR E5 and FLIR P60)</li>
+        </ul>
+      </description>
+    </release>
+
     <release version="1.0.0" date="2020-12-28" urgency="low" type="stable">
       <description>
         <p>First release of Blackbody. The most important features are:</p>
