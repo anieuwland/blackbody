@@ -62,7 +62,7 @@
     <property name="transient_for">blackbody_window</property>
     <property name="attached_to">app_menu_item_about</property>
     <property name="program_name">Blackbody</property>
-    <property name="version">1.0.0</property>
+    <property name="version">1.1.0-dev</property>
     <property name="copyright" translatable="yes">This program is made available under the European Public License (EUPL-1.2).</property>
     <property name="comments" translatable="yes">A  thermogram viewer.</property>
     <property name="website">https://bitbucket.org/nimmerwoner/blackbody/</property>
