@@ -423,6 +423,7 @@ All other changes or additions to this Appendix require the production of a new 
         <child>
           <object class="GtkSpinButton" id="min_temp_spinner">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
             <property name="max-length">5</property>
             <property name="width-chars">5</property>
@@ -459,6 +460,7 @@ All other changes or additions to this Appendix require the production of a new 
         <child>
           <object class="GtkSpinButton" id="max_temp_spinner">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
             <property name="max-length">5</property>
             <property name="width-chars">5</property>
@@ -478,6 +480,7 @@ All other changes or additions to this Appendix require the production of a new 
         <child>
           <object class="GtkSpinButton" id="zoom_spinner">
             <property name="visible">True</property>
+            <property name="sensitive">False</property>
             <property name="can-focus">True</property>
             <property name="max-length">6</property>
             <property name="width-chars">6</property>

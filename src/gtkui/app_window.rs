@@ -216,6 +216,11 @@ impl AppState {
             self.min_spinner.set_value(thermogram.min_temp().into());
             self.max_spinner.set_value(thermogram.max_temp().into());
 
+            // Enable controls to be sensitive to user input
+            self.min_spinner.set_sensitive(true);
+            self.max_spinner.set_sensitive(true);
+            self.zoom_spinner.set_sensitive(true);
+
             // Update thermogram and draw
             self.thermogram.replace(Some(thermogram));
             self.draw_render_threaded();
@@ -295,6 +300,11 @@ impl AppState {
     }
 
     fn zoom_from_scroll(&self, event: &gdk::EventScroll) -> glib::signal::Inhibit {
+        if !self.zoom_spinner.is_sensitive() {
+            // Return without updating if zoom spinner is not sensitive
+            return glib::signal::Inhibit(true);
+        }
+
         let (_, y) = event.get_scroll_deltas().unwrap();
         let delta = if y < 0.0 {
             5.0

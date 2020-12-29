@@ -5,6 +5,7 @@ Incremental release to Blackbody. Improvements
 * An error message is shown if opening a thermogram fails
 * When opening fails, Blackbody doesn't unload any loaded thermograms anymore
 * Added logo's heat waves as a nicer placeholder when no thermogram is opened yet
+* Refined headerbar controls to only be sensitive when a thermogram is opened
 
 # 1.0.0 (2020-12-28)
 First release of Blackbody. The most important features are:
