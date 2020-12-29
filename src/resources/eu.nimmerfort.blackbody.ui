@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.36.0 -->
+<!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkAccelGroup" id="app_accel_group"/>
@@ -18,13 +18,13 @@
     <property name="lower">-99</property>
     <property name="upper">99</property>
     <property name="value">20</property>
-    <property name="page_increment">10</property>
+    <property name="page-increment">10</property>
   </object>
   <object class="GtkAdjustment" id="min_temp_adjustment">
     <property name="lower">-99</property>
     <property name="upper">99</property>
     <property name="value">1</property>
-    <property name="page_increment">10</property>
+    <property name="page-increment">10</property>
   </object>
   <object class="GtkListStore" id="render_palette_model">
     <columns>
@@ -53,15 +53,15 @@
     <property name="lower">5</property>
     <property name="upper">2000</property>
     <property name="value">100</property>
-    <property name="step_increment">1</property>
-    <property name="page_increment">10</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
   </object>
   <object class="GtkAboutDialog" id="about_dialog">
-    <property name="can_focus">False</property>
-    <property name="type_hint">dialog</property>
-    <property name="transient_for">blackbody_window</property>
-    <property name="attached_to">app_menu_item_about</property>
-    <property name="program_name">Blackbody</property>
+    <property name="can-focus">False</property>
+    <property name="type-hint">dialog</property>
+    <property name="transient-for">blackbody_window</property>
+    <property name="attached-to">app_menu_item_about</property>
+    <property name="program-name">Blackbody</property>
     <property name="version">1.1.0-dev</property>
     <property name="copyright" translatable="yes">This program is made available under the European Public License (EUPL-1.2).</property>
     <property name="comments" translatable="yes">A  thermogram viewer.</property>
@@ -223,18 +223,18 @@ The European Commission may update this Appendix to later versions of the above 
 
 All other changes or additions to this Appendix require the production of a new EUPL version.</property>
     <property name="authors">Arthur Nieuwland</property>
-    <property name="logo_icon_name">face-smile</property>
-    <property name="wrap_license">True</property>
-    <property name="license_type">custom</property>
+    <property name="logo-icon-name">face-smile</property>
+    <property name="wrap-license">True</property>
+    <property name="license-type">custom</property>
     <child internal-child="vbox">
       <object class="GtkBox">
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
+            <property name="can-focus">False</property>
+            <property name="layout-style">end</property>
             <child>
               <placeholder/>
             </child>
@@ -253,31 +253,28 @@ All other changes or additions to this Appendix require the production of a new 
         </child>
       </object>
     </child>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
   </object>
   <object class="GtkPopoverMenu" id="app_menu">
-    <property name="can_focus">False</property>
-    <property name="relative_to">app_menu_button</property>
+    <property name="can-focus">False</property>
+    <property name="relative-to">app_menu_button</property>
     <property name="position">bottom</property>
-    <property name="constrain_to">none</property>
+    <property name="constrain-to">none</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="margin_start">6</property>
-        <property name="margin_end">6</property>
-        <property name="margin_top">6</property>
-        <property name="margin_bottom">6</property>
+        <property name="can-focus">False</property>
+        <property name="margin-start">6</property>
+        <property name="margin-end">6</property>
+        <property name="margin-top">6</property>
+        <property name="margin-bottom">6</property>
         <property name="orientation">vertical</property>
         <property name="spacing">3</property>
         <child>
           <object class="GtkModelButton" id="app_menu_item_open">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="action_name">app.open</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="action-name">app.open</property>
             <property name="text" translatable="yes">Open...</property>
             <accelerator key="o" signal="activate" modifiers="GDK_CONTROL_MASK"/>
           </object>
@@ -290,7 +287,7 @@ All other changes or additions to this Appendix require the production of a new 
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -301,15 +298,15 @@ All other changes or additions to this Appendix require the production of a new 
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <property name="spacing">6</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="halign">end</property>
-                <property name="margin_start">3</property>
-                <property name="margin_end">3</property>
+                <property name="margin-start">3</property>
+                <property name="margin-end">3</property>
                 <property name="label" translatable="yes">Palette</property>
                 <property name="xalign">0</property>
               </object>
@@ -322,11 +319,11 @@ All other changes or additions to this Appendix require the production of a new 
             <child>
               <object class="GtkComboBoxText" id="palette_chooser">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="margin_start">3</property>
-                <property name="margin_end">3</property>
+                <property name="can-focus">False</property>
+                <property name="margin-start">3</property>
+                <property name="margin-end">3</property>
                 <property name="active">0</property>
-                <property name="active_id">0</property>
+                <property name="active-id">0</property>
                 <items>
                   <item id="0" translatable="yes">Turbo</item>
                   <item id="1" translatable="yes">Cividis</item>
@@ -356,7 +353,7 @@ All other changes or additions to this Appendix require the production of a new 
         <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -367,9 +364,9 @@ All other changes or additions to this Appendix require the production of a new 
         <child>
           <object class="GtkModelButton" id="app_menu_item_about">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="action_name">app.about</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="action-name">app.about</property>
             <property name="text" translatable="yes">About Blackbody</property>
           </object>
           <packing>
@@ -389,26 +386,26 @@ All other changes or additions to this Appendix require the production of a new 
     </accessibility>
   </object>
   <object class="GtkApplicationWindow" id="blackbody_window">
-    <property name="can_focus">False</property>
+    <property name="can-focus">False</property>
     <child>
       <object class="GtkScrolledWindow">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="shadow_type">in</property>
+        <property name="can-focus">True</property>
+        <property name="shadow-type">in</property>
         <child>
           <object class="GtkViewport">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can-focus">False</property>
             <child>
               <object class="GtkEventBox" id="viewed_image_events">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can-focus">False</property>
                 <property name="events">GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK</property>
                 <child>
                   <object class="GtkImage" id="viewed_image">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="stock">gtk-missing-image</property>
+                    <property name="can-focus">False</property>
+                    <property name="pixbuf">placeholder.svg</property>
                   </object>
                 </child>
               </object>
@@ -420,20 +417,20 @@ All other changes or additions to this Appendix require the production of a new 
     <child type="titlebar">
       <object class="GtkHeaderBar" id="headerbar">
         <property name="visible">True</property>
-        <property name="can_focus">False</property>
+        <property name="can-focus">False</property>
         <property name="title" translatable="yes">Blackbody</property>
-        <property name="show_close_button">True</property>
+        <property name="show-close-button">True</property>
         <child>
           <object class="GtkSpinButton" id="min_temp_spinner">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="max_length">5</property>
-            <property name="width_chars">5</property>
-            <property name="max_width_chars">5</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">5</property>
+            <property name="width-chars">5</property>
+            <property name="max-width-chars">5</property>
             <property name="text" translatable="yes">°C</property>
             <property name="xalign">1</property>
-            <property name="caps_lock_warning">False</property>
-            <property name="input_purpose">digits</property>
+            <property name="caps-lock-warning">False</property>
+            <property name="input-purpose">digits</property>
             <property name="adjustment">min_temp_adjustment</property>
             <property name="digits">1</property>
             <property name="numeric">True</property>
@@ -442,33 +439,33 @@ All other changes or additions to this Appendix require the production of a new 
         <child>
           <object class="GtkMenuButton" id="app_menu_button">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">True</property>
+            <property name="can-focus">True</property>
+            <property name="focus-on-click">False</property>
+            <property name="receives-default">True</property>
             <property name="popover">app_menu</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">open-menu-symbolic</property>
+                <property name="can-focus">False</property>
+                <property name="icon-name">open-menu-symbolic</property>
               </object>
             </child>
           </object>
           <packing>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">1</property>
           </packing>
         </child>
         <child>
           <object class="GtkSpinButton" id="max_temp_spinner">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="max_length">5</property>
-            <property name="width_chars">5</property>
-            <property name="max_width_chars">5</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">5</property>
+            <property name="width-chars">5</property>
+            <property name="max-width-chars">5</property>
             <property name="xalign">1</property>
-            <property name="caps_lock_warning">False</property>
-            <property name="input_purpose">digits</property>
+            <property name="caps-lock-warning">False</property>
+            <property name="input-purpose">digits</property>
             <property name="adjustment">max_temp_adjustment</property>
             <property name="digits">1</property>
             <property name="numeric">True</property>
@@ -481,17 +478,17 @@ All other changes or additions to this Appendix require the production of a new 
         <child>
           <object class="GtkSpinButton" id="zoom_spinner">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="max_length">6</property>
-            <property name="width_chars">6</property>
-            <property name="max_width_chars">6</property>
+            <property name="can-focus">True</property>
+            <property name="max-length">6</property>
+            <property name="width-chars">6</property>
+            <property name="max-width-chars">6</property>
             <property name="xalign">1</property>
             <property name="adjustment">zoom_adjustment</property>
             <property name="numeric">True</property>
             <property name="value">100</property>
           </object>
           <packing>
-            <property name="pack_type">end</property>
+            <property name="pack-type">end</property>
             <property name="position">3</property>
           </packing>
         </child>

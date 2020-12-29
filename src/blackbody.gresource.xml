@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="/eu/nimmerfort/blackbody">
     <file>resources/eu.nimmerfort.blackbody.ui</file>
+    <file>resources/placeholder.svg</file>
   </gresource>
 </gresources>
