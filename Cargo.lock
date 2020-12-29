@@ -156,9 +156,9 @@ dependencies = [
 
 [[package]]
 name = "flyr"
-version = "0.4.0"
+version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cc70f031f9dabfe0bc1ebd0bd404874568d8978ceacb0f923bc4d1615a7ce81"
+checksum = "1cc76e6deb32099954bfc7312ed4f21f187ad9cadc718f1e3a52f9e246360de0"
 dependencies = [
  "binread",
  "image",
@@ -454,9 +454,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libblackbody"
-version = "0.3.0"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "348419b0ca9291549a5c1fbbce6e29ea6bfafddbd543bc53aee02372cb668660"
+checksum = "0b5eb332b7581cff51eaadc58752af6772f860d13ed8971bcd85c6794ccbcd5f"
 dependencies = [
  "flyr",
  "ndarray",
