@@ -174,27 +174,52 @@ impl AppState {
     }
 
     pub fn set_thermogram_from_path(&self, o_path: Option<&Path>) {
+        // Attempt to open the thermogram and show an error dialog if that fails
         let o_thermogram = o_path.and_then(Thermogram::from_file);
+        match (&o_path, &o_thermogram) {
+            // In case a path is set, but opening fails, show the error dialog
+            (Some(path), None) => {
+                // Construct the error message and attempt to include the file path in it
+                let mut msg = String::from(
+                    "Failed to open file. This could be because the file is (partially) \
+                    corrupted or the camera is unsupported. "
+                );
+                if let Some(path_str) = path.to_str() {
+                    msg = msg + "\n\nIssue encountered on file: ";
+                    msg = msg + path_str;
+                }
+
+                // Construct dialog and show
+                let fail_dialog = gtk::MessageDialog::new(
+                    Some(&self.window),
+                    gtk::DialogFlags::MODAL,
+                    gtk::MessageType::Error,
+                    gtk::ButtonsType::Close,
+                    msg.as_str(),
+                );
+
+                fail_dialog.run();
+                fail_dialog.destroy();
+            },
+            _ => (),
+        }
+
         self.set_thermogram(o_thermogram);
         self.draw_render_threaded();
     }
 
     fn set_thermogram(&self, o_thermogram: Option<Thermogram>) {
-        match o_thermogram {
-            Some(thermogram) => {
-                // Update controls and draw thermogram
-                self.headerbar.set_title(Some(&thermogram.identifier()));
-                self.headerbar.set_subtitle(thermogram.path());
-                self.min_spinner.set_value(thermogram.min_temp().into());
-                self.max_spinner.set_value(thermogram.max_temp().into());
-                self.thermogram.replace(Some(thermogram));
-                self.draw_render_threaded();
-            }
-            None => {
-                // Set to empty
-                self.thermogram.replace(None);
-            }
-        }
+        o_thermogram.map(|thermogram| {
+            // Update controls
+            self.headerbar.set_title(Some(&thermogram.identifier()));
+            self.headerbar.set_subtitle(thermogram.path());
+            self.min_spinner.set_value(thermogram.min_temp().into());
+            self.max_spinner.set_value(thermogram.max_temp().into());
+
+            // Update thermogram and draw
+            self.thermogram.replace(Some(thermogram));
+            self.draw_render_threaded();
+        });
     }
 
     fn connect_channel(img: &mut Image, args: (Bytes, usize, usize, f64)) -> glib::Continue {
