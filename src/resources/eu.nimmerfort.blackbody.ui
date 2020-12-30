@@ -402,10 +402,33 @@ All other changes or additions to this Appendix require the production of a new 
                 <property name="can-focus">False</property>
                 <property name="events">GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK</property>
                 <child>
-                  <object class="GtkImage" id="viewed_image">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="pixbuf">placeholder.svg</property>
+                    <child>
+                      <object class="GtkDrawingArea" id="thermal_bar">
+                        <property name="width-request">30</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkImage" id="viewed_image">
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <property name="pixbuf">placeholder.svg</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                 </child>
               </object>

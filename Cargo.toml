@@ -33,3 +33,6 @@ features = [ "v2_60",]
 [dependencies.gettext-rs]
 version = "0.4.4"
 features = [ "gettext-system",]
+
+[dependencies.cairo-rs]
+version = "0.8.1"

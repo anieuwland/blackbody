@@ -24,6 +24,7 @@ use gio::SimpleAction;
 use glib::{Bytes, MainContext, SyncSender};
 use gtk::prelude::*;
 use gtk::*;
+use cairo;
 
 use libblackbody::*;
 
@@ -41,6 +42,7 @@ pub struct AppState {
     image_events: EventBox,
     min_spinner: SpinButton,
     max_spinner: SpinButton,
+    thermal_bar: DrawingArea,
     zoom_spinner: SpinButton,
     about_dialog: AboutDialog,
     filter_thermograms: FileFilter,
@@ -77,6 +79,7 @@ impl AppState {
             image_events: builder.get_object("viewed_image_events").unwrap(),
             min_spinner: builder.get_object("min_temp_spinner").unwrap(),
             max_spinner: builder.get_object("max_temp_spinner").unwrap(),
+            thermal_bar: builder.get_object("thermal_bar").unwrap(),
             zoom_spinner: builder.get_object("zoom_spinner").unwrap(),
             about_dialog: builder.get_object("about_dialog").unwrap(),
             filter_thermograms: builder.get_object("filter_thermograms").unwrap(),
@@ -104,6 +107,7 @@ impl AppState {
 
         // If given, set initial thermogram, then return final constructed app
         this.clone().borrow().set_thermogram(thermogram);
+        // this.clone().borrow().thermal_bar.set_from_pixbuf(Some(&this.clone().borrow().draw_bar()));
         this
     }
 
@@ -170,6 +174,34 @@ impl AppState {
             this.borrow()
                 .palette_chooser
                 .connect_changed(move |_| that.borrow().draw_render_threaded());
+        }
+        {
+            let that = this.clone();
+            this.borrow()
+                .thermal_bar
+                .connect_draw(move |_, context| {
+                    let width = that.borrow().thermal_bar.get_allocated_width() as f64;
+                    let height = that.borrow().thermal_bar.get_allocated_height() as f64;
+                    let pattern = cairo::LinearGradient::new(0.0, 0.0, 0.0, height);
+
+                    let palette_idx = that.borrow()
+                        .palette_chooser
+                        .get_active_id()
+                        .map_or(0, |id| id.as_str().as_bytes()[0] as usize - 48);
+                    let palette = PALETTES[palette_idx];
+
+                    let step = 1.0 / 256.0;
+                    for (i, v) in palette.iter().enumerate() {
+                        let i_f = i as f64;
+                        let (r, g, b) = (v[0].into(), v[1].into(), v[2].into());
+                        pattern.add_color_stop_rgb(1.0 - i_f * step, r, g, b);
+                    }
+
+                    context.rectangle(0.0, 0.0, width, height);
+                    context.set_source(&pattern);
+                    context.fill();
+                    gtk::Inhibit(false)
+                });
         }
     }
 
@@ -324,6 +356,18 @@ impl AppState {
         if adj_zoom >= min_zoom && adj_zoom <= max_zoom {
             self.zoom_spinner.set_value(self.zoom_spinner.get_value() + modifier);
         }
+    }
+
+    fn draw_bar(&self) -> Pixbuf {
+        let height = 256;// self.thermal_bar.get_allocated_height();
+        let width = 30;
+
+        let surface = cairo::ImageSurface::create(cairo::Format::ARgb32, width, height).unwrap();
+        let context = cairo::Context::new(&surface);
+        context.set_source_rgb(1.0, 0.0, 0.0);
+
+        context.paint();
+        gdk::pixbuf_get_from_surface(&surface, 0, 0, width, height).unwrap()
     }
 }
 
