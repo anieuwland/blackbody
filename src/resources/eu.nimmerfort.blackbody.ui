@@ -15,14 +15,14 @@
     </mime-types>
   </object>
   <object class="GtkAdjustment" id="max_temp_adjustment">
-    <property name="lower">-99</property>
-    <property name="upper">99</property>
+    <property name="lower">-273.14999999999998</property>
+    <property name="upper">1000000</property>
     <property name="value">20</property>
     <property name="page-increment">10</property>
   </object>
   <object class="GtkAdjustment" id="min_temp_adjustment">
-    <property name="lower">-99</property>
-    <property name="upper">99</property>
+    <property name="lower">-273.14999999999998</property>
+    <property name="upper">1000000</property>
     <property name="value">1</property>
     <property name="page-increment">10</property>
   </object>
