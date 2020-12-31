@@ -1,7 +1,3 @@
-// TODO Draw image directly on drawingarea with cairo
-// 	cairo_rectangle (cr, x, y, 1, 1);
-//	cairo_set_source_rgb (cr, red, green, blue);
-//	cairo_fill (cr);
 // https://gtk-rs.org/docs/gtk/struct.DrawingArea.html
 // https://www.reddit.com/r/rust/comments/6catf5/drawing_to_a_gtkdrawingarea/
 // https://stackoverflow.com/questions/959675/what-is-the-fastest-way-to-draw-an-image-in-gtk
@@ -18,7 +14,6 @@ use std::path::Path;
 use std::rc::Rc;
 use std::thread;
 
-use cairo;
 use gdk_pixbuf::Pixbuf;
 use gio::prelude::*;
 use gio::SimpleAction;
@@ -26,7 +21,10 @@ use glib::{Bytes, MainContext, SyncSender};
 use gtk::prelude::*;
 use gtk::*;
 
-use libblackbody::*;
+use libblackbody::{Thermogram, ThermogramTrait};
+
+use crate::gtkui::palettes::PALETTES;
+use crate::gtkui::thermometer::Thermometer;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -42,7 +40,7 @@ pub struct AppState {
     image_events: EventBox,
     min_spinner: SpinButton,
     max_spinner: SpinButton,
-    thermometer: DrawingArea,
+    thermometer: Rc<RefCell<Thermometer>>,
     zoom_spinner: SpinButton,
     about_dialog: AboutDialog,
     filter_thermograms: FileFilter,
@@ -63,6 +61,8 @@ impl AppState {
         builder.set_application(application);
         let (render_s, render_r) = MainContext::sync_channel(glib::PRIORITY_DEFAULT, 256);
 
+        let thermometer = Thermometer::new(builder.get_object("thermometer").unwrap(), PALETTES[0]);
+
         let state = AppState {
             // Application's state struct
             window: builder.get_object("blackbody_window").unwrap(),
@@ -76,7 +76,7 @@ impl AppState {
             image_events: builder.get_object("viewed_image_events").unwrap(),
             min_spinner: builder.get_object("min_temp_spinner").unwrap(),
             max_spinner: builder.get_object("max_temp_spinner").unwrap(),
-            thermometer: builder.get_object("thermometer").unwrap(),
+            thermometer: thermometer,
             zoom_spinner: builder.get_object("zoom_spinner").unwrap(),
             about_dialog: builder.get_object("about_dialog").unwrap(),
             filter_thermograms: builder.get_object("filter_thermograms").unwrap(),
@@ -86,6 +86,9 @@ impl AppState {
             thermogram: RefCell::new(None),
             render_sender: render_s,
         };
+
+        // Update child widget with application's state
+        state.update_thermometer();
 
         // Some initial configuration
         state.window.add_accel_group(&state.accel_group);
@@ -152,31 +155,27 @@ impl AppState {
             // Lower bound spinner: redraw when changed
             let that = this.clone();
             this.borrow().min_spinner.set_increments(0.5, 5.0);
-            this.borrow()
-                .min_spinner
-                .connect_value_changed(move |_| that.borrow().draw_render_threaded());
+            this.borrow().min_spinner.connect_value_changed(move |_| {
+                that.borrow().update_thermometer();
+                that.borrow().draw_render_threaded()
+            });
         }
         {
             // Upper bound spinner: redraw when changed
             let that = this.clone();
             this.borrow().max_spinner.set_increments(0.5, 5.0);
-            this.borrow()
-                .max_spinner
-                .connect_value_changed(move |_| that.borrow().draw_render_threaded());
+            this.borrow().max_spinner.connect_value_changed(move |_| {
+                that.borrow().update_thermometer();
+                that.borrow().draw_render_threaded()
+            });
         }
         {
             // Redraw on palette change
             let that = this.clone();
             this.borrow().palette_chooser.connect_changed(move |_| {
-                that.borrow().thermometer.queue_draw();
+                that.borrow().update_thermometer();
                 that.borrow().draw_render_threaded()
             });
-        }
-        {
-            let that = this.clone();
-            this.borrow()
-                .thermometer
-                .connect_draw(move |_, context| that.borrow().render_temperature_bar(context));
         }
     }
 
@@ -256,7 +255,6 @@ impl AppState {
 
     fn show_thermogram_chooser(&self) {
         // Prepare file chooser dialog window
-        // TODO Filter image types
         let parent = &self.window;
         let chooser = FileChooserNative::new(
             Some("Open warmtebeeld"),
@@ -286,10 +284,7 @@ impl AppState {
         let zoom = self.zoom_spinner.get_value() / 100f64;
         let o_thermogram = self.thermogram.clone().into_inner();
         let sender_local = self.render_sender.clone();
-        let palette_idx: usize = match self.palette_chooser.get_active_id() {
-            Some(id) => id.as_str().as_bytes()[0] as usize - 48,
-            _ => 0,
-        };
+        let palette_idx = self.get_palette_idx();
 
         o_thermogram.map(|thermogram| {
             thread::spawn(move || {
@@ -333,40 +328,19 @@ impl AppState {
         }
     }
 
-    fn render_temperature_bar(&self, context: &cairo::Context) -> Inhibit {
-        let width = self.thermometer.get_allocated_width() as f64;
-        let height = self.thermometer.get_allocated_height() as f64;
-        let pattern = cairo::LinearGradient::new(0.0, 0.0, 0.0, height);
+    fn update_thermometer(&self) {
+        let min = self.min_spinner.get_value();
+        self.thermometer.borrow_mut().set_minimum(min as f32);
+        let max = self.max_spinner.get_value();
+        self.thermometer.borrow_mut().set_maximum(max as f32);
 
-        let palette_idx = self
-            .palette_chooser
-            .get_active_id()
-            .map_or(0, |id| id.as_str().as_bytes()[0] as usize - 48);
-        let palette = PALETTES[palette_idx];
+        let palette = PALETTES[self.get_palette_idx()];
+        self.thermometer.borrow_mut().set_palette(palette);
 
-        let step = 1.0 / 256.0;
-        for (i, v) in palette.iter().enumerate() {
-            let i_f = i as f64;
-            let (r, g, b) = (v[0].into(), v[1].into(), v[2].into());
-            pattern.add_color_stop_rgb(1.0 - i_f * step, r, g, b);
-        }
+        self.thermometer.borrow().queue_draw();
+    }
 
-        context.rectangle(0.0, 0.0, width, height);
-        context.set_source(&pattern);
-        context.fill();
-        Inhibit(false)
+    fn get_palette_idx(&self) -> usize {
+        self.palette_chooser.get_active_id().map_or(0, |id| id.as_str().as_bytes()[0] as usize - 48)
     }
 }
-
-const PALETTES: [[[f32; 3]; 256]; 10] = [
-    palettes::TURBO,
-    palettes::CIVIDIS,
-    palettes::COPPER,
-    palettes::GRAY,
-    palettes::AFMHOT,
-    palettes::INFERNO,
-    palettes::JET,
-    palettes::COOLWARM,
-    palettes::MAGMA,
-    palettes::VIRIDIS,
-];
