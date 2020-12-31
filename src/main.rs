@@ -7,8 +7,7 @@ use gettextrs::*;
 use gio::prelude::*;
 use gtk::*;
 
-use gtkui::app_window::*;
-
+use crate::gtkui::app_window::AppState;
 
 pub fn main() {
     // Get url of file if given
