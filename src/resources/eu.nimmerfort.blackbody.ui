@@ -392,7 +392,7 @@ All other changes or additions to this Appendix require the production of a new 
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <child>
-          <object class="GtkDrawingArea" id="thermal_bar">
+          <object class="GtkDrawingArea" id="thermometer">
             <property name="width-request">20</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>

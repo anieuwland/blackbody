@@ -42,7 +42,7 @@ pub struct AppState {
     image_events: EventBox,
     min_spinner: SpinButton,
     max_spinner: SpinButton,
-    thermal_bar: DrawingArea,
+    thermometer: DrawingArea,
     zoom_spinner: SpinButton,
     about_dialog: AboutDialog,
     filter_thermograms: FileFilter,
@@ -76,7 +76,7 @@ impl AppState {
             image_events: builder.get_object("viewed_image_events").unwrap(),
             min_spinner: builder.get_object("min_temp_spinner").unwrap(),
             max_spinner: builder.get_object("max_temp_spinner").unwrap(),
-            thermal_bar: builder.get_object("thermal_bar").unwrap(),
+            thermometer: builder.get_object("thermometer").unwrap(),
             zoom_spinner: builder.get_object("zoom_spinner").unwrap(),
             about_dialog: builder.get_object("about_dialog").unwrap(),
             filter_thermograms: builder.get_object("filter_thermograms").unwrap(),
@@ -104,7 +104,6 @@ impl AppState {
 
         // If given, set initial thermogram, then return final constructed app
         this.clone().borrow().set_thermogram(thermogram);
-        // this.clone().borrow().thermal_bar.set_from_pixbuf(Some(&this.clone().borrow().draw_bar()));
         this
     }
 
@@ -169,14 +168,14 @@ impl AppState {
             // Redraw on palette change
             let that = this.clone();
             this.borrow().palette_chooser.connect_changed(move |_| {
-                that.borrow().thermal_bar.queue_draw();
+                that.borrow().thermometer.queue_draw();
                 that.borrow().draw_render_threaded()
             });
         }
         {
             let that = this.clone();
             this.borrow()
-                .thermal_bar
+                .thermometer
                 .connect_draw(move |_, context| that.borrow().render_temperature_bar(context));
         }
     }
@@ -335,8 +334,8 @@ impl AppState {
     }
 
     fn render_temperature_bar(&self, context: &cairo::Context) -> Inhibit {
-        let width = self.thermal_bar.get_allocated_width() as f64;
-        let height = self.thermal_bar.get_allocated_height() as f64;
+        let width = self.thermometer.get_allocated_width() as f64;
+        let height = self.thermometer.get_allocated_height() as f64;
         let pattern = cairo::LinearGradient::new(0.0, 0.0, 0.0, height);
 
         let palette_idx = self
