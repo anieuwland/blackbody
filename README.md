@@ -13,7 +13,17 @@ An image viewer specialized in rendering thermograms. For an animated example, v
 * Zoom in and out
 * Written in Rust and therefore fast
 
-## Download and use
+## Get it
+Blackbody is available on [Flathub](https://flathub.org/apps/details/eu.nimmerfort.blackbody). 
+It can be installed using your software center, the linked page or the following 
+commands:
+
+```shell
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install flathub eu.nimmerfort.blackbody
+flatpak run eu.nimmerfort.blackbody
+``` 
+
 The [downloads](https://bitbucket.org/nimmerwoner/blackbody/downloads/) page
 lists download options for Linux and Windows. The Linux version is available as
 a flatpak. After installing, Blackbody then appears in your overview. The
