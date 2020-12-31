@@ -305,7 +305,7 @@ All other changes or additions to this Appendix require the production of a new 
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">end</property>
-                <property name="margin-start">3</property>
+                <property name="margin-start">6</property>
                 <property name="margin-end">3</property>
                 <property name="label" translatable="yes">Palette</property>
                 <property name="xalign">0</property>
@@ -388,52 +388,56 @@ All other changes or additions to this Appendix require the production of a new 
   <object class="GtkApplicationWindow" id="blackbody_window">
     <property name="can-focus">False</property>
     <child>
-      <object class="GtkScrolledWindow">
+      <object class="GtkBox">
         <property name="visible">True</property>
-        <property name="can-focus">True</property>
-        <property name="shadow-type">in</property>
+        <property name="can-focus">False</property>
         <child>
-          <object class="GtkViewport">
+          <object class="GtkDrawingArea" id="thermal_bar">
+            <property name="width-request">20</property>
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="margin-start">6</property>
+            <property name="margin-end">6</property>
+            <property name="margin-top">6</property>
+            <property name="margin-bottom">6</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="shadow-type">in</property>
             <child>
-              <object class="GtkEventBox" id="viewed_image_events">
+              <object class="GtkViewport">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="events">GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK</property>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkEventBox" id="viewed_image_events">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <child>
-                      <object class="GtkDrawingArea" id="thermal_bar">
-                        <property name="width-request">30</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
+                    <property name="events">GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK</property>
                     <child>
                       <object class="GtkImage" id="viewed_image">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="pixbuf">placeholder.svg</property>
                       </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
                     </child>
                   </object>
                 </child>
               </object>
             </child>
           </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
         </child>
       </object>
     </child>
