@@ -1,6 +1,7 @@
 CHANGELOG
 ---------
 # 1.2.0
+* Temperature in the render can be investigated by hovering over pixels
 * Added a thermometer showing the colors and associated temperatures
 * Allowed temperature range is now -273,15 to 1.000.000 instead of -99 to 99 (all °C)
 
