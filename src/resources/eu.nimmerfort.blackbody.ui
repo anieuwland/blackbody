@@ -425,6 +425,8 @@ All other changes or additions to this Appendix require the production of a new 
                       <object class="GtkImage" id="viewed_image">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
+                        <property name="halign">center</property>
+                        <property name="valign">center</property>
                         <property name="pixbuf">placeholder.svg</property>
                       </object>
                     </child>

@@ -110,75 +110,6 @@ impl AppState {
         this
     }
 
-    fn connect_signals(this: &Rc<RefCell<Self>>, application: &Application) {
-        {
-            // Application activation: initial window size and other values
-            let that = this.clone();
-            application.connect_activate(move |app| {
-                app.add_window(&that.borrow().window);
-                that.borrow().window.set_default_size(680, 520);
-                that.borrow().window.show_all();
-            });
-        }
-        {
-            // Application menu: connecting buttons to actions
-            let that = this.clone();
-            let open = SimpleAction::new("open", None);
-            open.connect_activate(move |_, _| that.borrow().show_thermogram_chooser());
-            application.add_action(&open);
-        }
-        {
-            // Show about dialog window
-            let that = this.clone();
-            let about = SimpleAction::new("about", None);
-            about.connect_activate(move |_, _| {
-                let _ = that.borrow().about_dialog.run();
-                that.borrow().about_dialog.hide();
-            });
-            application.add_action(&about);
-        }
-        {
-            // Zoom spinner: redraw thermogram when changed
-            let that = this.clone();
-            this.borrow()
-                .zoom_spinner
-                .connect_value_changed(move |_| that.borrow().draw_render_threaded());
-        }
-        {
-            // Zoom spinner: update zoom factor with scroll wheel and redraw
-            let that = this.clone();
-            this.borrow()
-                .image_events
-                .connect_scroll_event(move |_, event| that.borrow().zoom_from_scroll(event));
-        }
-        {
-            // Lower bound spinner: redraw when changed
-            let that = this.clone();
-            this.borrow().min_spinner.set_increments(0.5, 5.0);
-            this.borrow().min_spinner.connect_value_changed(move |_| {
-                that.borrow().update_thermometer();
-                that.borrow().draw_render_threaded()
-            });
-        }
-        {
-            // Upper bound spinner: redraw when changed
-            let that = this.clone();
-            this.borrow().max_spinner.set_increments(0.5, 5.0);
-            this.borrow().max_spinner.connect_value_changed(move |_| {
-                that.borrow().update_thermometer();
-                that.borrow().draw_render_threaded()
-            });
-        }
-        {
-            // Redraw on palette change
-            let that = this.clone();
-            this.borrow().palette_chooser.connect_changed(move |_| {
-                that.borrow().update_thermometer();
-                that.borrow().draw_render_threaded()
-            });
-        }
-    }
-
     pub fn set_thermogram_from_path(&self, o_path: Option<&Path>) {
         // Attempt to open the thermogram and show an error dialog if that fails
         let o_thermogram = o_path.and_then(Thermogram::from_file);
@@ -342,5 +273,104 @@ impl AppState {
 
     fn get_palette_idx(&self) -> usize {
         self.palette_chooser.get_active_id().map_or(0, |id| id.as_str().as_bytes()[0] as usize - 48)
+    }
+
+    fn set_thermogram_tooltip_text(&self, x: i32, y: i32, tooltip: &Tooltip) -> bool {
+        self.thermogram.borrow().clone().map_or(false, |thermogram| {
+            // Translate the pointer coordinates to the thermogram's coordinate system
+            let shape = thermogram.thermal_shape();
+            let zoom = self.zoom_spinner.get_value() / 100f64;
+            let x = (x as f64 / zoom) as usize;
+            let y = (y as f64 / zoom) as usize;
+
+            // Show no tooltip if x and y fall outside of the thermogram
+            if x >= shape[1] || y >= shape[0] {
+                return false;
+            }
+
+            // Set tooltip to temperature from thermogram
+            let val = thermogram.thermal()[[y, x]];
+            let temp = format!("{:.2}", val);
+            tooltip.set_text(Some(temp.as_str()));
+            true
+        })
+    }
+
+    fn connect_signals(this: &Rc<RefCell<Self>>, application: &Application) {
+        {
+            // Application activation: initial window size and other values
+            let that = this.clone();
+            application.connect_activate(move |app| {
+                app.add_window(&that.borrow().window);
+                that.borrow().window.set_default_size(680, 520);
+                that.borrow().window.show_all();
+            });
+        }
+        {
+            // Application menu: connecting buttons to actions
+            let that = this.clone();
+            let open = SimpleAction::new("open", None);
+            open.connect_activate(move |_, _| that.borrow().show_thermogram_chooser());
+            application.add_action(&open);
+        }
+        {
+            // Show about dialog window
+            let that = this.clone();
+            let about = SimpleAction::new("about", None);
+            about.connect_activate(move |_, _| {
+                let _ = that.borrow().about_dialog.run();
+                that.borrow().about_dialog.hide();
+            });
+            application.add_action(&about);
+        }
+        {
+            // Zoom spinner: redraw thermogram when changed
+            let that = this.clone();
+            this.borrow()
+                .zoom_spinner
+                .connect_value_changed(move |_| that.borrow().draw_render_threaded());
+        }
+        {
+            // Zoom spinner: update zoom factor with scroll wheel and redraw
+            let that = this.clone();
+            this.borrow()
+                .image_events
+                .connect_scroll_event(move |_, event| that.borrow().zoom_from_scroll(event));
+        }
+        {
+            // Show the temperature of a cell when hovering over it
+            let that = this.clone();
+            this.borrow().image.set_property("has-tooltip", &true.to_value()).ok().map(|_| {
+                this.borrow().image.connect_query_tooltip(move |_, x, y, _, tooltip| {
+                    that.borrow().set_thermogram_tooltip_text(x, y, tooltip)
+                });
+            });
+        }
+        {
+            // Lower bound spinner: redraw when changed
+            let that = this.clone();
+            this.borrow().min_spinner.set_increments(0.5, 5.0);
+            this.borrow().min_spinner.connect_value_changed(move |_| {
+                that.borrow().update_thermometer();
+                that.borrow().draw_render_threaded()
+            });
+        }
+        {
+            // Upper bound spinner: redraw when changed
+            let that = this.clone();
+            this.borrow().max_spinner.set_increments(0.5, 5.0);
+            this.borrow().max_spinner.connect_value_changed(move |_| {
+                that.borrow().update_thermometer();
+                that.borrow().draw_render_threaded()
+            });
+        }
+        {
+            // Redraw on palette change
+            let that = this.clone();
+            this.borrow().palette_chooser.connect_changed(move |_| {
+                that.borrow().update_thermometer();
+                that.borrow().draw_render_threaded()
+            });
+        }
     }
 }
