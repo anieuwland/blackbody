@@ -18,13 +18,13 @@ use std::path::Path;
 use std::rc::Rc;
 use std::thread;
 
+use cairo;
 use gdk_pixbuf::Pixbuf;
 use gio::prelude::*;
 use gio::SimpleAction;
 use glib::{Bytes, MainContext, SyncSender};
 use gtk::prelude::*;
 use gtk::*;
-use cairo;
 
 use libblackbody::*;
 
@@ -56,10 +56,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(
-        application: &Application,
-        thermogram: Option<Thermogram>,
-    ) -> Rc<RefCell<AppState>> {
+    pub fn new(application: &Application, thermogram: Option<Thermogram>) -> Rc<RefCell<AppState>> {
         // Create application from builder
         let ui = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui";
         let builder = Builder::new_from_resource(ui);
@@ -171,37 +168,16 @@ impl AppState {
         {
             // Redraw on palette change
             let that = this.clone();
-            this.borrow()
-                .palette_chooser
-                .connect_changed(move |_| that.borrow().draw_render_threaded());
+            this.borrow().palette_chooser.connect_changed(move |_| {
+                that.borrow().thermal_bar.queue_draw();
+                that.borrow().draw_render_threaded()
+            });
         }
         {
             let that = this.clone();
             this.borrow()
                 .thermal_bar
-                .connect_draw(move |_, context| {
-                    let width = that.borrow().thermal_bar.get_allocated_width() as f64;
-                    let height = that.borrow().thermal_bar.get_allocated_height() as f64;
-                    let pattern = cairo::LinearGradient::new(0.0, 0.0, 0.0, height);
-
-                    let palette_idx = that.borrow()
-                        .palette_chooser
-                        .get_active_id()
-                        .map_or(0, |id| id.as_str().as_bytes()[0] as usize - 48);
-                    let palette = PALETTES[palette_idx];
-
-                    let step = 1.0 / 256.0;
-                    for (i, v) in palette.iter().enumerate() {
-                        let i_f = i as f64;
-                        let (r, g, b) = (v[0].into(), v[1].into(), v[2].into());
-                        pattern.add_color_stop_rgb(1.0 - i_f * step, r, g, b);
-                    }
-
-                    context.rectangle(0.0, 0.0, width, height);
-                    context.set_source(&pattern);
-                    context.fill();
-                    gtk::Inhibit(false)
-                });
+                .connect_draw(move |_, context| that.borrow().render_temperature_bar(context));
         }
     }
 
@@ -214,7 +190,7 @@ impl AppState {
                 // Construct the error message and attempt to include the file path in it
                 let mut msg = String::from(
                     "Failed to open file. This could be because the file is (partially) \
-                    corrupted or the camera is unsupported. "
+                    corrupted or the camera is unsupported. ",
                 );
                 if let Some(path_str) = path.to_str() {
                     msg = msg + "\n\nIssue encountered on file: ";
@@ -232,7 +208,7 @@ impl AppState {
 
                 fail_dialog.run();
                 fail_dialog.destroy();
-            },
+            }
             _ => (),
         }
 
@@ -331,10 +307,10 @@ impl AppState {
         });
     }
 
-    fn zoom_from_scroll(&self, event: &gdk::EventScroll) -> glib::signal::Inhibit {
+    fn zoom_from_scroll(&self, event: &gdk::EventScroll) -> Inhibit {
         if !self.zoom_spinner.is_sensitive() {
             // Return without updating if zoom spinner is not sensitive
-            return glib::signal::Inhibit(true);
+            return Inhibit(true);
         }
 
         let (_, y) = event.get_scroll_deltas().unwrap();
@@ -347,7 +323,7 @@ impl AppState {
         };
 
         self.update_zoom_factor(delta);
-        glib::signal::Inhibit(true)
+        Inhibit(true)
     }
 
     fn update_zoom_factor(&self, modifier: f64) {
@@ -358,16 +334,28 @@ impl AppState {
         }
     }
 
-    fn draw_bar(&self) -> Pixbuf {
-        let height = 256;// self.thermal_bar.get_allocated_height();
-        let width = 30;
+    fn render_temperature_bar(&self, context: &cairo::Context) -> Inhibit {
+        let width = self.thermal_bar.get_allocated_width() as f64;
+        let height = self.thermal_bar.get_allocated_height() as f64;
+        let pattern = cairo::LinearGradient::new(0.0, 0.0, 0.0, height);
 
-        let surface = cairo::ImageSurface::create(cairo::Format::ARgb32, width, height).unwrap();
-        let context = cairo::Context::new(&surface);
-        context.set_source_rgb(1.0, 0.0, 0.0);
+        let palette_idx = self
+            .palette_chooser
+            .get_active_id()
+            .map_or(0, |id| id.as_str().as_bytes()[0] as usize - 48);
+        let palette = PALETTES[palette_idx];
 
-        context.paint();
-        gdk::pixbuf_get_from_surface(&surface, 0, 0, width, height).unwrap()
+        let step = 1.0 / 256.0;
+        for (i, v) in palette.iter().enumerate() {
+            let i_f = i as f64;
+            let (r, g, b) = (v[0].into(), v[1].into(), v[2].into());
+            pattern.add_color_stop_rgb(1.0 - i_f * step, r, g, b);
+        }
+
+        context.rectangle(0.0, 0.0, width, height);
+        context.set_source(&pattern);
+        context.fill();
+        Inhibit(false)
     }
 }
 

@@ -9,7 +9,6 @@ use gtk::*;
 
 use gtkui::app_window::*;
 
-
 pub fn main() {
     // Get url of file if given
     let o_thermogram_path = std::env::args().nth(1);
