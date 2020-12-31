@@ -73,8 +73,20 @@
 
   <screenshots>
     <screenshot>
-      <caption>The Blackbody application</caption>
+      <caption>A cat with a heater in the background (19°C - 40°C, inferno palette)</caption>
       <image type="source" width="682" height="569">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-01.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>A cat with a heater in the background, halved in size (19°C - 67°C, cividis palette)</caption>
+      <image type="source" width="682" height="569">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-02.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>A house in winter (6°C - 12°C, turbo palette)</caption>
+      <image type="source" width="682" height="569">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-03.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>A running jet engine (15°C - 95°C, palette emphasizing warmth)</caption>
+      <image type="source" width="682" height="569">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-04.png</image>
     </screenshot>
   </screenshots>
 </component>
