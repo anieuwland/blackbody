@@ -285,6 +285,36 @@ All other changes or additions to this Appendix require the production of a new 
           </packing>
         </child>
         <child>
+          <object class="GtkModelButton" id="app_menu_item_save_thermal">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="action-name">app.save</property>
+            <property name="text" translatable="yes">Save thermogram...</property>
+            <accelerator key="s" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkModelButton" id="app_menu_item_export_render">
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+            <property name="action-name">app.export</property>
+            <property name="text" translatable="yes">Export render...</property>
+            <accelerator key="e" signal="activate" modifiers="GDK_CONTROL_MASK"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkSeparator">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
@@ -292,7 +322,7 @@ All other changes or additions to this Appendix require the production of a new 
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -347,7 +377,7 @@ All other changes or additions to this Appendix require the production of a new 
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <child>
@@ -358,7 +388,7 @@ All other changes or additions to this Appendix require the production of a new 
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
@@ -372,7 +402,7 @@ All other changes or additions to this Appendix require the production of a new 
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">5</property>
+            <property name="position">6</property>
           </packing>
         </child>
       </object>

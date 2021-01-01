@@ -445,6 +445,7 @@ dependencies = [
  "num-rational",
  "num-traits",
  "png",
+ "tiff",
 ]
 
 [[package]]
@@ -455,11 +456,12 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libblackbody"
-version = "0.3.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b5eb332b7581cff51eaadc58752af6772f860d13ed8971bcd85c6794ccbcd5f"
+checksum = "8be50008943daf1333d25c35597f7942460f31c2884466b11c8668a00a8a0a39"
 dependencies = [
  "flyr",
+ "image",
  "ndarray",
  "tiff",
 ]

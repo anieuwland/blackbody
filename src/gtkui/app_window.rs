@@ -28,6 +28,8 @@ use crate::gtkui::thermometer::Thermometer;
 
 #[derive(Clone)]
 pub struct AppState {
+    builder: Builder,
+
     // Controls
     window: ApplicationWindow,
     headerbar: HeaderBar,
@@ -64,6 +66,8 @@ impl AppState {
         let thermometer = Thermometer::new(builder.get_object("thermometer").unwrap(), PALETTES[0]);
 
         let state = AppState {
+            builder: builder.clone(),
+
             // Application's state struct
             window: builder.get_object("blackbody_window").unwrap(),
             headerbar: builder.get_object("headerbar").unwrap(),
@@ -152,11 +156,7 @@ impl AppState {
             self.headerbar.set_subtitle(thermogram.path());
             self.min_spinner.set_value(thermogram.min_temp().into());
             self.max_spinner.set_value(thermogram.max_temp().into());
-
-            // Enable controls to be sensitive to user input
-            self.min_spinner.set_sensitive(true);
-            self.max_spinner.set_sensitive(true);
-            self.zoom_spinner.set_sensitive(true);
+            self.enable_thermogam_ui();
 
             // Update thermogram and draw
             self.thermogram.replace(Some(thermogram));
@@ -209,10 +209,50 @@ impl AppState {
         self.set_thermogram_from_path(path);
     }
 
+    // fn show_thermogram_saver(&self) {
+    // }
+
+    fn show_render_exporter(&self) {
+        // Prepare file chooser dialog window to save as png
+        let parent = &self.window;
+        let chooser = FileChooserNative::new(
+            Some("Open warmtebeeld"),
+            Some(parent),
+            FileChooserAction::Save,
+            None,
+            None,
+        );
+        let pngs = FileFilter::new();
+        pngs.set_name(Some("PNG"));
+        pngs.add_mime_type("image/png");
+        chooser.add_filter(&pngs);
+        chooser.set_current_name("export.png");
+
+        // Show dialog and return if nothing chosen
+        let response = chooser.run();
+        if response != ResponseType::Accept {
+            return;
+        }
+
+        // Handle opening a thermogram
+        chooser.get_filename().map(|path| {
+            let mut path = path;
+            path.set_extension("png");
+
+            self.thermogram.borrow().clone().map(|thermogram| {
+                let min_temp = self.get_minimum_temperature();
+                let max_temp = self.get_maximum_temperature();
+                let palette_idx = self.get_palette_idx();
+                let palette = PALETTES[palette_idx];
+                thermogram.save_render(path, min_temp, max_temp, palette)
+            });
+        });
+    }
+
     fn draw_render_threaded(&self) {
-        let min_temp = self.min_spinner.get_value() as f32;
-        let max_temp = self.max_spinner.get_value() as f32;
-        let zoom = self.zoom_spinner.get_value() / 100f64;
+        let min_temp = self.get_minimum_temperature();
+        let max_temp = self.get_maximum_temperature();
+        let zoom = self.get_zoom() / 100f64;
         let o_thermogram = self.thermogram.clone().into_inner();
         let sender_local = self.render_sender.clone();
         let palette_idx = self.get_palette_idx();
@@ -252,34 +292,42 @@ impl AppState {
     }
 
     fn update_zoom_factor(&self, modifier: f64) {
-        let adj_zoom = self.zoom_spinner.get_value() as f64 + modifier;
+        let adj_zoom = self.get_zoom() + modifier;
         let (min_zoom, max_zoom) = self.zoom_spinner.get_range();
         if adj_zoom >= min_zoom && adj_zoom <= max_zoom {
-            self.zoom_spinner.set_value(self.zoom_spinner.get_value() + modifier);
+            self.zoom_spinner.set_value(self.get_zoom() + modifier);
         }
     }
 
     fn update_thermometer(&self) {
-        let min = self.min_spinner.get_value();
-        self.thermometer.borrow_mut().set_minimum(min as f32);
-        let max = self.max_spinner.get_value();
-        self.thermometer.borrow_mut().set_maximum(max as f32);
-
-        let palette = PALETTES[self.get_palette_idx()];
-        self.thermometer.borrow_mut().set_palette(palette);
+        self.thermometer.borrow_mut().set_minimum(self.get_minimum_temperature());
+        self.thermometer.borrow_mut().set_maximum(self.get_maximum_temperature());
+        self.thermometer.borrow_mut().set_palette(PALETTES[self.get_palette_idx()]);
 
         self.thermometer.borrow().queue_draw();
+    }
+
+    fn get_minimum_temperature(&self) -> f32 {
+        self.min_spinner.get_value() as f32
+    }
+
+    fn get_maximum_temperature(&self) -> f32 {
+        self.max_spinner.get_value() as f32
     }
 
     fn get_palette_idx(&self) -> usize {
         self.palette_chooser.get_active_id().map_or(0, |id| id.as_str().as_bytes()[0] as usize - 48)
     }
 
+    fn get_zoom(&self) -> f64 {
+        self.zoom_spinner.get_value()
+    }
+
     fn set_thermogram_tooltip_text(&self, x: i32, y: i32, tooltip: &Tooltip) -> bool {
         self.thermogram.borrow().clone().map_or(false, |thermogram| {
             // Translate the pointer coordinates to the thermogram's coordinate system
             let shape = thermogram.thermal_shape();
-            let zoom = self.zoom_spinner.get_value() / 100f64;
+            let zoom = self.get_zoom() / 100f64;
             let x = (x as f64 / zoom) as usize;
             let y = (y as f64 / zoom) as usize;
 
@@ -296,6 +344,18 @@ impl AppState {
         })
     }
 
+    fn enable_thermogam_ui(&self) {
+        // Function set controls to sensitive that only make sense when a thermogram is open
+        self.builder
+            .get_application()
+            .and_then(|app| app.lookup_action("export"))
+            .and_then(|act| act.downcast::<SimpleAction>().ok())
+            .and_then(|act| Some(act.set_enabled(true)));
+        self.min_spinner.set_sensitive(true);
+        self.max_spinner.set_sensitive(true);
+        self.zoom_spinner.set_sensitive(true);
+    }
+
     fn connect_signals(this: &Rc<RefCell<Self>>, application: &Application) {
         {
             // Application activation: initial window size and other values
@@ -307,11 +367,24 @@ impl AppState {
             });
         }
         {
-            // Application menu: connecting buttons to actions
+            // Show open thermogram dialog
             let that = this.clone();
             let open = SimpleAction::new("open", None);
             open.connect_activate(move |_, _| that.borrow().show_thermogram_chooser());
             application.add_action(&open);
+
+            // Show save thermogram dialog
+            // let that = this.clone();
+            // let save = SimpleAction::new("save", None);
+            // save.connect_activate(move |_, _| that.borrow().show_thermogram_saver());
+            // application.add_action(&save);
+
+            // Show export thermogram render dialog
+            let that = this.clone();
+            let export = SimpleAction::new("export", None);
+            export.connect_activate(move |_, _| that.borrow().show_render_exporter());
+            export.set_enabled(false);
+            application.add_action(&export);
         }
         {
             // Show about dialog window
