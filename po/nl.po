@@ -7,21 +7,41 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-10-16 13:36+0200\n"
-"PO-Revision-Date: 2020-10-16 13:53+0200\n"
+"POT-Creation-Date: 2021-01-02 12:54+0100\n"
+"PO-Revision-Date: 2021-01-02 13:11+0100\n"
+"Last-Translator: \n"
 "Language-Team: \n"
+"Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4.1\n"
-"Last-Translator: \n"
+"X-Generator: Poedit 2.4.2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Language: nl\n"
 
-#: data/eu.nimmerfort.blackbody.desktop.in:3
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:4
-msgid "Blackbody"
-msgstr "Blackbody"
+#: src/resources/eu.nimmerfort.blackbody.ui:66
+msgid "A  thermogram viewer."
+msgstr "Een thermogramvertoner."
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:76
+msgid "A cat with a heater in the background (19°C - 40°C, inferno palette)"
+msgstr ""
+"Een kat met een radiator in the achtergrond (19°C - 40°C, inferno palet)"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:80
+msgid ""
+"A cat with a heater in the background, halved in size (19°C - 67°C, cividis "
+"palette)"
+msgstr ""
+"Een kat met een radiator in de achtergrond, in grootte gehalveerd (19°C - "
+"67°C, cividis palet)"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:84
+msgid "A house in winter (6°C - 12°C, turbo palette)"
+msgstr "Een huis in de winter (6°C - 12°C, turbo palet)"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:88
+msgid "A running jet engine (15°C - 95°C, palette emphasizing warmth)"
+msgstr "Een lopende jetturbine (15°C - 95°C, warmte-benadrukkende palet)"
 
 #: data/eu.nimmerfort.blackbody.desktop.in:4
 msgid "A thermogram viewer"
@@ -31,9 +51,23 @@ msgstr "Een thermogramvertoner"
 msgid "A thermogram viewer."
 msgstr "Een thermogramvertoner."
 
+#: src/resources/eu.nimmerfort.blackbody.ui:445
+msgid "About Blackbody"
+msgstr "Over Blackbody"
+
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:13
 msgid "Arthur Nieuwland"
 msgstr "Arthur Nieuwland"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:26
+msgid "Available for Linux and Windows"
+msgstr "Werkt op Linux en Windows"
+
+#: data/eu.nimmerfort.blackbody.desktop.in:3
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:4
+#: src/resources/eu.nimmerfort.blackbody.ui:532
+msgid "Blackbody"
+msgstr "Blackbody"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:17
 msgid ""
@@ -42,116 +76,24 @@ msgstr ""
 "Blackbody is een thermogramvertoner. Het rendert warmtebeelden naar RGB-"
 "beelden."
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:18
-msgid "Features:"
-msgstr "Features:"
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:28
+msgid "Cameras known to work:"
+msgstr "Camera's waarmee Blackbody overweg kan:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:20
-msgid "Loading FLIR thermograms from many cameras"
-msgstr "FLIR-thermogrammen van verschillende camera's inladen"
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:21
-msgid "Loading single-band TIFFs assumed to be in °C"
-msgstr "Enkelbands TIFF-beelden inladen (aangenomen in °C)"
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:22
-msgid "Rendering to many different colors palettes, including inferno and turbo"
-msgstr ""
-"Naar uiteenlopende kleurpaletten renderen, onder andere inferno en turbo"
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:23
-msgid "Specify the thermal range to render"
-msgstr "Het te renderen temperatuurbereik specificeren"
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:24
-msgid "Zoom in and out"
-msgstr "In- en uitzoomen"
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:25
-msgid "Translated to multiple languages"
-msgstr "Is in meerdere talen beschikbaar"
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:26
-msgid "Available for Linux and Windows"
-msgstr "Werkt op Linux en Windows"
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:47
-msgid "The Blackbody application"
-msgstr "Het programma Blackbody"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:23
-msgid "Open..."
-msgstr "Openen..."
-
-#: src/resources/eu.nimmerfort.blackbody.ui:53
-msgid "Palette"
-msgstr "Palette"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:71
-#: src/resources/eu.nimmerfort.blackbody.ui:161
-msgid "Turbo"
-msgstr "Turbo"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:72
-#: src/resources/eu.nimmerfort.blackbody.ui:167
+#: src/resources/eu.nimmerfort.blackbody.ui:45
+#: src/resources/eu.nimmerfort.blackbody.ui:404
 msgid "Cividis"
 msgstr "Cividis"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:73
-msgid "Copper"
-msgstr "Koper"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:74
-msgid "Grayscale"
-msgstr "Grijs"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:75
-msgid "Hot"
-msgstr "Heet"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:76
-#: src/resources/eu.nimmerfort.blackbody.ui:164
-msgid "Inferno"
-msgstr "Inferno"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:77
-#: src/resources/eu.nimmerfort.blackbody.ui:158
-msgid "Jet"
-msgstr "Jet"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:78
+#: src/resources/eu.nimmerfort.blackbody.ui:410
 msgid "Coolwarm"
 msgstr "Koelwarm"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:79
-#: src/resources/eu.nimmerfort.blackbody.ui:170
-msgid "Magma"
-msgstr "Magma"
+#: src/resources/eu.nimmerfort.blackbody.ui:405
+msgid "Copper"
+msgstr "Koper"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:80
-msgid "Viridis"
-msgstr "Viridis"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:113
-msgid "About Blackbody"
-msgstr "Over Blackbody"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:223
-msgid "°C"
-msgstr "°C"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:297
-msgid ""
-"This program is made available under the European Public License (EUPL-1.2)."
-msgstr ""
-"This programma is beschikbaar gemaakt onder de Europese openbare licentie "
-"(EUPL-1.2)."
-
-#: src/resources/eu.nimmerfort.blackbody.ui:298
-msgid "A  thermogram viewer."
-msgstr "Een thermogramvertoner."
-
-#: src/resources/eu.nimmerfort.blackbody.ui:300
+#: src/resources/eu.nimmerfort.blackbody.ui:68
 msgid ""
 "EUROPEAN UNION PUBLIC LICENCE v. 1.2\n"
 "\n"
@@ -765,3 +707,148 @@ msgstr ""
 "\n"
 "Voor alle andere wijzigingen van of aanvullingen op dit aanhangsel is de "
 "ontwikkeling van een nieuwe EUPL-versie vereist."
+
+#: src/resources/eu.nimmerfort.blackbody.ui:292
+msgid "Export thermogram..."
+msgstr "Thermogram exporteren..."
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:30
+msgid "FLIR C2"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:31
+msgid "FLIR E4"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:32
+msgid "FLIR E5"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:36
+msgid "FLIR E53"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:33
+msgid "FLIR E6"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:37
+msgid "FLIR E75"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:34
+msgid "FLIR E8"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:35
+msgid "FLIR E8XT"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:38
+msgid "FLIR P60 (PAL)"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:39
+msgid "FLIR T630SC"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:40
+msgid "FLIR T660"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:18
+msgid "Features:"
+msgstr "Functionaliteit:"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:406
+msgid "Grayscale"
+msgstr "Grijs"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:407
+msgid "Hot"
+msgstr "Heet"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:42
+#: src/resources/eu.nimmerfort.blackbody.ui:408
+msgid "Inferno"
+msgstr "Inferno"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:36
+#: src/resources/eu.nimmerfort.blackbody.ui:409
+msgid "Jet"
+msgstr "Jet"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:20
+msgid "Loading FLIR thermograms from many cameras"
+msgstr "FLIR-thermogrammen van verschillende camera's inladen"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:21
+msgid "Loading single-band TIFFs assumed to be in °C"
+msgstr "Enkelbands TIFF-beelden inladen (aangenomen in °C)"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:48
+#: src/resources/eu.nimmerfort.blackbody.ui:411
+msgid "Magma"
+msgstr "Magma"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:277
+msgid "Open..."
+msgstr "Openen..."
+
+#: src/resources/eu.nimmerfort.blackbody.ui:385
+msgid "Palette"
+msgstr "Palet"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:22
+msgid "Rendering to many different colors palettes, including inferno and turbo"
+msgstr ""
+"Naar uiteenlopende kleurpaletten renderen, onder andere inferno en turbo"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:307
+msgid "Save render..."
+msgstr "Render opslaan..."
+
+#: src/resources/eu.nimmerfort.blackbody.ui:337
+msgid "Show thermometer"
+msgstr "Thermometer tonen"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:23
+msgid "Specifying the thermal range to render"
+msgstr "Het warmtebereik instellen"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:65
+msgid ""
+"This program is made available under the European Public License (EUPL-1.2)."
+msgstr ""
+"This programma is beschikbaar gemaakt onder de Europese openbare licentie "
+"(EUPL-1.2)."
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:25
+msgid "Translated to multiple languages"
+msgstr "Vertaald in meerdere talen"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:39
+#: src/resources/eu.nimmerfort.blackbody.ui:403
+msgid "Turbo"
+msgstr "Turbo"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:412
+msgid "Viridis"
+msgstr "Viridis"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:24
+msgid "Zooming in and out"
+msgstr "In- en uitzoomen"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:542
+msgid "°C"
+msgstr "°C"
+
+#~ msgid "Specify the thermal range to render"
+#~ msgstr "Het te renderen temperatuurbereik specificeren"
+
+#~ msgid "Zoom in and out"
+#~ msgstr "In- en uitzoomen"
+
+#~ msgid "The Blackbody application"
+#~ msgstr "Het programma Blackbody"
