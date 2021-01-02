@@ -19,6 +19,8 @@
     <ul>
       <li>Loading FLIR thermograms from many cameras</li>
       <li>Loading single-band TIFFs assumed to be in °C</li>
+      <li>Investigating temperatures with the mouse</li>
+      <li>Exporting thermal data or renders to files</li>
       <li>Rendering to many different colors palettes, including inferno and turbo</li>
       <li>Specifying the thermal range to render</li>
       <li>Zooming in and out</li>
@@ -42,6 +44,19 @@
   </description>
 
   <releases>
+    <release version="1.2.0" date="2021-01-02" urgency="low" type="stable">
+      <description>
+        <p>This release adds major interactivity improvements:</p>
+        <ul>
+          <li>Temperature in the render can be investigated by hovering over pixels</li>>
+          <li>Added a thermometer showing the colors and associated temperatures</li>
+          <li>Thermogram renders can be saved to PNGs</li>
+          <li>Thermograms' celsius data can be exported to tiff</li>
+          <li>Allowed temperature range is now -273,15 to 1.000.000 instead of -99 to 99 (all °C)</li>
+        </ul>
+      </description>
+    </release>
+
     <release version="1.1.0" date="2020-12-29" urgency="low" type="stable">
       <description>
         <p>A small, incremental update to Blackbody. Improvements:</p>
