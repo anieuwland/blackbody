@@ -10,7 +10,7 @@
 // https://www.bassi.io/articles/2015/02/17/using-opengl-with-gtk/
 
 use std::cell::RefCell;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::thread;
 
@@ -211,7 +211,19 @@ impl AppState {
         tiffs.add_mime_type("image/tif");
         tiffs.add_mime_type("image/tiff");
         chooser.add_filter(&tiffs);
-        chooser.set_current_name("thermogram.tiff");
+
+        // Set default save filename
+        let path = self
+            .thermogram
+            .borrow()
+            .clone()
+            .and_then(|t| {
+                let mut path = PathBuf::from(t.identifier());
+                path.set_extension("tiff");
+                path.to_str().map(String::from)
+            })
+            .unwrap_or(String::from("thermogram.tiff"));
+        chooser.set_current_name(path);
 
         // Show dialog and return if nothing chosen
         let response = chooser.run();
@@ -247,7 +259,19 @@ impl AppState {
         pngs.set_name(Some("PNG"));
         pngs.add_mime_type("image/png");
         chooser.add_filter(&pngs);
-        chooser.set_current_name("export.png");
+
+        // Set default save filename
+        let path = self
+            .thermogram
+            .borrow()
+            .clone()
+            .and_then(|t| {
+                let mut path = PathBuf::from(t.identifier());
+                path.set_extension("png");
+                path.to_str().map(String::from)
+            })
+            .unwrap_or(String::from("render.png"));
+        chooser.set_current_name(path);
 
         // Show dialog and return if nothing chosen
         let response = chooser.run();
