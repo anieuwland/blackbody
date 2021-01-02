@@ -208,10 +208,11 @@ impl AppState {
             None,
             None,
         );
-        let pngs = FileFilter::new();
-        pngs.set_name(Some("TIFF"));
-        pngs.add_mime_type("image/tif");
-        chooser.add_filter(&pngs);
+        let tiffs = FileFilter::new();
+        tiffs.set_name(Some("TIFF"));
+        tiffs.add_mime_type("image/tif");
+        tiffs.add_mime_type("image/tiff");
+        chooser.add_filter(&tiffs);
         chooser.set_current_name("thermogram.tiff");
 
         // Show dialog and return if nothing chosen
