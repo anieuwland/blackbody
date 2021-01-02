@@ -198,7 +198,7 @@ impl AppState {
         self.set_thermogram_from_path(path);
     }
 
-    fn show_thermogram_saver(&self) {
+    fn show_thermogram_exporter(&self) {
         // Prepare file chooser dialog window to save as png
         let parent = &self.window;
         let chooser = FileChooserNative::new(
@@ -234,7 +234,7 @@ impl AppState {
         });
     }
 
-    fn show_render_exporter(&self) {
+    fn show_render_saver(&self) {
         // Prepare file chooser dialog window to save as png
         let parent = &self.window;
         let chooser = FileChooserNative::new(
@@ -382,7 +382,7 @@ impl AppState {
             .and_then(|act| Some(act.set_enabled(true)));
         self.builder
             .get_application()
-            .and_then(|app| app.lookup_action("save"))
+            .and_then(|app| app.lookup_action("render"))
             .and_then(|act| act.downcast::<SimpleAction>().ok())
             .and_then(|act| Some(act.set_enabled(true)));
         self.min_spinner.set_sensitive(true);
@@ -423,15 +423,15 @@ impl AppState {
 
             // Show save thermogram dialog
             let that = this.clone();
-            let save = SimpleAction::new("save", None);
-            save.connect_activate(move |_, _| that.borrow().show_thermogram_saver());
+            let save = SimpleAction::new("export", None);
+            save.connect_activate(move |_, _| that.borrow().show_thermogram_exporter());
             save.set_enabled(false);
             application.add_action(&save);
 
             // Show export thermogram render dialog
             let that = this.clone();
-            let export = SimpleAction::new("export", None);
-            export.connect_activate(move |_, _| that.borrow().show_render_exporter());
+            let export = SimpleAction::new("render", None);
+            export.connect_activate(move |_, _| that.borrow().show_render_saver());
             export.set_enabled(false);
             application.add_action(&export);
         }
