@@ -200,7 +200,7 @@ impl AppState {
         // Prepare file chooser dialog window to save as png
         let parent = &self.window;
         let chooser = FileChooserNative::new(
-            Some("Open warmtebeeld"),
+            Some("Choose export location"),
             Some(parent),
             FileChooserAction::Save,
             None,
@@ -249,7 +249,7 @@ impl AppState {
         // Prepare file chooser dialog window to save as png
         let parent = &self.window;
         let chooser = FileChooserNative::new(
-            Some("Open warmtebeeld"),
+            Some("Choose render location"),
             Some(parent),
             FileChooserAction::Save,
             None,
