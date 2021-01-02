@@ -121,26 +121,15 @@ impl AppState {
             // In case a path is set, but opening fails, show the error dialog
             (Some(path), None) => {
                 // Construct the error message and attempt to include the file path in it
+                let p = path.to_str().unwrap_or("<invalid file>");
                 let mut msg = String::from(
                     "Failed to open file. This could be because the file is (partially) \
                     corrupted or the camera is unsupported. ",
                 );
-                if let Some(path_str) = path.to_str() {
-                    msg = msg + "\n\nIssue encountered on file: ";
-                    msg = msg + path_str;
-                }
 
-                // Construct dialog and show
-                let fail_dialog = gtk::MessageDialog::new(
-                    Some(&self.window),
-                    gtk::DialogFlags::MODAL,
-                    gtk::MessageType::Error,
-                    gtk::ButtonsType::Close,
-                    msg.as_str(),
-                );
+                msg = msg + "\n\nIssue encountered on file: " + p;
 
-                fail_dialog.run();
-                fail_dialog.destroy();
+                self.show_failure_dialog(msg.as_str());
             }
             _ => (),
         }
@@ -209,8 +198,41 @@ impl AppState {
         self.set_thermogram_from_path(path);
     }
 
-    // fn show_thermogram_saver(&self) {
-    // }
+    fn show_thermogram_saver(&self) {
+        // Prepare file chooser dialog window to save as png
+        let parent = &self.window;
+        let chooser = FileChooserNative::new(
+            Some("Open warmtebeeld"),
+            Some(parent),
+            FileChooserAction::Save,
+            None,
+            None,
+        );
+        let pngs = FileFilter::new();
+        pngs.set_name(Some("TIFF"));
+        pngs.add_mime_type("image/tif");
+        chooser.add_filter(&pngs);
+        chooser.set_current_name("thermogram.tiff");
+
+        // Show dialog and return if nothing chosen
+        let response = chooser.run();
+        if response != ResponseType::Accept {
+            return;
+        }
+
+        // Handle opening a thermogram
+        chooser.get_filename().map(|path| {
+            self.thermogram.borrow().clone().map(|thermogram| {
+                let success = thermogram.export_thermal(&path);
+                if success.is_none() {
+                    // Inform user of export failure
+                    let p = path.to_str().unwrap_or("<invalid path>");
+                    let msg = format!("Failed to export to {}", p);
+                    self.show_failure_dialog(msg.as_str());
+                }
+            });
+        });
+    }
 
     fn show_render_exporter(&self) {
         // Prepare file chooser dialog window to save as png
@@ -244,7 +266,14 @@ impl AppState {
                 let max_temp = self.get_maximum_temperature();
                 let palette_idx = self.get_palette_idx();
                 let palette = PALETTES[palette_idx];
-                thermogram.save_render(path, min_temp, max_temp, palette)
+
+                let success = thermogram.save_render(path.clone(), min_temp, max_temp, palette);
+                if success.is_none() {
+                    // Inform user of save failure
+                    let p = path.to_str().unwrap_or("<invalid path>");
+                    let msg = format!("Failed to export to {}", p);
+                    self.show_failure_dialog(msg.as_str());
+                }
             });
         });
     }
@@ -351,9 +380,28 @@ impl AppState {
             .and_then(|app| app.lookup_action("export"))
             .and_then(|act| act.downcast::<SimpleAction>().ok())
             .and_then(|act| Some(act.set_enabled(true)));
+        self.builder
+            .get_application()
+            .and_then(|app| app.lookup_action("save"))
+            .and_then(|act| act.downcast::<SimpleAction>().ok())
+            .and_then(|act| Some(act.set_enabled(true)));
         self.min_spinner.set_sensitive(true);
         self.max_spinner.set_sensitive(true);
         self.zoom_spinner.set_sensitive(true);
+    }
+
+    fn show_failure_dialog(&self, msg: &str) {
+        // Construct dialog and show
+        let fail_dialog = gtk::MessageDialog::new(
+            Some(&self.window),
+            gtk::DialogFlags::MODAL,
+            gtk::MessageType::Error,
+            gtk::ButtonsType::Close,
+            msg,
+        );
+
+        fail_dialog.run();
+        fail_dialog.destroy();
     }
 
     fn connect_signals(this: &Rc<RefCell<Self>>, application: &Application) {
@@ -374,10 +422,11 @@ impl AppState {
             application.add_action(&open);
 
             // Show save thermogram dialog
-            // let that = this.clone();
-            // let save = SimpleAction::new("save", None);
-            // save.connect_activate(move |_, _| that.borrow().show_thermogram_saver());
-            // application.add_action(&save);
+            let that = this.clone();
+            let save = SimpleAction::new("save", None);
+            save.connect_activate(move |_, _| that.borrow().show_thermogram_saver());
+            save.set_enabled(false);
+            application.add_action(&save);
 
             // Show export thermogram render dialog
             let that = this.clone();
