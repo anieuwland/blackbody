@@ -415,6 +415,7 @@ All other changes or additions to this Appendix require the production of a new 
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
+                <property name="pack-type">end</property>
                 <property name="position">1</property>
               </packing>
             </child>
