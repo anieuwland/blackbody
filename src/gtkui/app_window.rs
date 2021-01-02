@@ -34,14 +34,13 @@ pub struct AppState {
     window: ApplicationWindow,
     headerbar: HeaderBar,
     app_menu: PopoverMenu,
-    app_menu_button: MenuButton,
-    app_menu_item_open: ModelButton,
-    app_menu_item_about: ModelButton,
     palette_chooser: ComboBoxText,
     image: Image,
     image_events: EventBox,
     min_spinner: SpinButton,
     max_spinner: SpinButton,
+    thermometer_toggler: CheckButton,
+    thermometer_revealer: Revealer,
     thermometer: Rc<RefCell<Thermometer>>,
     zoom_spinner: SpinButton,
     about_dialog: AboutDialog,
@@ -72,14 +71,13 @@ impl AppState {
             window: builder.get_object("blackbody_window").unwrap(),
             headerbar: builder.get_object("headerbar").unwrap(),
             app_menu: builder.get_object("app_menu").unwrap(),
-            app_menu_button: builder.get_object("app_menu_button").unwrap(),
-            app_menu_item_open: builder.get_object("app_menu_item_open").unwrap(),
-            app_menu_item_about: builder.get_object("app_menu_item_about").unwrap(),
             palette_chooser: builder.get_object("palette_chooser").unwrap(),
             image: builder.get_object("viewed_image").unwrap(),
             image_events: builder.get_object("viewed_image_events").unwrap(),
             min_spinner: builder.get_object("min_temp_spinner").unwrap(),
             max_spinner: builder.get_object("max_temp_spinner").unwrap(),
+            thermometer_toggler: builder.get_object("thermometer_toggler").unwrap(),
+            thermometer_revealer: builder.get_object("thermometer_revealer").unwrap(),
             thermometer: thermometer,
             zoom_spinner: builder.get_object("zoom_spinner").unwrap(),
             about_dialog: builder.get_object("about_dialog").unwrap(),
@@ -96,8 +94,8 @@ impl AppState {
 
         // Some initial configuration
         state.window.add_accel_group(&state.accel_group);
-        state.filter_thermograms.set_name(Some("Warmtebeelden: *.jpg (FLIR), *.tiff"));
-        state.filter_all_files.set_name(Some("Alle bestanden"));
+        state.filter_thermograms.set_name(Some("Thermograms: *.jpg (FLIR), *.tiff"));
+        state.filter_all_files.set_name(Some("All files"));
 
         // Set up cross-thread channel for rendering thermogram on separate thread, but
         // actually drawing in the window on the main thread. Helps against blocking UI.
@@ -145,7 +143,7 @@ impl AppState {
             self.headerbar.set_subtitle(thermogram.path());
             self.min_spinner.set_value(thermogram.min_temp().into());
             self.max_spinner.set_value(thermogram.max_temp().into());
-            self.enable_thermogam_ui();
+            self.enable_thermogram_ui();
 
             // Update thermogram and draw
             self.thermogram.replace(Some(thermogram));
@@ -374,7 +372,7 @@ impl AppState {
         })
     }
 
-    fn enable_thermogam_ui(&self) {
+    fn enable_thermogram_ui(&self) {
         // Function set controls to sensitive that only make sense when a thermogram is open
         self.builder
             .get_application()
@@ -389,6 +387,7 @@ impl AppState {
         self.min_spinner.set_sensitive(true);
         self.max_spinner.set_sensitive(true);
         self.zoom_spinner.set_sensitive(true);
+        self.palette_chooser.set_sensitive(true);
     }
 
     fn show_failure_dialog(&self, msg: &str) {
@@ -493,6 +492,16 @@ impl AppState {
             this.borrow().palette_chooser.connect_changed(move |_| {
                 that.borrow().update_thermometer();
                 that.borrow().draw_render_threaded()
+            });
+        }
+        {
+            // Show or hide the thermometer
+            let that = this.clone();
+            this.borrow().thermometer_toggler.connect_toggled(move |_| {
+                let show = !that.borrow().thermometer_revealer.get_reveal_child();
+                let sensitive_palette = that.borrow().thermogram.borrow().is_some() || show;
+                that.borrow().palette_chooser.set_sensitive(sensitive_palette);
+                that.borrow().thermometer_revealer.set_reveal_child(show);
             });
         }
     }

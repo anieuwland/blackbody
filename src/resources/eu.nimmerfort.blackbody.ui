@@ -60,7 +60,6 @@
     <property name="can-focus">False</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">blackbody_window</property>
-    <property name="attached-to">app_menu_item_about</property>
     <property name="program-name">Blackbody</property>
     <property name="version">1.2.0-dev</property>
     <property name="copyright" translatable="yes">This program is made available under the European Public License (EUPL-1.2).</property>
@@ -329,14 +328,60 @@ All other changes or additions to this Appendix require the production of a new 
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
+            <property name="margin-start">6</property>
+            <property name="margin-end">6</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="label" translatable="yes">Show thermometer</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkCheckButton" id="thermometer_toggler">
+                <property name="visible">True</property>
+                <property name="can-focus">True</property>
+                <property name="receives-default">False</property>
+                <property name="draw-indicator">True</property>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="pack-type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="margin-start">6</property>
+            <property name="margin-end">6</property>
+            <property name="margin-top">6</property>
             <property name="spacing">6</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="halign">end</property>
-                <property name="margin-start">6</property>
-                <property name="margin-end">3</property>
                 <property name="label" translatable="yes">Palette</property>
                 <property name="xalign">0</property>
               </object>
@@ -349,9 +394,9 @@ All other changes or additions to this Appendix require the production of a new 
             <child>
               <object class="GtkComboBoxText" id="palette_chooser">
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can-focus">False</property>
-                <property name="margin-start">3</property>
-                <property name="margin-end">3</property>
+                <property name="margin-start">12</property>
                 <property name="active">0</property>
                 <property name="active-id">0</property>
                 <items>
@@ -377,7 +422,7 @@ All other changes or additions to this Appendix require the production of a new 
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">4</property>
+            <property name="position">5</property>
           </packing>
         </child>
         <child>
@@ -388,7 +433,7 @@ All other changes or additions to this Appendix require the production of a new 
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">5</property>
+            <property name="position">6</property>
           </packing>
         </child>
         <child>
@@ -402,7 +447,7 @@ All other changes or additions to this Appendix require the production of a new 
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">6</property>
+            <property name="position">7</property>
           </packing>
         </child>
       </object>
@@ -422,19 +467,26 @@ All other changes or additions to this Appendix require the production of a new 
         <property name="visible">True</property>
         <property name="can-focus">False</property>
         <child>
-          <object class="GtkDrawingArea" id="thermometer">
-            <property name="width-request">20</property>
+          <object class="GtkRevealer" id="thermometer_revealer">
             <property name="visible">True</property>
             <property name="can-focus">False</property>
-            <property name="margin-start">6</property>
-            <property name="margin-end">6</property>
-            <property name="margin-top">6</property>
-            <property name="margin-bottom">6</property>
+            <property name="transition-type">slide-right</property>
+            <child>
+              <object class="GtkDrawingArea" id="thermometer">
+                <property name="width-request">20</property>
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <property name="margin-start">6</property>
+                <property name="margin-end">6</property>
+                <property name="margin-top">6</property>
+                <property name="margin-bottom">6</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
@@ -468,7 +520,7 @@ All other changes or additions to this Appendix require the production of a new 
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
