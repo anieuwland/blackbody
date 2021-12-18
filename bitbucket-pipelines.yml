@@ -32,14 +32,14 @@ pipelines:
             - cd dist
             - zip -r blackbody-$VERSION-windows.zip blackbody-$VERSION-windows
           artifacts:
-            - windows/dist/**
+            - windows/dist/*.zip
       - step:
             name: Publishing to downloads page
             clone:
               enabled: false
             script:
               - ls windows/dist/*.zip
-              - for BLACKBODY_ARTEFACT in `ls dist/blackbody-*.zip`; do curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$BLACKBODY_ARTEFACT"; done
+              - for BLACKBODY_ARTEFACT in `ls windows/dist/blackbody-*.zip`; do curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$BLACKBODY_ARTEFACT"; done
       # - step:
       #   name: Publishing to Flathub repository
       #   script:
