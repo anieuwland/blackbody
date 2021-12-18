@@ -47,6 +47,12 @@ fn init_env() {
     .or_else(|_| {
         let exe_path = std::env::current_exe().expect("Can't determine executable path");
         let exe_dir = exe_path.parent().expect("Can't determine executable's directory");
+        let res_path = exe_dir.join("blackbody.gresource");
+        gio::Resource::load(res_path)
+    })
+    .or_else(|_| {
+        let exe_path = std::env::current_exe().expect("Can't determine executable path");
+        let exe_dir = exe_path.parent().expect("Can't determine executable's directory");
         let res_path = exe_dir.join("resources").join("blackbody.gresource");
         gio::Resource::load(res_path)
     })

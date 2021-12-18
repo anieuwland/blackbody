@@ -1,0 +1,42 @@
+pipelines:
+  tags:
+    'release-*':
+      # - parallel:
+      #   - step:
+      #     name: Building for Linux (x86_64)
+      #     image: blackbody-build-env:32
+      #       - meson -Dbuildtype=release linux
+      #       - cd linux
+      #       - BLACKBODY_BUILDER=linux ninja
+      #     artifacts:
+      #       - linux/dist/**
+      - step:
+          name: Building for Windows (x86_64)
+          image: anieuwland/images:blackbody-build-env-latest
+          script:
+            - meson -Dbuildtype=release windows
+            - cd windows
+            - BLACKBODY_BUILDER=windows ninja
+            - cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll src/
+            - cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/gdbus.exe src/
+            - mkdir -p src/share/glib-2.0/schemas
+            - cp /usr/x86_64-w64-mingw32/sys-root/mingw/share/glib-2.0/schemas/gschemas.compiled src/share/glib-2.0/schemas/gschemas.compiled
+            - cp -r /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons src/share/icons
+            - mkdir dist
+            - mv src dist/blackbody-$VERSION-windows
+            - cd dist
+            - zip -r blackbody-$VERSION-windows.zip blackbody-$VERSION-windows
+          artifacts:
+            - windows/dist/**
+      - step:
+            name: Publishing to downloads page
+            clone:
+              enabled: false
+            script:
+              - ls windows/dist/*.zip
+              - for BLACKBODY_ARTEFACT in `ls dist/blackbody-*.zip`; do curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$BLACKBODY_ARTEFACT"; done
+      # - step:
+      #   name: Publishing to Flathub repository
+      #   script:
+          # TODO
+      #     - echo "Done"
