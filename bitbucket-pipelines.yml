@@ -14,7 +14,7 @@ pipelines:
           name: Building for Windows (x86_64)
           image: registry.fedoraproject.org/fedora-minimal:32
           script:
-            - microdnf install glib2-devel gtk3-devel cairo-devel pango-devel meson ninja-build libappstream-glib desktop-file-utils gcc mingw64-gcc mingw64-pango mingw64-poppler mingw64-gtk3 mingw64-winpthreads mingw64-winpthreads-static git
+            - microdnf install glib2-devel gtk3-devel cairo-devel pango-devel meson ninja-build libappstream-glib desktop-file-utils gcc mingw64-gcc mingw64-pango mingw64-poppler mingw64-gtk3 mingw64-winpthreads mingw64-winpthreads-static
             - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rust-init.sh
             - bash rust-init.sh -y --profile minimal -t x86_64-pc-windows-gnu,x86_64-unknown-linux-gnu
             - rm rust-init.sh
