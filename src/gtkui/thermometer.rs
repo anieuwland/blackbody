@@ -2,20 +2,21 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use cairo::{Context, LinearGradient};
-use glib::prelude::*;
-use gtk::{DrawingArea, Inhibit, Tooltip, WidgetExt};
+use gio::prelude::ObjectExt;
+use gtk::prelude::WidgetExt;
+use gtk::{DrawingArea, Inhibit, Tooltip};
 
 #[derive(Clone)]
 pub struct Thermometer {
     pub thermometer: DrawingArea,
-    palette: [[f32; 3]; 256],
+    palette: Vec<[f32; 3]>,
     min: f32,
     max: f32,
 }
 
 impl Thermometer {
-    pub fn new(thermometer: DrawingArea, palette: [[f32; 3]; 256]) -> Rc<RefCell<Thermometer>> {
-        let thermometer = Thermometer { thermometer, palette, min: 0.0, max: 0.0 };
+    pub fn new(thermometer: DrawingArea, palette: Vec<[f32; 3]>) -> Rc<RefCell<Thermometer>> {
+        let thermometer = Thermometer { thermometer, palette: palette, min: 0.0, max: 0.0 };
 
         let this = Rc::new(RefCell::new(thermometer));
         {
@@ -28,19 +29,17 @@ impl Thermometer {
         {
             // Let the tooltip show the temperature of that color
             let that = this.clone();
-            this.borrow().thermometer.set_property("has-tooltip", &true.to_value()).ok().map(
-                |_| {
-                    this.borrow().thermometer.connect_query_tooltip(move |_, _, y, _, tooltip| {
-                        that.borrow().set_tooltip_text(tooltip, y)
-                    });
-                },
-            );
+            this.borrow().thermometer.set_property("has-tooltip", &true).ok().map(|_| {
+                this.borrow().thermometer.connect_query_tooltip(move |_, _, y, _, tooltip| {
+                    that.borrow().set_tooltip_text(tooltip, y)
+                });
+            });
         }
 
         this
     }
 
-    pub fn set_palette(&mut self, palette: [[f32; 3]; 256]) {
+    pub fn set_palette(&mut self, palette: Vec<[f32; 3]>) {
         self.palette = palette;
     }
 
@@ -56,18 +55,18 @@ impl Thermometer {
         self.thermometer.queue_draw();
     }
 
-    pub fn get_allocated_height(&self) -> i32 {
-        self.thermometer.get_allocated_height()
+    pub fn allocated_height(&self) -> i32 {
+        self.thermometer.allocated_height()
     }
 
-    pub fn get_allocated_width(&self) -> i32 {
-        self.thermometer.get_allocated_width()
+    pub fn allocated_width(&self) -> i32 {
+        self.thermometer.allocated_width()
     }
 
     fn render_thermometer(&self, context: &Context) -> Inhibit {
         // Define the area and direction of the gradient
-        let width = self.get_allocated_width() as f64;
-        let height = self.get_allocated_height() as f64;
+        let width = self.allocated_width() as f64;
+        let height = self.allocated_height() as f64;
         let pattern = LinearGradient::new(0.0, 0.0, 0.0, height);
 
         // Set the color transition points
@@ -80,15 +79,15 @@ impl Thermometer {
 
         // Actually draw the gradient in the size of the widget
         context.rectangle(0.0, 0.0, width, height);
-        context.set_source(&pattern);
-        context.fill();
+        let _ = context.set_source(&pattern);
+        let _ = context.fill();
         Inhibit(false)
     }
 
     fn set_tooltip_text(&self, tooltip: &Tooltip, y: i32) -> bool {
         // Calculate the position of the mouse on the thermometer
         // Return early if it would result in division by 0
-        let max_y = self.get_allocated_height() - 1;
+        let max_y = self.allocated_height() - 1;
         if max_y == 0 {
             return false;
         }

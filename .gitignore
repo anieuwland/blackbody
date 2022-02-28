@@ -3,3 +3,5 @@ target
 *.mo
 *.ui~
 src/config.rs
+libblackbody
+flyr-rs

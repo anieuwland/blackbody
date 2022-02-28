@@ -9,22 +9,36 @@
 // https://stackoverflow.com/questions/45424802/how-to-embed-an-sdl-surface-into-gtk
 // https://www.bassi.io/articles/2015/02/17/using-opengl-with-gtk/
 
+use core::cmp::{max, min};
 use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::thread;
 
+use gdk::prelude::{ActionMapExt, ApplicationExt};
 use gdk_pixbuf::Pixbuf;
-use gio::prelude::*;
 use gio::SimpleAction;
-use glib::{Bytes, MainContext, SyncSender};
-use gtk::prelude::*;
-use gtk::*;
-
+use glib::{Bytes, Cast, MainContext, ObjectExt, SyncSender, ToValue};
+use gtk::prelude::{
+    BuilderExt, BuilderExtManual, ComboBoxExt, DialogExt, FileChooserExt, GtkApplicationExt,
+    GtkWindowExt, HeaderBarExt, ImageExt, NativeDialogExt, RevealerExt, SpinButtonExt,
+    ToggleButtonExt, WidgetExt, WidgetExtManual,
+};
+use gtk::{
+    AboutDialog, AccelGroup, Application, ApplicationWindow, CheckButton, ComboBoxText, EventBox,
+    FileFilter, HeaderBar, Image, PopoverMenu, Revealer, SpinButton, ToggleButton,
+};
+use gtk::{
+    Builder, FileChooserAction, FileChooserNative, Inhibit, ResponseType, SpinButtonSignals,
+    Tooltip,
+};
 use libblackbody::{Thermogram, ThermogramTrait};
 
+use crate::gtkui::imagery_toggles::ImageryToggles;
 use crate::gtkui::palettes::PALETTES;
 use crate::gtkui::thermometer::Thermometer;
+
+use super::imagery_toggles::ImageryKind;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -35,6 +49,7 @@ pub struct AppState {
     headerbar: HeaderBar,
     app_menu: PopoverMenu,
     palette_chooser: ComboBoxText,
+    embedded_palette_toggle: ToggleButton,
     image: Image,
     image_events: EventBox,
     min_spinner: SpinButton,
@@ -48,6 +63,9 @@ pub struct AppState {
     filter_all_files: FileFilter,
     accel_group: AccelGroup,
 
+    // Tool bar items
+    imagery_toggles: Rc<RefCell<ImageryToggles>>,
+
     // Model members
     thermogram: RefCell<Option<Thermogram>>,
     render_sender: SyncSender<(Bytes, usize, usize, f64)>,
@@ -58,34 +76,40 @@ impl AppState {
     pub fn new(application: &Application, thermogram: Option<Thermogram>) -> Rc<RefCell<AppState>> {
         // Create application from builder
         let ui = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui";
-        let builder = Builder::new_from_resource(ui);
+        let builder = Builder::from_resource(ui);
         builder.set_application(application);
         let (render_s, render_r) = MainContext::sync_channel(glib::PRIORITY_DEFAULT, 256);
 
-        let thermometer = Thermometer::new(builder.get_object("thermometer").unwrap(), PALETTES[0]);
+        let thermometer =
+            Thermometer::new(builder.object("thermometer").unwrap(), PALETTES[0].into());
 
+        let ref_thermogram = RefCell::new(None);
         let state = AppState {
             builder: builder.clone(),
 
             // Application's state struct
-            window: builder.get_object("blackbody_window").unwrap(),
-            headerbar: builder.get_object("headerbar").unwrap(),
-            app_menu: builder.get_object("app_menu").unwrap(),
-            palette_chooser: builder.get_object("palette_chooser").unwrap(),
-            image: builder.get_object("viewed_image").unwrap(),
-            image_events: builder.get_object("viewed_image_events").unwrap(),
-            min_spinner: builder.get_object("min_temp_spinner").unwrap(),
-            max_spinner: builder.get_object("max_temp_spinner").unwrap(),
-            thermometer_toggler: builder.get_object("thermometer_toggler").unwrap(),
-            thermometer_revealer: builder.get_object("thermometer_revealer").unwrap(),
+            window: builder.object("blackbody_window").unwrap(),
+            headerbar: builder.object("headerbar").unwrap(),
+            app_menu: builder.object("app_menu").unwrap(),
+            palette_chooser: builder.object("palette_chooser").unwrap(),
+            embedded_palette_toggle: builder.object("embedded_palette_toggle").unwrap(),
+            image: builder.object("viewed_image").unwrap(),
+            image_events: builder.object("viewed_image_events").unwrap(),
+            min_spinner: builder.object("min_temp_spinner").unwrap(),
+            max_spinner: builder.object("max_temp_spinner").unwrap(),
+            thermometer_toggler: builder.object("thermometer_toggler").unwrap(),
+            thermometer_revealer: builder.object("thermometer_revealer").unwrap(),
             thermometer: thermometer,
-            zoom_spinner: builder.get_object("zoom_spinner").unwrap(),
-            about_dialog: builder.get_object("about_dialog").unwrap(),
-            filter_thermograms: builder.get_object("filter_thermograms").unwrap(),
-            filter_all_files: builder.get_object("filter_all_files").unwrap(),
-            accel_group: builder.get_object("app_accel_group").unwrap(),
+            zoom_spinner: builder.object("zoom_spinner").unwrap(),
+            about_dialog: builder.object("about_dialog").unwrap(),
+            filter_thermograms: builder.object("filter_thermograms").unwrap(),
+            filter_all_files: builder.object("filter_all_files").unwrap(),
+            accel_group: builder.object("app_accel_group").unwrap(),
 
-            thermogram: RefCell::new(None),
+            // Tool bar items
+            imagery_toggles: ImageryToggles::from_builder(builder, &ref_thermogram),
+
+            thermogram: ref_thermogram,
             render_sender: render_s,
         };
 
@@ -140,20 +164,20 @@ impl AppState {
         o_thermogram.map(|thermogram| {
             // Update controls
             self.headerbar.set_title(Some(&thermogram.identifier()));
-            self.headerbar.set_subtitle(thermogram.path());
+            self.headerbar.set_subtitle(thermogram.path().and_then(|p| p.to_str()));
             self.min_spinner.set_value(thermogram.min_temp().into());
             self.max_spinner.set_value(thermogram.max_temp().into());
-            self.enable_thermogram_ui();
 
             // Update thermogram and draw
             self.thermogram.replace(Some(thermogram));
             self.draw_render_threaded();
+            self.enable_thermogram_ui();
         });
     }
 
     fn connect_channel(img: &mut Image, args: (Bytes, usize, usize, f64)) -> glib::Continue {
         let (glib_bytes, width, height, zoom) = args;
-        let pixbuf = Pixbuf::new_from_bytes(
+        let pixbuf = Pixbuf::from_bytes(
             &glib_bytes,
             gdk_pixbuf::Colorspace::Rgb,
             false,
@@ -163,8 +187,8 @@ impl AppState {
             3 * width as i32,
         );
 
-        let width = (pixbuf.get_width() as f64 * zoom) as i32;
-        let height = (pixbuf.get_height() as f64 * zoom) as i32;
+        let width = (pixbuf.width() as f64 * zoom) as i32;
+        let height = (pixbuf.height() as f64 * zoom) as i32;
         let pixbuf_new = pixbuf.scale_simple(width, height, gdk_pixbuf::InterpType::Bilinear);
 
         img.set_from_pixbuf(pixbuf_new.as_ref());
@@ -191,7 +215,7 @@ impl AppState {
         }
 
         // Handle opening a thermogram
-        let path = chooser.get_filename();
+        let path = chooser.filename();
         let path = path.as_ref().map(AsRef::as_ref);
         self.set_thermogram_from_path(path);
     }
@@ -223,7 +247,7 @@ impl AppState {
                 path.to_str().map(String::from)
             })
             .unwrap_or(String::from("thermogram.tiff"));
-        chooser.set_current_name(path);
+        chooser.set_current_name(&path);
 
         // Show dialog and return if nothing chosen
         let response = chooser.run();
@@ -232,7 +256,7 @@ impl AppState {
         }
 
         // Handle opening a thermogram
-        chooser.get_filename().map(|path| {
+        chooser.filename().map(|path| {
             self.thermogram.borrow().clone().map(|thermogram| {
                 let success = thermogram.export_thermal(&path);
                 if success.is_none() {
@@ -271,7 +295,7 @@ impl AppState {
                 path.to_str().map(String::from)
             })
             .unwrap_or(String::from("render.png"));
-        chooser.set_current_name(path);
+        chooser.set_current_name(&path);
 
         // Show dialog and return if nothing chosen
         let response = chooser.run();
@@ -280,17 +304,16 @@ impl AppState {
         }
 
         // Handle opening a thermogram
-        chooser.get_filename().map(|path| {
+        chooser.filename().map(|path| {
             let mut path = path;
             path.set_extension("png");
 
             self.thermogram.borrow().clone().map(|thermogram| {
-                let min_temp = self.get_minimum_temperature();
-                let max_temp = self.get_maximum_temperature();
-                let palette_idx = self.get_palette_idx();
-                let palette = PALETTES[palette_idx];
+                let min_temp = self.minimum_temperature();
+                let max_temp = self.maximum_temperature();
 
-                let success = thermogram.save_render(path.clone(), min_temp, max_temp, palette);
+                let palette = self.palette();
+                let success = thermogram.save_render(path.clone(), min_temp, max_temp, &palette);
                 if success.is_none() {
                     // Inform user of save failure
                     let p = path.to_str().unwrap_or("<invalid path>");
@@ -302,24 +325,30 @@ impl AppState {
     }
 
     fn draw_render_threaded(&self) {
-        let min_temp = self.get_minimum_temperature();
-        let max_temp = self.get_maximum_temperature();
-        let zoom = self.get_zoom() / 100f64;
-        let o_thermogram = self.thermogram.clone().into_inner();
+        let min_temp = self.minimum_temperature();
+        let max_temp = self.maximum_temperature();
+        let zoom = self.zoom() / 100f64;
         let sender_local = self.render_sender.clone();
-        let palette_idx = self.get_palette_idx();
 
-        o_thermogram.map(|thermogram| {
+        let palette = self.palette();
+        let imagery_kind = self.imagery_toggles.borrow().kind();
+
+        self.thermogram.clone().into_inner().map(|thermogram| {
             thread::spawn(move || {
-                let palette = PALETTES[palette_idx];
-                let render = thermogram.render(min_temp, max_temp, palette);
-                let (bytes, width, height) =
-                    (render.as_slice().unwrap(), render.shape()[1], render.shape()[0]);
+                let image = match (imagery_kind, thermogram.optical()) {
+                    (ImageryKind::Optical, Some(optical)) => optical.to_owned(),
+                    _ => thermogram.render(min_temp, max_temp, &palette).to_owned(),
+                };
 
-                let glib_bytes = Bytes::from(bytes);
-                sender_local
-                    .send((glib_bytes, width, height, zoom))
-                    .expect("Failed sending rendered bytes!");
+                if let Some(bytes) = image.as_slice() {
+                    let height = image.shape()[0];
+                    let width = image.shape()[1];
+
+                    let glib_bytes = Bytes::from(bytes);
+                    sender_local
+                        .send((glib_bytes, width, height, zoom))
+                        .expect("Failed sending rendered bytes!");
+                }
             });
         });
     }
@@ -330,56 +359,66 @@ impl AppState {
             return Inhibit(true);
         }
 
-        let (_, y) = event.get_scroll_deltas().unwrap();
-        let delta = if y < 0.0 {
-            5.0
-        } else if y > 0.0 {
-            -5.0
-        } else {
-            0.0
-        };
+        event.scroll_deltas().map(|(_, y)| {
+            let delta = if y < 0.0 {
+                5.0
+            } else if y > 0.0 {
+                -5.0
+            } else {
+                0.0
+            };
 
-        self.update_zoom_factor(delta);
+            self.update_zoom_factor(delta);
+        });
+
         Inhibit(true)
     }
 
     fn update_zoom_factor(&self, modifier: f64) {
-        let adj_zoom = self.get_zoom() + modifier;
-        let (min_zoom, max_zoom) = self.zoom_spinner.get_range();
+        let adj_zoom = self.zoom() + modifier;
+        let (min_zoom, max_zoom) = self.zoom_spinner.range();
         if adj_zoom >= min_zoom && adj_zoom <= max_zoom {
-            self.zoom_spinner.set_value(self.get_zoom() + modifier);
+            self.zoom_spinner.set_value(self.zoom() + modifier);
         }
     }
 
     fn update_thermometer(&self) {
-        self.thermometer.borrow_mut().set_minimum(self.get_minimum_temperature());
-        self.thermometer.borrow_mut().set_maximum(self.get_maximum_temperature());
-        self.thermometer.borrow_mut().set_palette(PALETTES[self.get_palette_idx()]);
+        let palette = self.palette();
 
+        self.thermometer.borrow_mut().set_minimum(self.minimum_temperature());
+        self.thermometer.borrow_mut().set_maximum(self.maximum_temperature());
+        self.thermometer.borrow_mut().set_palette(palette);
         self.thermometer.borrow().queue_draw();
     }
 
-    fn get_minimum_temperature(&self) -> f32 {
-        self.min_spinner.get_value() as f32
+    fn minimum_temperature(&self) -> f32 {
+        self.min_spinner.value() as f32
     }
 
-    fn get_maximum_temperature(&self) -> f32 {
-        self.max_spinner.get_value() as f32
+    fn maximum_temperature(&self) -> f32 {
+        self.max_spinner.value() as f32
     }
 
-    fn get_palette_idx(&self) -> usize {
-        self.palette_chooser.get_active_id().map_or(0, |id| id.as_str().as_bytes()[0] as usize - 48)
+    fn palette_idx(&self) -> usize {
+        let idx = self.palette_chooser.active_id().map_or(0, |id| {
+            id.as_str()
+                .as_bytes()
+                .into_iter()
+                .fold(0, |acc, val| acc * 10 + (max(48, *val) as usize - 48))
+        });
+
+        min(max(0, idx), PALETTES.len() - 1)
     }
 
-    fn get_zoom(&self) -> f64 {
-        self.zoom_spinner.get_value()
+    fn zoom(&self) -> f64 {
+        self.zoom_spinner.value()
     }
 
     fn set_thermogram_tooltip_text(&self, x: i32, y: i32, tooltip: &Tooltip) -> bool {
         self.thermogram.borrow().clone().map_or(false, |thermogram| {
             // Translate the pointer coordinates to the thermogram's coordinate system
             let shape = thermogram.thermal_shape();
-            let zoom = self.get_zoom() / 100f64;
+            let zoom = self.zoom() / 100f64;
             let x = (x as f64 / zoom) as usize;
             let y = (y as f64 / zoom) as usize;
 
@@ -398,20 +437,25 @@ impl AppState {
 
     fn enable_thermogram_ui(&self) {
         // Function set controls to sensitive that only make sense when a thermogram is open
-        self.builder
-            .get_application()
-            .and_then(|app| app.lookup_action("export"))
-            .and_then(|act| act.downcast::<SimpleAction>().ok())
-            .and_then(|act| Some(act.set_enabled(true)));
-        self.builder
-            .get_application()
-            .and_then(|app| app.lookup_action("render"))
-            .and_then(|act| act.downcast::<SimpleAction>().ok())
-            .and_then(|act| Some(act.set_enabled(true)));
-        self.min_spinner.set_sensitive(true);
-        self.max_spinner.set_sensitive(true);
-        self.zoom_spinner.set_sensitive(true);
-        self.palette_chooser.set_sensitive(true);
+        self.thermogram.borrow().as_ref().map(|thermogram| {
+            self.builder
+                .application()
+                .and_then(|app| app.lookup_action("export"))
+                .and_then(|act| act.downcast::<SimpleAction>().ok())
+                .and_then(|act| Some(act.set_enabled(true)));
+            self.builder
+                .application()
+                .and_then(|app| app.lookup_action("render"))
+                .and_then(|act| act.downcast::<SimpleAction>().ok())
+                .and_then(|act| Some(act.set_enabled(true)));
+            self.min_spinner.set_sensitive(true);
+            self.max_spinner.set_sensitive(true);
+            self.zoom_spinner.set_sensitive(true);
+            self.palette_chooser.set_sensitive(true);
+            if thermogram.has_palette() {
+                self.embedded_palette_toggle.set_sensitive(true);
+            };
+        });
     }
 
     fn show_failure_dialog(&self, msg: &str) {
@@ -425,7 +469,19 @@ impl AppState {
         );
 
         fail_dialog.run();
-        fail_dialog.destroy();
+        unsafe {
+            fail_dialog.destroy();
+        }
+    }
+
+    fn palette(&self) -> Vec<[f32; 3]> {
+        self.embedded_palette_toggle
+            .is_active()
+            .then(|| Some(true))
+            .and(self.thermogram.borrow().as_ref())
+            .and_then(|thermogram: &Thermogram| thermogram.palette())
+            .or(Some(PALETTES[self.palette_idx()].iter().map(|v| *v).collect()))
+            .unwrap() // TODO Remove unwrap; remove possible failure in indexed access
     }
 
     fn connect_signals(this: &Rc<RefCell<Self>>, application: &Application) {
@@ -522,10 +578,27 @@ impl AppState {
             // Show or hide the thermometer
             let that = this.clone();
             this.borrow().thermometer_toggler.connect_toggled(move |_| {
-                let show = !that.borrow().thermometer_revealer.get_reveal_child();
+                let show = !that.borrow().thermometer_revealer.reveals_child();
+                let active = that.borrow().embedded_palette_toggle.is_active();
                 let sensitive_palette = that.borrow().thermogram.borrow().is_some() || show;
+                let sensitive_palette = !active && sensitive_palette;
                 that.borrow().palette_chooser.set_sensitive(sensitive_palette);
                 that.borrow().thermometer_revealer.set_reveal_child(show);
+            });
+        }
+        {
+            let that = this.clone();
+            this.borrow().imagery_toggles.borrow().connect_toggle_callback(move || {
+                that.borrow().draw_render_threaded();
+            })
+        }
+        {
+            let that = this.clone();
+            this.borrow().embedded_palette_toggle.connect_toggled(move |_| {
+                let use_embedded = that.borrow().embedded_palette_toggle.is_active();
+                that.borrow().palette_chooser.set_sensitive(!use_embedded);
+                that.borrow().update_thermometer();
+                that.borrow().draw_render_threaded()
             });
         }
     }
