@@ -58,12 +58,10 @@ pipelines:
               # Set up environment
               - apt-get update && apt-get install -y python3-pip
               - pip3 install toml
-              - export BRANCH=test/$BITBUCKET_TAG-$BITBUCKET_COMMIT
               - git clone git@github.com:flathub/eu.nimmerfort.blackbody.git
               - cd eu.nimmerfort.blackbody
               - git config --global user.name "Arthur Nieuwland"
               - git config --global user.email "anieuwland@nimmerfort.eu"
-              - git checkout -b $BRANCH
               # Generate updates
               - python3 ../build-aux/flathub/flatpak-cargo-generator.py -o Cargo-sources.json ../Cargo.lock
               - jq ".modules[0].sources[1].tag = \"$BITBUCKET_TAG\" | .modules[0].sources[1].commit = \"$BITBUCKET_COMMIT\"" ../eu.nimmerfort.blackbody-flathub.json > eu.nimmerfort.blackbody.json
@@ -71,5 +69,5 @@ pipelines:
               - git add Cargo-sources.json eu.nimmerfort.blackbody.json
               - git commit -m "$BITBUCKET_TAG (from https://bitbucket.org/$BITBUCKET_REPO_FULL_NAME commit $BITBUCKET_COMMIT)"
               - git tag $BITBUCKET_TAG
-              - git push --set-upstream origin $BRANCH
+              - git push
               - git push --tags
