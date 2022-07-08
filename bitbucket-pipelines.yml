@@ -28,6 +28,7 @@ pipelines:
               - windows/dist/*.zip
         - step:
             name: Packaging for Linux (src)
+            image: atlassian/default-image:3
             script:
               - export VERSION=`echo $BITBUCKET_TAG | sed -e 's,release-,,'`
               - mkdir -p source/dist
@@ -40,6 +41,7 @@ pipelines:
       - parallel:
         - step:
             name: Publishing to downloads page
+            image: atlassian/default-image:3
             clone:
               enabled: false
             script:
@@ -51,6 +53,7 @@ pipelines:
               - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$SRC_PACKAGE"
         - step:
             name: Publishing to Flathub
+            image: atlassian/default-image:3
             script:
               - git clone git@github.com:flathub/eu.nimmerfort.blackbody.git
               - cd eu.nimmerfort.blackbody
@@ -74,6 +77,8 @@ pipelines:
             - export BRANCH=test/$BITBUCKET_TAG-$BITBUCKET_COMMIT
             - git clone git@github.com:flathub/eu.nimmerfort.blackbody.git
             - cd eu.nimmerfort.blackbody
+            - git config --global user.name "Arthur Nieuwland"
+            - git config --global user.email "anieuwland@nimmerfort.eu"
             - git checkout -b $BRANCH
             # Generate updates
             - python3 ../build-aux/flathub/flatpak-cargo-generator.py -o Cargo-sources.json ../Cargo.lock
