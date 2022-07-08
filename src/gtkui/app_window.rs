@@ -68,8 +68,7 @@ pub struct AppState {
 
     // Model members
     thermogram: RefCell<Option<Thermogram>>,
-    render_sender: SyncSender<(Bytes, usize, usize, f64)>,
-    //rx: glib::Receiver<glib::Bytes>,
+    render_sender: SyncSender<(Bytes, usize, usize, usize, usize)>,
 }
 
 impl AppState {
@@ -175,23 +174,28 @@ impl AppState {
         });
     }
 
-    fn connect_channel(img: &mut Image, args: (Bytes, usize, usize, f64)) -> glib::Continue {
-        let (glib_bytes, width, height, zoom) = args;
+    fn connect_channel(
+        img: &mut Image, 
+        args: (Bytes, usize, usize, usize, usize)
+    ) -> glib::Continue {
+        let (glib_bytes, src_width, src_height, dst_width, dst_height) = args;
         let pixbuf = Pixbuf::from_bytes(
             &glib_bytes,
             gdk_pixbuf::Colorspace::Rgb,
             false,
             8,
-            width as i32,
-            height as i32,
-            3 * width as i32,
+            src_width as i32,
+            src_height as i32,
+            3 * src_width as i32,
         );
 
-        let width = (pixbuf.width() as f64 * zoom) as i32;
-        let height = (pixbuf.height() as f64 * zoom) as i32;
-        let pixbuf_new = pixbuf.scale_simple(width, height, gdk_pixbuf::InterpType::Bilinear);
+        let pixbuf = pixbuf.scale_simple(
+            dst_width as i32, 
+            dst_height as i32, 
+            gdk_pixbuf::InterpType::Bilinear
+        );
 
-        img.set_from_pixbuf(pixbuf_new.as_ref());
+        img.set_from_pixbuf(pixbuf.as_ref());
         glib::Continue(true)
     }
 
@@ -341,12 +345,15 @@ impl AppState {
                 };
 
                 if let Some(bytes) = image.as_slice() {
-                    let height = image.shape()[0];
-                    let width = image.shape()[1];
+                    let src_height = image.shape()[0];
+                    let src_width = image.shape()[1];
+                    let tml_shape = thermogram.thermal_shape();
+                    let dst_height = (tml_shape[0] as f64 * zoom).round() as usize;
+                    let dst_width = (tml_shape[1] as f64 * zoom).round() as usize;
 
                     let glib_bytes = Bytes::from(bytes);
                     sender_local
-                        .send((glib_bytes, width, height, zoom))
+                        .send((glib_bytes, src_width, src_height, dst_width, dst_height))
                         .expect("Failed sending rendered bytes!");
                 }
             });
@@ -454,6 +461,8 @@ impl AppState {
             self.palette_chooser.set_sensitive(true);
             if thermogram.has_palette() {
                 self.embedded_palette_toggle.set_sensitive(true);
+                self.embedded_palette_toggle.set_active(true);
+                self.palette_chooser.set_sensitive(false);
             };
         });
     }

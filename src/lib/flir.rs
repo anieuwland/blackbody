@@ -88,16 +88,9 @@ fn ycc_to_rgb(y: u8, cb: u8, cr: u8) -> [f32; 3] {
     let g = y as f32 - 0.3455 * (cb as f32 - 128f32) - (0.7169 * (cr as f32 - 128f32));
     let b = y as f32 + 1.7790 * (cb as f32 - 128f32);
 
-    let r = if r > 0f32 { r } else { 0f32 };
-    let r = if r < 255f32 { r } else { 255f32 };
-    let g = if g > 0f32 { g } else { 0f32 };
-    let g = if g < 255f32 { g } else { 255f32 };
-    let b = if b > 0f32 { b } else { 0f32 };
-    let b = if b < 255f32 { b } else { 255f32 };
-
-    let r = r / 255f32;
-    let g = g / 255f32;
-    let b = b / 255f32;
+    let r = r.clamp(0f32, 255f32) / 255f32;
+    let g = g.clamp(0f32, 255f32) / 255f32;
+    let b = b.clamp(0f32, 255f32) / 255f32;
 
     return [r, g, b];
 }

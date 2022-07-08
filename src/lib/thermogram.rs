@@ -87,10 +87,10 @@ impl Thermogram {
             Some(2) => thermal.slice(s![..; 1,..;-1]).to_owned(),
             Some(3) => thermal.slice(s![..;-1,..;-1]).to_owned(),
             Some(4) => thermal.slice(s![..;-1,..; 1]).to_owned(),
-            // Some(5) => thermal.reversed_axes().to_owned(),
-            // Some(6) => thermal.reversed_axes().slice(s![..; 1,..;-1]).to_owned(),
-            // Some(7) => thermal.reversed_axes().slice(s![..;-1,..;-1]).to_owned(),
-            // Some(8) => thermal.reversed_axes().slice(s![..;-1,..; 1]).to_owned(),
+            Some(5) => thermal.t().to_owned(),
+            Some(6) => thermal.t().slice(s![..; 1,..;-1]).to_owned(),
+            Some(7) => thermal.t().slice(s![..;-1,..;-1]).to_owned(),
+            Some(8) => thermal.t().slice(s![..;-1,..; 1]).to_owned(),
             _ => thermal.to_owned(),
         };
 
