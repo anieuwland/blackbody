@@ -85,9 +85,8 @@ pipelines:
             - jq ".modules[0].sources[1].tag = \"$BITBUCKET_TAG\" | .modules[0].sources[1].commit = \"BITBUCKET_COMMIT\"" ../eu.nimmerfort.blackbody-flathub.json > eu.nimmerfort.blackbody.json
             # Commit and push
             - git add Cargo-sources.json eu.nimmerfort.blackbody.json
-            - git commit -m "$BITBUCKET_TAG ($BITBUCKET_COMMIT)"
+            - git commit -m "$BITBUCKET_TAG (from https://bitbucket.org/$BITBUCKET_REPO_FULL_NAME commit $BITBUCKET_COMMIT)"
             - git push --set-upstream origin $BRANCH
-            - git push
 
 
       # - step:
