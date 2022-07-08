@@ -66,7 +66,9 @@ pipelines:
     test-*:
       - step:
           name: Publishing to Flathub
+          image: python:3.8-slim
           script:
+            - apt-get update && apt-get install -y git
             - git clone git@github.com:flathub/eu.nimmerfort.blackbody.git
             - cd eu.nimmerfort.blackbody
             - export BRANCH=test/$BITBUCKET_TAG-$BITBUCKET_COMMIT
