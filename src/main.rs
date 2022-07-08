@@ -18,11 +18,10 @@ pub fn main() {
     init_env();
 
     // Load application
-    let application = Application::new(Some("eu.nimmerfort.blackbody"), Default::default())
-        .expect("failed to initialize GTK application");
+    let application = Application::new(Some("eu.nimmerfort.blackbody"), Default::default());
     let state = AppState::new(&application, None);
-    state.borrow().set_thermogram_from_path(o_thermogram_path);
-    let ret = application.run(&[]);
+    state.borrow_mut().set_thermogram_from_path(o_thermogram_path);
+    let ret = application.run();
     std::process::exit(ret);
 }
 
@@ -35,7 +34,7 @@ fn init_env() {
     textdomain("blackbody");
 
     // Set dark theme for image viewer
-    let settings = gtk::Settings::get_default().unwrap();
+    let settings = gtk::Settings::default().unwrap();
     let _ = settings.set_property("gtk-application-prefer-dark-theme", &true);
 
     // Load and register resource carrying the UI file
