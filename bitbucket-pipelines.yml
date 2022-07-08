@@ -69,7 +69,7 @@ pipelines:
           script:
             - git clone git@github.com:flathub/eu.nimmerfort.blackbody.git
             - cd eu.nimmerfort.blackbody
-            - export $BRANCH=test/$BITBUCKET_TAG-$BITBUCKET_COMMIT
+            - export BRANCH=test/$BITBUCKET_TAG-$BITBUCKET_COMMIT
             - git checkout -b $BRANCH
             - python3 ../build-aux/flathub/flatpak-cargo-generator.py -o Cargo-sources.json ../Cargo.lock
             - jq ".modules[0].sources[1].tag = \"$BITBUCKET_TAG\" | .modules[0].sources[1].commit = \"BITBUCKET_COMMIT\"" ../eu.nimmerfort.blackbody-flathub.json > eu.nimmerfort.blackbody.json
