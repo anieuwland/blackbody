@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2020 Arthur Nieuwland -->
+<!-- Copyright 2022 Arthur Nieuwland -->
 <component type="desktop-application">
   <name>Blackbody</name>
-	<summary>A thermogram viewer.</summary>
+	<summary>A thermogram viewer</summary>
 	<id>eu.nimmerfort.blackbody</id>
   <launchable type="desktop-id">eu.nimmerfort.blackbody.desktop</launchable>
 	<metadata_license>CC0-1.0</metadata_license>
@@ -14,13 +14,14 @@
   <update_contact>anieuwland@nimmerfort.eu</update_contact>
 
   <description>
-    <p>Blackbody is a thermogram viewer. It renders temperature data to RGB images.</p>
+    <p>Blackbody is a thermogram viewer. It allows viewing FLIR and TIFF images, giving control over the render settings.</p>
     <p>Features:</p>
     <ul>
-      <li>Loading FLIR thermograms from many cameras</li>
+      <li>Loading FLIR thermograms from many cameras, both thermal and optical data</li>
       <li>Loading single-band TIFFs assumed to be in °C</li>
       <li>Investigating temperatures with the mouse</li>
       <li>Exporting thermal data or renders to files</li>
+      <li>Rendering to embedded color palettes, if present</li>
       <li>Rendering to many different colors palettes, including inferno and turbo</li>
       <li>Specifying the thermal range to render</li>
       <li>Zooming in and out</li>
@@ -44,11 +45,22 @@
   </description>
 
   <releases>
+    <release version="1.3.0" date="2022-07-08" urgency="low" type="stable">
+      <description>
+        <p>This release overhauls the UI and adds important new features:</p>
+        <ul>
+          <li>Ability to view optical images (photos) in FLIR images</li>
+          <li>Support for rendering thermal data to FLIR's embedded palettes</li>
+          <li>Correcting for the rotation of a thermogram to show the image right side up</li>
+        </ul>
+      </description>
+    </release>
+
     <release version="1.2.0" date="2021-01-02" urgency="low" type="stable">
       <description>
         <p>This release adds major interactivity improvements:</p>
         <ul>
-          <li>Temperature in the render can be investigated by hovering over pixels</li>>
+          <li>Temperature in the render can be investigated by hovering over pixels</li>
           <li>Added a thermometer showing the colors and associated temperatures</li>
           <li>Thermogram renders can be saved to PNGs</li>
           <li>Thermograms' celsius data can be exported to tiff</li>
