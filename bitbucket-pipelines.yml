@@ -86,7 +86,7 @@ pipelines:
             # Commit and push
             - git add Cargo-sources.json eu.nimmerfort.blackbody.json
             - git commit -m "$BITBUCKET_TAG ($BITBUCKET_COMMIT)"
-            - git push --set-upstream $BRANCH
+            - git push --set-upstream origin $BRANCH
             - git push
 
 
