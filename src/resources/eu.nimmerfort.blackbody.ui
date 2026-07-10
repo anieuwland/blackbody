@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 -->
 <interface>
-  <requires lib="gtk+" version="3.20"/>
-  <object class="GtkAccelGroup" id="app_accel_group"/>
+  <requires lib="gtk" version="4.0"/>
   <object class="GtkFileFilter" id="filter_all_files">
     <patterns>
       <pattern>*</pattern>
@@ -560,19 +558,10 @@ All other changes or additions to this Appendix require the production of a new 
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <child>
-                  <object class="GtkEventBox" id="viewed_image_events">
-                    <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="events">GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK</property>
-                    <child>
-                      <object class="GtkImage" id="viewed_image">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="halign">center</property>
-                        <property name="valign">center</property>
-                        <property name="pixbuf">placeholder.svg</property>
-                      </object>
-                    </child>
+                  <object class="GtkPicture" id="viewed_image">
+                    <property name="halign">center</property>
+                    <property name="valign">center</property>
+                    <property name="can-shrink">False</property>
                   </object>
                 </child>
               </object>

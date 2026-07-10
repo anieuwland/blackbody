@@ -17,13 +17,13 @@ use std::thread;
 
 use gdk_pixbuf::Pixbuf;
 use gio::prelude::ActionMapExt;
-use gio::{Cancellable, SimpleAction};
+use gio::SimpleAction;
 use glib::object::{ObjectExt, SendWeakRef};
 use glib::{Bytes, MainContext};
 use gtk4::prelude::*;
 use gtk4::{
     AboutDialog, Application, ApplicationWindow, CheckButton, ComboBoxText, HeaderBar,
-    Image, PopoverMenu, Revealer, SpinButton, ToggleButton,
+    Picture, PopoverMenu, Revealer, SpinButton, ToggleButton,
 };
 use gtk4::{Builder, FileFilter, Tooltip};
 use libblackbody::{Thermogram, ThermogramTrait};
@@ -44,7 +44,7 @@ pub struct AppState {
     app_menu: PopoverMenu,
     palette_chooser: ComboBoxText,
     embedded_palette_toggle: ToggleButton,
-    image: Image,
+    image: Picture,
     min_spinner: SpinButton,
     max_spinner: SpinButton,
     thermometer_toggler: CheckButton,
@@ -280,7 +280,8 @@ impl AppState {
                             dst_height as i32,
                             gdk_pixbuf::InterpType::Bilinear,
                         );
-                        img.set_from_pixbuf(pixbuf.as_ref());
+                        let texture = pixbuf.map(|pb| gtk4::gdk::Texture::for_pixbuf(&pb));
+                        img.set_paintable(texture.as_ref());
                     });
                 }
             });
