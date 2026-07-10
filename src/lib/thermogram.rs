@@ -78,37 +78,6 @@ impl Thermogram {
         return None;
     }
 
-    pub fn correct_orientation(
-        thermal: &Array<f32, Ix2>,
-        orientation: Option<u16>,
-    ) -> Array<f32, Ix2> {
-        let thermal = match orientation {
-            Some(1) => thermal.to_owned(),
-            Some(2) => thermal.slice(s![..; 1,..;-1]).to_owned(),
-            Some(3) => thermal.slice(s![..;-1,..;-1]).to_owned(),
-            Some(4) => thermal.slice(s![..;-1,..; 1]).to_owned(),
-            Some(5) => thermal.t().to_owned(),
-            Some(6) => thermal.t().slice(s![..; 1,..;-1]).to_owned(),
-            Some(7) => thermal.t().slice(s![..;-1,..;-1]).to_owned(),
-            Some(8) => thermal.t().slice(s![..;-1,..; 1]).to_owned(),
-            _ => thermal.to_owned(),
-        };
-
-        thermal
-    }
-
-    pub fn orientation(path: &PathBuf) -> Option<u16> {
-        let res = rexif::parse_file(path).ok()?;
-
-        for e in res.entries {
-            match (e.tag, e.value) {
-                (rexif::ExifTag::Orientation, rexif::TagValue::U16(mut u16s)) => return u16s.pop(),
-                _ => (),
-            };
-        }
-
-        None
-    }
 }
 
 /// The `ThermogramTrait` implemented for the `Thermogram` enum. Method calls are forwarded to the
@@ -123,25 +92,9 @@ impl ThermogramTrait for Thermogram {
     }
 
     fn optical(&self) -> Option<Array<u8, Ix3>> {
-        if let Some(optical) = match self {
+        match self {
             Thermogram::Flir(t) => t.optical(),
             Thermogram::Tiff(t) => t.optical(),
-        } {
-            let optical = match self.path().and_then(|p| Self::orientation(p)) {
-                Some(1) => optical,
-                Some(2) => optical.slice(s![..; 1,..;-1,..]).to_owned(),
-                Some(3) => optical.slice(s![..;-1,..;-1,..]).to_owned(),
-                Some(4) => optical.slice(s![..;-1,..; 1,..]).to_owned(),
-                Some(5) => optical.permuted_axes([1, 0, 2]),
-                Some(6) => optical.permuted_axes([1, 0, 2]).slice(s![..; 1,..;-1,..]).to_owned(),
-                Some(7) => optical.permuted_axes([1, 0, 2]).slice(s![..;-1,..;-1,..]).to_owned(),
-                Some(8) => optical.permuted_axes([1, 0, 2]).slice(s![..;-1,..; 1,..]).to_owned(),
-                _ => optical,
-            };
-
-            Array::from_shape_vec(optical.raw_dim(), optical.iter().cloned().collect()).ok()
-        } else {
-            None
         }
     }
 

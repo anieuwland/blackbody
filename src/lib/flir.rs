@@ -2,7 +2,7 @@ use flyr::thermogram::FlyrThermogram;
 use ndarray::*;
 use std::path::{Path, PathBuf};
 
-use crate::{Thermogram, ThermogramTrait};
+use crate::ThermogramTrait;
 
 /// This is the struct and `ThermogramTrait` implementation for FLIR thermograms, using
 /// [flyr](https://crates.io/crates/flyr).
@@ -34,14 +34,12 @@ impl FlirThermogram {
 
     fn read_thermal(file_path: &Path) -> Option<FlirThermogram> {
         let thermogram = FlyrThermogram::new_from_path(file_path).ok()?;
-        let buffer = thermogram.celsius_array()?;
-        let orientation = Thermogram::orientation(&file_path.to_path_buf());
-        let buffer = Thermogram::correct_orientation(&buffer, orientation);
+        let thermal_buffer = thermogram.celsius_array()?;
 
         Some(FlirThermogram {
             thermogram,
             file_path: file_path.to_path_buf(),
-            thermal_buffer: buffer,
+            thermal_buffer,
         })
     }
 }

@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use glib::{ObjectExt, SignalHandlerId};
-use gtk::prelude::{BuilderExtManual, ButtonExt, ToggleButtonExt};
+use gtk::prelude::{BuilderExtManual, ToggleButtonExt};
 use gtk::{Builder, Image, SpinButton, ToggleButton};
 use libblackbody::Thermogram;
 
