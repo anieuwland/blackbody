@@ -597,7 +597,7 @@ impl AppState {
         }
         {
             let that = this.clone();
-            this.borrow().imagery_toggles.borrow().connect_toggle_callback(move || {
+            this.borrow().imagery_toggles.borrow().set_on_change(move || {
                 that.borrow().draw_render_threaded();
             })
         }

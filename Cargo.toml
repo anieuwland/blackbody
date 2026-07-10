@@ -3,9 +3,9 @@ name = "blackbody"
 path = "src/main.rs"
 
 [dependencies]
-ndarray = "0.15.4"
+ndarray = "0.17"
 tiff = "0.6.0"
-flyr = "0.5.0" 
+flyr = { path = "../flyr-rs" }
 rexif = "0.7.3"
 
 [dependencies.cairo-rs]

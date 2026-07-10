@@ -1,5 +1,4 @@
 use flyr::thermogram::FlyrThermogram;
-use flyr::try_parse_flir;
 use ndarray::*;
 use std::path::{Path, PathBuf};
 
@@ -34,18 +33,15 @@ impl FlirThermogram {
     }
 
     fn read_thermal(file_path: &Path) -> Option<FlirThermogram> {
-        let r_thermogram = try_parse_flir(file_path);
+        let thermogram = FlyrThermogram::new_from_path(file_path).ok()?;
+        let buffer = thermogram.celsius_array()?;
+        let orientation = Thermogram::orientation(&file_path.to_path_buf());
+        let buffer = Thermogram::correct_orientation(&buffer, orientation);
 
-        r_thermogram.ok().map(|thermogram| {
-            let buffer = thermogram.celsius();
-            let orientation = Thermogram::orientation(&file_path.to_path_buf());
-            let buffer = Thermogram::correct_orientation(&buffer, orientation);
-
-            FlirThermogram {
-                thermogram: thermogram,
-                file_path: (*file_path).to_path_buf(),
-                thermal_buffer: buffer,
-            }
+        Some(FlirThermogram {
+            thermogram,
+            file_path: file_path.to_path_buf(),
+            thermal_buffer: buffer,
         })
     }
 }
@@ -56,7 +52,7 @@ impl ThermogramTrait for FlirThermogram {
     }
 
     fn optical(&self) -> Option<Array<u8, Ix3>> {
-        self.thermogram.optical().ok()
+        self.thermogram.optical_array().ok()
     }
 
     fn identifier(&self) -> &str {

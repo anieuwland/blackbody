@@ -6,18 +6,19 @@ use gtk::prelude::{BuilderExtManual, ButtonExt, ToggleButtonExt};
 use gtk::{Builder, Image, SpinButton, ToggleButton};
 use libblackbody::Thermogram;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct ImageryToggles {
     pub tool_showable_thermal: ToggleButton,
     pub tool_showable_optical: ToggleButton,
 
-    // TODO Automatically zet zoom such that optical&thermal have same dimensions when they are toggled betweem using a reference to thermogram, zoom spinner and image
+    // TODO Automatically zet zoom such that optical&thermal have same dimensions when they are toggled between using a reference to thermogram, zoom spinner and image
     // thermogram: &'a RefCell<Option<Thermogram>>,
     image: Image,
     zoom_spinner: SpinButton,
 
     thermal_handler_id: Rc<RefCell<Option<SignalHandlerId>>>,
     optical_handler_id: Rc<RefCell<Option<SignalHandlerId>>>,
+    on_change: Rc<RefCell<Option<Box<dyn Fn()>>>>,
 }
 
 #[allow(dead_code)]
@@ -45,6 +46,7 @@ impl ImageryToggles {
 
             thermal_handler_id: Rc::new(RefCell::new(None)),
             optical_handler_id: Rc::new(RefCell::new(None)),
+            on_change: Rc::new(RefCell::new(None)),
         };
         let this = Rc::new(RefCell::new(toggles));
         Self::connect_signals(&this);
@@ -60,11 +62,8 @@ impl ImageryToggles {
         }
     }
 
-    pub fn connect_toggle_callback<F: Fn() + 'static + Clone>(&self, f: F) {
-        let f1 = f.clone();
-        let f2 = f.clone();
-        self.tool_showable_thermal.connect_clicked(move |_| f1());
-        self.tool_showable_optical.connect_clicked(move |_| f2());
+    pub fn set_on_change<F: Fn() + 'static>(&self, f: F) {
+        *self.on_change.borrow_mut() = Some(Box::new(f));
     }
 
     fn connect_signals(this: &Rc<RefCell<Self>>) {
@@ -103,5 +102,9 @@ impl ImageryToggles {
         if let Some(handler_id) = self.optical_handler_id.borrow().as_ref() {
             self.tool_showable_optical.unblock_signal(handler_id);
         };
+
+        if let Some(f) = self.on_change.borrow().as_ref() {
+            f();
+        }
     }
 }
