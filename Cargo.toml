@@ -6,7 +6,6 @@ path = "src/main.rs"
 ndarray = "0.17"
 tiff = "0.6.0"
 flyr = { path = "../flyr-rs" }
-rexif = "0.7.3"
 
 [dependencies.cairo-rs]
 version = "0.14.0"
