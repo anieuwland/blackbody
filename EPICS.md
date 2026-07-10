@@ -38,14 +38,21 @@ Design gate before the GTK4 port locks in structure. No deliverable code — out
 
 Needed for "modern Linux-native GNOME" credibility. Do after the design is settled so the port targets the right structure.
 
-- [ ] Port to `gtk4` + `libadwaita` crates
-- [ ] `AdwApplicationWindow` for free dark-mode, window decoration, responsive breakpoints
-- [ ] Replace manual dark-theme hack with `AdwStyleManager`
-- [ ] Header bar → `AdwToolbarView` + primary menu (HIG pattern)
+Port subtasks — do in order; build won't be green until subtask 5 cleans up the UI file.
+
+- [x] Swap `Cargo.toml` to `gtk4 = "0.11"` + `libadwaita = "0.9"`; drop standalone `gdk`
+- [x] Remove dead `render_palette_model` GtkListStore artifact
+- [x] **Subtask 1** — Port small Rust files: `thermometer.rs`, `imagery_toggles.rs`, `main.rs` — namespace `gtk::` → `gtk4::`, `Inhibit` → `Propagation`, `connect_draw` → `set_draw_func`, swap to `adw::Application`
+- [ ] **Subtask 2** — Port `app_window.rs` top: fix imports, struct fields, drop `EventBox`/`AccelGroup`
+- [ ] **Subtask 3** — Image display pipeline: `GtkImage`/`Pixbuf` → `GtkPicture`/`Texture` in Rust + UI file
+- [ ] **Subtask 4** — File dialogs: three `FileChooserNative::run()` → async `gtk4::FileDialog`
+- [ ] **Subtask 5** — Remaining dialogs + UI cleanup: `MessageDialog` → `adw::AlertDialog`, remove GTK3-only properties, fix `GtkAboutDialog`/`GtkAccelGroup` in UI
+- [ ] **Subtask 6** — Adwaita shell: `AdwApplicationWindow`, `AdwHeaderBar`, `AdwStyleManager` replaces dark-theme hack
+
+Later design items (after subtasks complete):
+- [ ] `AdwToolbarView` + primary menu (HIG pattern) for header bar
 - [ ] `GtkComboBoxText` → `AdwComboRow`
-- [ ] `GtkImage` + manual pixbuf → `GtkPicture`
 - [ ] Popovers → `AdwDialog` or inline `AdwActionRow`s where appropriate
-- [ ] Remove dead `render_palette_model` GtkListStore artifact
 
 ---
 

@@ -1,9 +1,10 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use glib::{ObjectExt, SignalHandlerId};
-use gtk::prelude::{BuilderExtManual, ToggleButtonExt};
-use gtk::{Builder, Image, SpinButton, ToggleButton};
+use glib::object::ObjectExt;
+use glib::SignalHandlerId;
+use gtk4::prelude::*;
+use gtk4::{Builder, SpinButton, ToggleButton};
 use libblackbody::Thermogram;
 
 #[derive(Clone)]
@@ -11,9 +12,8 @@ pub struct ImageryToggles {
     pub tool_showable_thermal: ToggleButton,
     pub tool_showable_optical: ToggleButton,
 
-    // TODO Automatically zet zoom such that optical&thermal have same dimensions when they are toggled between using a reference to thermogram, zoom spinner and image
-    // thermogram: &'a RefCell<Option<Thermogram>>,
-    image: Image,
+    // TODO Automatically set zoom so optical & thermal have same dimensions on toggle
+    #[allow(dead_code)]
     zoom_spinner: SpinButton,
 
     thermal_handler_id: Rc<RefCell<Option<SignalHandlerId>>>,
@@ -31,7 +31,7 @@ pub enum ImageryKind {
 
 impl ImageryToggles {
     pub fn from_builder(
-        builder: Builder,
+        builder: &Builder,
         _thermogram: &RefCell<Option<Thermogram>>,
     ) -> Rc<RefCell<ImageryToggles>> {
         let tool_showable_thermal = builder.object("imagery_thermal_toggle").unwrap();
@@ -40,10 +40,7 @@ impl ImageryToggles {
         let toggles = ImageryToggles {
             tool_showable_thermal,
             tool_showable_optical,
-            // thermogram,
-            image: builder.object("viewed_image").unwrap(),
             zoom_spinner: builder.object("zoom_spinner").unwrap(),
-
             thermal_handler_id: Rc::new(RefCell::new(None)),
             optical_handler_id: Rc::new(RefCell::new(None)),
             on_change: Rc::new(RefCell::new(None)),
@@ -98,7 +95,6 @@ impl ImageryToggles {
         if let Some(handler_id) = self.thermal_handler_id.borrow().as_ref() {
             self.tool_showable_thermal.unblock_signal(handler_id);
         };
-
         if let Some(handler_id) = self.optical_handler_id.borrow().as_ref() {
             self.tool_showable_optical.unblock_signal(handler_id);
         };

@@ -5,30 +5,31 @@ path = "src/main.rs"
 [dependencies]
 ndarray = "0.17"
 tiff = "0.6.0"
-flyr = { path = "../flyr-rs" }
+flyr = "0.6.0"
 
 [dependencies.cairo-rs]
-version = "0.14.0"
-
-[dependencies.gdk]
-version = "0.14.0"
+version = "0.22"
 
 [dependencies.gdk-pixbuf]
-version = "0.14.0"
+version = "0.22"
 
 [dependencies.gettext-rs]
-version = "0.4.4"
+version = "0.7"
 features = [ "gettext-system",]
 
 [dependencies.gio]
-version = "0.14.0"
+version = "0.22"
 
 [dependencies.glib]
-version = "0.14.0"
+version = "0.22"
 
-[dependencies.gtk]
-version = "0.14.0"
-features = [ "v3_24",]
+[dependencies.gtk4]
+version = "0.11"
+features = [ "v4_12",]
+
+[dependencies.libadwaita]
+version = "0.9"
+features = [ "v1_6",]
 
 [dependencies.image]
 version = "0.23.14"
@@ -45,5 +46,5 @@ description = "Blackbody is an image viewer for thermograms."
 version = "2.0.0"
 license = "EUPL-1.2"
 authors = [ "Arthur Nieuwland <anieuwland@nimmerfort.eu>",]
-edition = "2018"
+edition = "2021"
 repository = "https://bitbucket.org/nimmerwoner/blackbody/"

@@ -3,8 +3,8 @@
     "build-options" : {
         "append-path" : "/usr/lib/sdk/rust-stable/bin",
         "env" : {
-            "CARGO_HOME": "/run/build/blackbody/cargo",
-            "BLACKBODY_BUILDER": "flathub"
+            "CARGO_HOME" : "/run/build/blackbody/cargo",
+            "BLACKBODY_BUILDER" : "flathub"
         }
     },
     "cleanup" : [
@@ -30,21 +30,22 @@
             "buildsystem" : "meson",
             "name" : "blackbody",
             "config-opts" : [
-                "--buildtype=release"
+                "--buildtype=release",
+                "--libdir=lib"
             ],
-            "sources": [
+            "sources" : [
                 "Cargo-sources.json",
                 {
-                    "type": "git",
-                    "url": "https://bitbucket.org/nimmerwoner/blackbody/",
-                    "tag": "",
-                    "commit": ""
+                    "type" : "git",
+                    "url" : "https://bitbucket.org/nimmerwoner/blackbody/",
+                    "tag" : "",
+                    "commit" : ""
                 }
             ]
         }
     ],
     "runtime" : "org.gnome.Platform",
-    "runtime-version" : "41",
+    "runtime-version" : "47",
     "sdk" : "org.gnome.Sdk",
     "sdk-extensions" : [
         "org.freedesktop.Sdk.Extension.rust-stable"

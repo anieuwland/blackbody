@@ -174,29 +174,6 @@
       </packing>
     </child>
   </object>
-  <object class="GtkListStore" id="render_palette_model">
-    <columns>
-      <!-- column-name palette -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">Jet</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Turbo</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Inferno</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Cividis</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">Magma</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkAdjustment" id="zoom_adjustment">
     <property name="lower">5</property>
     <property name="upper">2000</property>

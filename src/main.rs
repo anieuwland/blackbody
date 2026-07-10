@@ -4,40 +4,31 @@ mod config;
 mod gtkui;
 
 use gettextrs::*;
-use gio::prelude::*;
-use gtk::*;
+use glib::ExitCode;
+use libadwaita as adw;
+use libadwaita::prelude::*;
 
 use crate::gtkui::app_window::AppState;
 
-pub fn main() {
-    // Get url of file if given
+pub fn main() -> ExitCode {
     let o_thermogram_path = std::env::args().nth(1);
     let o_thermogram_path = o_thermogram_path.as_ref().map(AsRef::as_ref);
 
-    // Ensure environment is correct for the app's theme and resource
     init_env();
 
-    // Load application
-    let application = Application::new(Some("eu.nimmerfort.blackbody"), Default::default());
+    let application = adw::Application::new(Some("eu.nimmerfort.blackbody"), Default::default());
     let state = AppState::new(&application, None);
     state.borrow_mut().set_thermogram_from_path(o_thermogram_path);
-    let ret = application.run();
-    std::process::exit(ret);
+    application.run()
 }
 
 fn init_env() {
-    gtk::init().expect("Couldn't start Blackbody");
-
     // Enable localization
     setlocale(LocaleCategory::LcAll, "");
     bindtextdomain("blackbody", config::LOCALEDIR);
     textdomain("blackbody");
 
-    // Set dark theme for image viewer
-    let settings = gtk::Settings::default().unwrap();
-    let _ = settings.set_property("gtk-application-prefer-dark-theme", &true);
-
-    // Load and register resource carrying the UI file
+    // Load and register resource bundle
     let res = {
         let pkg_dir = std::path::Path::new(config::PKGDATADIR);
         let res_path = pkg_dir.join("blackbody.gresource");
