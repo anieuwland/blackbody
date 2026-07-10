@@ -9,9 +9,8 @@ use crate::thermogram_trait::ThermogramTrait;
 /// `image-rs/tiff`.
 ///
 /// A 'TIFF thermogram' is basically any TIFF file with a channel of data, assumed to be
-/// thermographic. Currently the only supported data types are u16 and u32, which are converted to
-/// floats. U16 data is assumed to be centikelvin and converted to centigrades by subtracting 27315.
-/// U32 is assumed to actually be a f32 and transmuted to that data type.
+/// thermographic. Integer types (U16, U32, U64) are treated as centikelvin and converted to Celsius
+/// by subtracting 27315 and dividing by 100. U8 and float types (F32, F64) are used as-is.
 ///
 /// While a file can be directly read with `from_file`, it is recommended to instead use the
 /// `Thermogram::from_file` instead. The latter detects what kind of file (TIFF, FLIR) it is dealing
