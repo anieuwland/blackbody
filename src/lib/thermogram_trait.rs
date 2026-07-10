@@ -18,7 +18,6 @@ use crate::palettes;
 ///     fn render(&self min_temp: f32, max_temp: f32, palette: [[f32; 3]; 256]) -> Array<u8, Ix3>;  // Thermal data render using the given palette
 ///     fn render_defaults(&self) -> Array<u8, Ix3>;  // Thermal data rendered using the minimum and maximum thermal value and the `palette::TURBO` palette.
 ///     fn thermal_shape(&self) -> [usize; 2];  // The [height, width] of the thermal data
-///     fn normalized_minmax(&self) -> Array<f32, Ix2>;  // Thermal data normalized to lie in the range 0.0..=1.0
 /// }
 /// ```
 pub trait ThermogramTrait {
@@ -175,15 +174,4 @@ pub trait ThermogramTrait {
         self.thermal().fold(f32::MIN, |acc, elem| acc.max(*elem))
     }
 
-    /// Normalized the thermal array to lie in the 0.0..=1.0 in such a way to prevent division by 0
-    /// errors.
-    fn normalized_minmax(&self) -> Array<f32, Ix2> {
-        let thermal = self.thermal();
-        let max_temp = self.max_temp();
-        let divider = match max_temp == 0.0 {
-            true => self.min_temp() + 0.0000000001,
-            false => max_temp,
-        };
-        (thermal - self.min_temp()) / divider
-    }
 }

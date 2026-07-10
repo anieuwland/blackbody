@@ -42,7 +42,6 @@
 //!     fn render(&self min_temp: f32, max_temp: f32, palette: [[f32; 3]; 256]) -> Array<u8, Ix3>;  // Thermal data render using the given palette
 //!     fn render_defaults(&self) -> Array<u8, Ix3>;  // Thermal data rendered using default settings
 //!     fn thermal_shape(&self) -> [usize; 2];  // The [height, width] of the thermal data
-//!     fn normalized_minmax(&self) -> Array<f32, Ix2>;  // Thermal data normalized to lie in the range 0.0..=1.0
 //! }
 //! ```
 //!
