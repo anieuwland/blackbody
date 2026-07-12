@@ -116,6 +116,16 @@ pub trait ThermogramTrait {
     ///
     /// # Returns
     /// `Some<()>` in case of success, otherwise `None`.
+    fn export_thermal_png(&self, path: &PathBuf) -> Option<()> {
+        let w = self.thermal_shape()[1] as u32;
+        let h = self.thermal_shape()[0] as u32;
+        let pixels: Vec<u16> = self.thermal().iter()
+            .map(|&c| (c * 100.0 + 27315.0).clamp(0.0, 65535.0) as u16)
+            .collect();
+        image::ImageBuffer::<image::Luma<u16>, _>::from_raw(w, h, pixels)?
+            .save(path).ok()
+    }
+
     fn export_thermal(&self, path: &PathBuf) -> Option<()> {
         // TODO Return LibblackbodyErrorEnum with finegrained failure info instead of Option
         let thermal = self.thermal().iter().map(|v| *v).collect::<Vec<f32>>();

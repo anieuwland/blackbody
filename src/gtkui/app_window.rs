@@ -10,8 +10,9 @@ use glib::MainContext;
 use gtk4::prelude::*;
 use gtk4::{
     Builder, Button, DrawingArea, EventControllerKey, EventControllerMotion, EventControllerScroll,
-    EventControllerScrollFlags, FileFilter, FlowBox, Label, MenuButton, Orientation,
-    Overlay, Picture, Scale, ScrolledWindow, SelectionMode, ToggleButton, Tooltip,
+    EventControllerScrollFlags, FileChooserAction, FileChooserNative, FileFilter, FlowBox, Label,
+    MenuButton, Orientation, Overlay, Picture, ResponseType, Scale, ScrolledWindow, SelectionMode,
+    ToggleButton, Tooltip,
 };
 use libadwaita::{ActionRow, PreferencesGroup};
 use libadwaita as adw;
@@ -596,27 +597,49 @@ impl AppState {
         let that = this.clone();
         let tiff_filter = FileFilter::new();
         tiff_filter.add_mime_type("image/tiff");
-        tiff_filter.set_name(Some("TIFF"));
-        let filters = gio::ListStore::new::<FileFilter>();
-        filters.append(&tiff_filter);
+        tiff_filter.set_name(Some("TIFF (32-bit float)"));
+        let png_filter = FileFilter::new();
+        png_filter.add_mime_type("image/png");
+        png_filter.set_name(Some("PNG (16-bit)"));
         let initial_name = that.borrow().thermogram.borrow().as_ref()
-            .map(|t| {
-                let mut p = PathBuf::from(t.identifier());
-                p.set_extension("tiff");
-                p.file_name().unwrap_or_default().to_string_lossy().into_owned()
-            })
-            .unwrap_or_else(|| "thermogram.tiff".into());
-        let dialog = gtk4::FileDialog::builder()
-            .title("Export thermal")
-            .filters(&filters)
-            .initial_name(&initial_name)
-            .build();
-        dialog.save(Some(&window), gio::Cancellable::NONE, move |result| {
-            if let Ok(file) = result {
-                if let Some(path) = file.path() {
+            .map(|t| Path::new(t.identifier()).file_stem()
+                .and_then(|s| s.to_str()).unwrap_or("thermogram").to_string())
+            .unwrap_or_else(|| "thermogram".into());
+        let dialog = FileChooserNative::new(
+            Some("Export thermogram…"),
+            Some(&window),
+            FileChooserAction::Save,
+            Some("Export"),
+            Some("Cancel"),
+        );
+        dialog.add_filter(&tiff_filter);
+        dialog.add_filter(&png_filter);
+        dialog.set_current_name(&initial_name);
+        dialog.connect_response(move |dlg, response| {
+            if response == ResponseType::Accept {
+                if let Some(path) = dlg.file().and_then(|f| f.path()) {
+                    let ext = dlg.filter().and_then(|f| f.name())
+                        .map(|n| if n.contains("PNG") { "png" } else { "tiff" })
+                        .unwrap_or("tiff");
+                    let path = if path.extension()
+                        .and_then(|e| e.to_str())
+                        .map(|e| e.eq_ignore_ascii_case(ext))
+                        .unwrap_or(false)
+                    {
+                        path
+                    } else {
+                        let mut s = path.into_os_string();
+                        s.push(format!(".{ext}"));
+                        PathBuf::from(s)
+                    };
                     let thermogram = that.borrow().thermogram.borrow().clone();
                     if let Some(thermogram) = thermogram {
-                        if thermogram.export_thermal(&path).is_none() {
+                        let ok = if ext == "png" {
+                            thermogram.export_thermal_png(&path)
+                        } else {
+                            thermogram.export_thermal(&path)
+                        };
+                        if ok.is_none() {
                             let p = path.to_str().unwrap_or("<invalid path>");
                             that.borrow().show_error_dialog(&format!("Failed to export to {p}"));
                         }
@@ -624,6 +647,7 @@ impl AppState {
                 }
             }
         });
+        dialog.show();
     }
 
     fn show_render_dialog(this: &Rc<RefCell<Self>>) {
