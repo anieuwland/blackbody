@@ -9,8 +9,9 @@ use glib::object::SendWeakRef;
 use glib::{Bytes, MainContext};
 use gtk4::prelude::*;
 use gtk4::{
-    Builder, Button, DrawingArea, FileFilter, FlowBox, Label, ListBox, MenuButton, Orientation,
-    Picture, Scale, SelectionMode, ToggleButton, Tooltip,
+    Builder, Button, DrawingArea, EventControllerMotion, EventControllerScroll,
+    EventControllerScrollFlags, FileFilter, FlowBox, Label, ListBox, MenuButton, Orientation,
+    Picture, Scale, ScrolledWindow, SelectionMode, ToggleButton, Tooltip,
 };
 use libadwaita::{ActionRow, PreferencesDialog, PreferencesGroup, PreferencesPage};
 use libadwaita as adw;
@@ -37,10 +38,12 @@ pub struct AppState {
     palette_button: MenuButton,
     palette_box: gtk4::Box,
     palette_idx: Cell<usize>,
+    scrolled_window: ScrolledWindow,
     zoom_button: MenuButton,
     zoom_list: ListBox,
     zoom_fit: Cell<bool>,
     zoom_factor: Cell<f64>,
+    mouse_pos: Cell<(f64, f64)>,
     action_export: SimpleAction,
     action_render: SimpleAction,
     action_info: SimpleAction,
@@ -73,10 +76,12 @@ impl AppState {
             palette_button: builder.object("palette_button").unwrap(),
             palette_box: builder.object("palette_box").unwrap(),
             palette_idx: Cell::new(0),
+            scrolled_window: builder.object("scrolled_window").unwrap(),
             zoom_button: builder.object("zoom_button").unwrap(),
             zoom_list: builder.object("zoom_list").unwrap(),
             zoom_fit: Cell::new(true),
             zoom_factor: Cell::new(1.0),
+            mouse_pos: Cell::new((0.0, 0.0)),
             action_export: SimpleAction::new("export", None),
             action_render: SimpleAction::new("render", None),
             action_info: SimpleAction::new("info", None),
@@ -672,6 +677,61 @@ impl AppState {
                     s.max_scale.set_value(max);
                 }
             });
+        }
+        {
+            // Ctrl+scroll → zoom; plain scroll → pan (handled by ScrolledWindow)
+            let that = this.clone();
+            let ctrl = EventControllerScroll::new(EventControllerScrollFlags::VERTICAL);
+            ctrl.connect_scroll(move |_controller, _dx, dy| {
+                let s = that.borrow();
+
+                let (mx, my) = s.mouse_pos.get();
+
+                // Effective zoom factor before this step; fit mode needs its ratio computed.
+                let old_factor = if s.zoom_fit.get() {
+                    s.image.paintable().map(|p| {
+                        let vw = s.scrolled_window.width() as f64;
+                        let vh = s.scrolled_window.height() as f64;
+                        (vw / p.intrinsic_width() as f64)
+                            .min(vh / p.intrinsic_height() as f64)
+                    }).unwrap_or(1.0)
+                } else {
+                    s.zoom_factor.get()
+                };
+
+                let new_factor = (old_factor * 1.05_f64.powf(-dy)).clamp(0.1, 10.0);
+                s.zoom_fit.set(false);
+                s.zoom_factor.set(new_factor);
+
+                // Image-space point under the cursor before zoom.
+                let hadj = s.scrolled_window.hadjustment();
+                let vadj = s.scrolled_window.vadjustment();
+                let img_x = hadj.value() + mx;
+                let img_y = vadj.value() + my;
+                let ratio = new_factor / old_factor;
+
+                // Pre-expand the adjustment bounds to the new image size so that
+                // set_value below is not clamped to the old (smaller) upper.
+                // The layout pass will confirm the same values from set_size_request.
+                if let Some(p) = s.image.paintable() {
+                    hadj.set_upper((p.intrinsic_width() as f64 * new_factor).ceil());
+                    vadj.set_upper((p.intrinsic_height() as f64 * new_factor).ceil());
+                }
+                hadj.set_value(img_x * ratio - mx);
+                vadj.set_value(img_y * ratio - my);
+
+                s.apply_zoom();
+
+                glib::Propagation::Stop
+            });
+            this.borrow().scrolled_window.add_controller(ctrl);
+
+            let that = this.clone();
+            let motion = EventControllerMotion::new();
+            motion.connect_motion(move |_, x, y| {
+                that.borrow().mouse_pos.set((x, y));
+            });
+            this.borrow().scrolled_window.add_controller(motion);
         }
         {
             // Zoom list: row activated selects zoom level
