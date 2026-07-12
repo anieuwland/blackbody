@@ -168,35 +168,84 @@
         </child>
 
         <property name="content">
-          <object class="AdwToolbarView" id="inner_toolbar_view">
-            <property name="content">
-              <object class="GtkBox" id="canvas_box">
-                <property name="orientation">horizontal</property>
+          <object class="GtkBox" id="canvas_box">
+            <property name="orientation">horizontal</property>
+            <property name="hexpand">true</property>
+            <property name="vexpand">true</property>
+            <child>
+              <object class="GtkOverlay" id="canvas_overlay">
                 <property name="hexpand">true</property>
                 <property name="vexpand">true</property>
-                <child>
-                  <!-- Overlay so zoom button floats over the thermogram canvas only -->
-                  <object class="GtkOverlay" id="canvas_overlay">
+                <property name="child">
+                  <object class="GtkScrolledWindow" id="scrolled_window">
                     <property name="hexpand">true</property>
                     <property name="vexpand">true</property>
                     <property name="child">
-                      <object class="GtkScrolledWindow" id="scrolled_window">
+                      <object class="GtkDrawingArea" id="viewed_image">
                         <property name="hexpand">true</property>
                         <property name="vexpand">true</property>
-                        <property name="child">
-                          <object class="GtkDrawingArea" id="viewed_image">
-                            <property name="hexpand">true</property>
-                            <property name="vexpand">true</property>
-                          </object>
-                        </property>
                       </object>
                     </property>
-                    <child type="overlay">
+                  </object>
+                </property>
+                <child type="overlay">
+                  <!-- Transparent row: positions both OSD pills at the same height -->
+                  <object class="GtkBox">
+                    <property name="orientation">horizontal</property>
+                    <property name="halign">fill</property>
+                    <property name="valign">end</property>
+                    <property name="spacing">8</property>
+                    <property name="margin-start">16</property>
+                    <property name="margin-end">16</property>
+                    <property name="margin-bottom">16</property>
+                    <child>
+                      <object class="GtkBox" id="range_bar">
+                        <property name="orientation">horizontal</property>
+                        <property name="spacing">6</property>
+                        <property name="hexpand">true</property>
+                        <style><class name="osd"/></style>
+                        <child>
+                          <object class="GtkLabel" id="min_label">
+                            <property name="label">0.0 °C</property>
+                            <property name="width-chars">8</property>
+                            <property name="xalign">0</property>
+                            <property name="margin-start">8</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">horizontal</property>
+                            <property name="spacing">0</property>
+                            <property name="hexpand">true</property>
+                            <child>
+                              <object class="GtkScale" id="min_scale">
+                                <property name="adjustment">min_temp_adj</property>
+                                <property name="draw-value">false</property>
+                                <property name="hexpand">true</property>
+                                <property name="inverted">true</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkScale" id="max_scale">
+                                <property name="adjustment">max_temp_adj</property>
+                                <property name="draw-value">false</property>
+                                <property name="hexpand">true</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="max_label">
+                            <property name="label">20.0 °C</property>
+                            <property name="width-chars">8</property>
+                            <property name="xalign">1</property>
+                            <property name="margin-end">8</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkMenuButton" id="zoom_button">
-                        <property name="halign">end</property>
-                        <property name="valign">end</property>
-                        <property name="margin-bottom">16</property>
-                        <property name="margin-end">16</property>
                         <property name="always-show-arrow">true</property>
                         <property name="tooltip-text" translatable="yes">Zoom</property>
                         <property name="sensitive">false</property>
@@ -219,70 +268,17 @@
                         <property name="menu-model">zoom_menu_model</property>
                       </object>
                     </child>
-                  </object><!-- GtkOverlay -->
-                </child>
-                <child>
-                  <object class="GtkDrawingArea" id="color_bar">
-                    <property name="width-request">48</property>
-                    <property name="vexpand">true</property>
                   </object>
                 </child>
-              </object>
-            </property>
-            <child type="bottom">
-              <object class="GtkBox" id="range_bar">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">6</property>
-                <property name="margin-start">12</property>
-                <property name="margin-end">12</property>
-                <property name="margin-top">6</property>
-                <property name="margin-bottom">6</property>
-                <child>
-                  <object class="GtkLabel" id="min_label">
-                    <property name="label">0.0 °C</property>
-                    <property name="width-chars">8</property>
-                    <property name="xalign">0</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkBox">
-                    <property name="orientation">horizontal</property>
-                    <property name="spacing">0</property>
-                    <property name="hexpand">true</property>
-                    <child>
-                      <object class="GtkScale" id="min_scale">
-                        <property name="adjustment">min_temp_adj</property>
-                        <property name="draw-value">false</property>
-                        <property name="hexpand">true</property>
-                        <property name="inverted">true</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkScale" id="max_scale">
-                        <property name="adjustment">max_temp_adj</property>
-                        <property name="draw-value">false</property>
-                        <property name="hexpand">true</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="max_label">
-                    <property name="label">20.0 °C</property>
-                    <property name="width-chars">8</property>
-                    <property name="xalign">1</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkButton" id="auto_button">
-                    <property name="label" translatable="yes">Auto</property>
-                    <property name="tooltip-text" translatable="yes">Snap range to image min/max</property>
-                    <property name="sensitive">false</property>
-                  </object>
-                </child>
+              </object><!-- GtkOverlay -->
+            </child>
+            <child>
+              <object class="GtkDrawingArea" id="color_bar">
+                <property name="width-request">48</property>
+                <property name="vexpand">true</property>
               </object>
             </child>
-          </object><!-- inner AdwToolbarView -->
+          </object>
         </property>
 
       </object><!-- outer AdwToolbarView -->

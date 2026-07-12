@@ -31,7 +31,6 @@ pub struct AppState {
     max_scale: Scale,
     min_label: Label,
     max_label: Label,
-    auto_button: Button,
     mode_thermal: ToggleButton,
     mode_optical: ToggleButton,
     mode_pip: ToggleButton,
@@ -69,7 +68,6 @@ impl AppState {
             max_scale: builder.object("max_scale").unwrap(),
             min_label: builder.object("min_label").unwrap(),
             max_label: builder.object("max_label").unwrap(),
-            auto_button: builder.object("auto_button").unwrap(),
             range_bar: builder.object("range_bar").unwrap(),
             mode_thermal: builder.object("mode_thermal").unwrap(),
             mode_optical: builder.object("mode_optical").unwrap(),
@@ -103,6 +101,7 @@ impl AppState {
         css.load_from_string(
             "scale.range-min trough { margin-right: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
              scale.range-max trough { margin-left:  0; border-top-left-radius:  0; border-bottom-left-radius:  0; }
+             box.osd { border-radius: 9px; }
 ",
         );
         gtk4::style_context_add_provider_for_display(
@@ -144,7 +143,6 @@ impl AppState {
                     self.max_scale.set_value(max as f64);
                     self.min_label.set_text(&format!("{:.1} °C", min));
                     self.max_label.set_text(&format!("{:.1} °C", max));
-                    self.auto_button.set_sensitive(true);
                     self.zoom_button.set_sensitive(true);
                     self.action_export.set_enabled(true);
                     self.action_render.set_enabled(true);
@@ -697,24 +695,6 @@ impl AppState {
                 s.min_scale.adjustment().set_lower(-(actual as f64));
                 s.draw_render_threaded();
                 s.color_bar.queue_draw();
-            });
-        }
-        {
-            // Auto button: snap range to image min/max
-            let that = this.clone();
-            this.borrow().auto_button.connect_clicked(move |_| {
-                let thermogram = that.borrow().thermogram.borrow().clone();
-                if let Some(thermogram) = thermogram {
-                    let s = that.borrow();
-                    let min = thermogram.min_temp() as f64;
-                    let max = thermogram.max_temp() as f64;
-                    // Reset inner bounds first so set_value is never clamped.
-                    // min_scale stores -actual_min, so its lower (right) = -max.
-                    s.min_scale.adjustment().set_lower(-max);
-                    s.max_scale.adjustment().set_lower(min);
-                    s.min_scale.set_value(-min);
-                    s.max_scale.set_value(max);
-                }
             });
         }
         {
