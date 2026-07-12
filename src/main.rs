@@ -13,6 +13,7 @@ use crate::gtkui::app_window::AppState;
 pub fn main() -> ExitCode {
     let cli_path: Option<std::path::PathBuf> = std::env::args().nth(1).map(Into::into);
 
+    println!("Launching Blackbody {}", config::VERSION);
     init_env();
 
     let application = adw::Application::new(
@@ -40,8 +41,8 @@ pub fn main() -> ExitCode {
 fn init_env() {
     // Enable localization
     setlocale(LocaleCategory::LcAll, "");
-    bindtextdomain("blackbody", config::LOCALEDIR);
-    textdomain("blackbody");
+    bindtextdomain("blackbody", config::LOCALEDIR).ok();
+    textdomain("blackbody").ok();
 
     // Load and register resource bundle
     let res = {

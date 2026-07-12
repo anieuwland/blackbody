@@ -10,8 +10,8 @@ use glib::MainContext;
 use gtk4::prelude::*;
 use gtk4::{
     Builder, Button, DrawingArea, EventControllerKey, EventControllerMotion, EventControllerScroll,
-    EventControllerScrollFlags, FileChooserAction, FileChooserNative, FileFilter, FlowBox, Label,
-    MenuButton, Orientation, Overlay, Picture, ResponseType, Scale, ScrolledWindow, SelectionMode,
+    EventControllerScrollFlags, FileFilter, FlowBox, Label,
+    MenuButton, Orientation, Overlay, Picture, Scale, ScrolledWindow, SelectionMode,
     ToggleButton, Tooltip,
 };
 use libadwaita::{ActionRow, PreferencesGroup};
@@ -58,7 +58,6 @@ pub struct AppState {
     action_export: SimpleAction,
     action_render: SimpleAction,
     info_button: ToggleButton,
-    info_split_view: adw::OverlaySplitView,
     info_sidebar: gtk4::Box,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
@@ -115,7 +114,6 @@ impl AppState {
             action_export: SimpleAction::new("export", None),
             action_render: SimpleAction::new("render", None),
             info_button: builder.object("info_button").unwrap(),
-            info_split_view: builder.object("info_split_view").unwrap(),
             info_sidebar: builder.object("info_sidebar").unwrap(),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
@@ -593,7 +591,10 @@ impl AppState {
         }
     }
 
+    #[allow(deprecated)]
     fn show_export_dialog(this: &Rc<RefCell<Self>>) {
+        #[allow(deprecated)]
+        use gtk4::{FileChooserAction, FileChooserNative, ResponseType};
         let window = this.borrow().window.clone();
         let that = this.clone();
         let tiff_filter = FileFilter::new();
@@ -724,7 +725,7 @@ impl AppState {
                 .css_classes(["flat"])
                 .build();
             open_btn.connect_clicked(move |_| {
-                gtk4::show_uri(None::<&gtk4::Window>, &dir_uri, 0);
+                gtk4::UriLauncher::new(&dir_uri).launch(None::<&gtk4::Window>, gio::Cancellable::NONE, |_| {});
             });
 
             let file_group = PreferencesGroup::new();

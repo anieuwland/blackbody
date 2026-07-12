@@ -51,7 +51,7 @@ impl TiffThermogram {
         let arr_dims = Dim((tiff_dims.1 as usize, tiff_dims.0 as usize));
         let vec_to_ndarray = |values| {
             let thermal = ndarray::ArrayBase::from(values);
-            let thermal = thermal.into_shape(arr_dims).unwrap();
+            let thermal = thermal.into_shape_with_order(arr_dims).unwrap();
             thermal
         };
 
