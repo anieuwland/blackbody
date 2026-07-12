@@ -351,13 +351,15 @@ impl AppState {
     }
 
     fn apply_mode(this: &Rc<RefCell<Self>>, button: &ToggleButton) {
-        // Mutual exclusion: activate the clicked button, deactivate others
+        // GTK already set `button` active before emitting toggled; just deactivate the others.
+        // Touching `button` here would re-emit toggled → infinite recursion → stack overflow.
         {
             let s = this.borrow();
             for tb in [&s.mode_thermal, &s.mode_optical, &s.mode_pip] {
-                tb.set_active(false);
+                if *tb != *button {
+                    tb.set_active(false);
+                }
             }
-            button.set_active(true);
         }
 
         let s = this.borrow();
