@@ -1,17 +1,17 @@
 use std::cell::{Cell, RefCell};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 use cairo::LinearGradient;
-use gdk_pixbuf::Pixbuf;
 use gio::SimpleAction;
 use glib::object::SendWeakRef;
-use glib::{Bytes, MainContext};
+use glib::MainContext;
 use gtk4::prelude::*;
 use gtk4::{
     Builder, Button, DrawingArea, EventControllerMotion, EventControllerScroll,
-    EventControllerScrollFlags, FileFilter, FlowBox, Label, ListBox, MenuButton, Orientation,
-    Picture, Scale, ScrolledWindow, SelectionMode, ToggleButton, Tooltip,
+    EventControllerScrollFlags, FileFilter, FlowBox, Label, MenuButton, Orientation,
+    Scale, ScrolledWindow, SelectionMode, ToggleButton, Tooltip,
 };
 use libadwaita::{ActionRow, PreferencesDialog, PreferencesGroup, PreferencesPage};
 use libadwaita as adw;
@@ -24,7 +24,7 @@ const UI: &str = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui"
 
 pub struct AppState {
     window: adw::ApplicationWindow,
-    image: Picture,
+    image: DrawingArea,
     color_bar: DrawingArea,
     range_bar: gtk4::Box,
     min_scale: Scale,
@@ -40,9 +40,10 @@ pub struct AppState {
     palette_idx: Cell<usize>,
     scrolled_window: ScrolledWindow,
     zoom_button: MenuButton,
-    zoom_list: ListBox,
+    zoom_label: Label,
     zoom_fit: Cell<bool>,
     zoom_factor: Cell<f64>,
+    image_bgra: Arc<Mutex<Option<(Vec<u8>, i32, i32)>>>,
     mouse_pos: Cell<(f64, f64)>,
     action_export: SimpleAction,
     action_render: SimpleAction,
@@ -78,9 +79,10 @@ impl AppState {
             palette_idx: Cell::new(0),
             scrolled_window: builder.object("scrolled_window").unwrap(),
             zoom_button: builder.object("zoom_button").unwrap(),
-            zoom_list: builder.object("zoom_list").unwrap(),
+            zoom_label: builder.object("zoom_label").unwrap(),
             zoom_fit: Cell::new(true),
             zoom_factor: Cell::new(1.0),
+            image_bgra: Arc::new(Mutex::new(None)),
             mouse_pos: Cell::new((0.0, 0.0)),
             action_export: SimpleAction::new("export", None),
             action_render: SimpleAction::new("render", None),
@@ -100,7 +102,8 @@ impl AppState {
         let css = gtk4::CssProvider::new();
         css.load_from_string(
             "scale.range-min trough { margin-right: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
-             scale.range-max trough { margin-left:  0; border-top-left-radius:  0; border-bottom-left-radius:  0; }",
+             scale.range-max trough { margin-left:  0; border-top-left-radius:  0; border-bottom-left-radius:  0; }
+",
         );
         gtk4::style_context_add_provider_for_display(
             &gtk4::gdk::Display::default().unwrap(),
@@ -167,18 +170,24 @@ impl AppState {
 
     fn apply_zoom(&self) {
         if self.zoom_fit.get() {
-            self.image.set_can_shrink(true);
+            self.image.set_halign(gtk4::Align::Fill);
+            self.image.set_valign(gtk4::Align::Fill);
             self.image.set_size_request(-1, -1);
-            self.zoom_button.set_icon_name("zoom-fit-best-symbolic");
+            self.zoom_label.set_text("Fit");
         } else {
             let factor = self.zoom_factor.get();
-            if let Some(p) = self.image.paintable() {
-                let w = (p.intrinsic_width() as f64 * factor) as i32;
-                let h = (p.intrinsic_height() as f64 * factor) as i32;
-                self.image.set_can_shrink(false);
+            let data = self.image_bgra.lock().unwrap();
+            if let Some((_, img_w, img_h)) = data.as_ref() {
+                let w = (*img_w as f64 * factor) as i32;
+                let h = (*img_h as f64 * factor) as i32;
+                // Center within the viewport so the image doesn't stretch to fill it.
+                // The viewport always allocates max(natural, viewport_size); halign=center
+                // keeps the DrawingArea at its natural (= size_request) size within that.
+                self.image.set_halign(gtk4::Align::Center);
+                self.image.set_valign(gtk4::Align::Center);
                 self.image.set_size_request(w, h);
             }
-            self.zoom_button.set_icon_name("zoom-in-symbolic");
+            self.zoom_label.set_text(&format!("{}%", (factor * 100.0).round() as u32));
         }
     }
 
@@ -220,6 +229,7 @@ impl AppState {
         let palette: Vec<[f32; 3]> = self.palette.borrow().clone();
         let thermal_mode = self.is_thermal_mode();
         let img_ref = SendWeakRef::from(self.image.downgrade());
+        let surface_arc = self.image_bgra.clone();
 
         if let Some(thermogram) = self.thermogram.borrow().clone() {
             std::thread::spawn(move || {
@@ -231,20 +241,20 @@ impl AppState {
                 if let Some(bytes) = image.as_slice() {
                     let h = image.shape()[0] as i32;
                     let w = image.shape()[1] as i32;
-                    let glib_bytes = Bytes::from(bytes);
+                    // Convert RGB → Cairo Rgb24 (4 bytes/pixel: BGRX on little-endian)
+                    let stride = w * 4;
+                    let mut bgra = vec![0u8; (h * stride) as usize];
+                    for (i, pixel) in bytes.chunks_exact(3).enumerate() {
+                        let j = i * 4;
+                        bgra[j]     = pixel[2]; // B
+                        bgra[j + 1] = pixel[1]; // G
+                        bgra[j + 2] = pixel[0]; // R
+                    }
                     MainContext::default().invoke(move || {
-                        let Some(img) = img_ref.upgrade() else { return };
-                        let pixbuf = Pixbuf::from_bytes(
-                            &glib_bytes,
-                            gdk_pixbuf::Colorspace::Rgb,
-                            false,
-                            8,
-                            w,
-                            h,
-                            3 * w,
-                        );
-                        let texture = gtk4::gdk::Texture::for_pixbuf(&pixbuf);
-                        img.set_paintable(Some(&texture));
+                        *surface_arc.lock().unwrap() = Some((bgra, w, h));
+                        if let Some(img) = img_ref.upgrade() {
+                            img.queue_draw();
+                        }
                     });
                 }
             });
@@ -635,6 +645,35 @@ impl AppState {
             });
         }
         {
+            // Image draw function: scales the rendered image to fill the DrawingArea.
+            // In fit mode the area fills the viewport (hexpand/vexpand=true), so the
+            // image is scaled to fit. In zoom mode size_request sets the area to exactly
+            // the desired pixel size, so the image fills it 1:1.
+            let surface_arc = this.borrow().image_bgra.clone();
+            this.borrow().image.set_draw_func(move |_, ctx, width, height| {
+                let data = surface_arc.lock().unwrap();
+                let Some((bytes, img_w, img_h)) = data.as_ref() else { return };
+                let bytes_clone = bytes.clone();
+                let (img_w, img_h) = (*img_w, *img_h);
+                drop(data);
+                let stride = img_w * 4;
+                let Ok(surface) = cairo::ImageSurface::create_for_data(
+                    bytes_clone, cairo::Format::Rgb24, img_w, img_h, stride,
+                ) else { return };
+                let scale = (width as f64 / img_w as f64).min(height as f64 / img_h as f64);
+                let draw_w = img_w as f64 * scale;
+                let draw_h = img_h as f64 * scale;
+                let off_x = (width as f64 - draw_w) / 2.0;
+                let off_y = (height as f64 - draw_h) / 2.0;
+                let _ = ctx.save();
+                ctx.translate(off_x, off_y);
+                ctx.scale(scale, scale);
+                let _ = ctx.set_source_surface(&surface, 0.0, 0.0);
+                let _ = ctx.paint();
+                let _ = ctx.restore();
+            });
+        }
+        {
             // min_scale stores -actual_min; negate to recover temperature.
             let that = this.clone();
             this.borrow().min_scale.connect_value_changed(move |scale| {
@@ -689,11 +728,11 @@ impl AppState {
 
                 // Effective zoom factor before this step; fit mode needs its ratio computed.
                 let old_factor = if s.zoom_fit.get() {
-                    s.image.paintable().map(|p| {
+                    let data = s.image_bgra.lock().unwrap();
+                    data.as_ref().map(|(_, img_w, img_h)| {
                         let vw = s.scrolled_window.width() as f64;
                         let vh = s.scrolled_window.height() as f64;
-                        (vw / p.intrinsic_width() as f64)
-                            .min(vh / p.intrinsic_height() as f64)
+                        (vw / *img_w as f64).min(vh / *img_h as f64)
                     }).unwrap_or(1.0)
                 } else {
                     s.zoom_factor.get()
@@ -713,9 +752,12 @@ impl AppState {
                 // Pre-expand the adjustment bounds to the new image size so that
                 // set_value below is not clamped to the old (smaller) upper.
                 // The layout pass will confirm the same values from set_size_request.
-                if let Some(p) = s.image.paintable() {
-                    hadj.set_upper((p.intrinsic_width() as f64 * new_factor).ceil());
-                    vadj.set_upper((p.intrinsic_height() as f64 * new_factor).ceil());
+                {
+                    let data = s.image_bgra.lock().unwrap();
+                    if let Some((_, img_w, img_h)) = data.as_ref() {
+                        hadj.set_upper((*img_w as f64 * new_factor).ceil());
+                        vadj.set_upper((*img_h as f64 * new_factor).ceil());
+                    }
                 }
                 hadj.set_value(img_x * ratio - mx);
                 vadj.set_value(img_y * ratio - my);
@@ -734,26 +776,25 @@ impl AppState {
             this.borrow().scrolled_window.add_controller(motion);
         }
         {
-            // Zoom list: row activated selects zoom level
-            // ponytail: toggle on button click skipped; popover covers the use case
             let that = this.clone();
-            this.borrow().zoom_list.connect_row_activated(move |_, row| {
-                const FACTORS: &[f64] = &[0.0, 0.25, 0.50, 1.0, 1.5, 2.0];
-                let idx = row.index() as usize;
+            let set_zoom = SimpleAction::new("set-zoom", Some(glib::VariantTy::new("i").unwrap()));
+            set_zoom.connect_activate(move |_, param| {
+                let pct = param.and_then(|v| v.get::<i32>()).unwrap_or(100);
                 let s = that.borrow();
-                if idx == 0 {
-                    s.zoom_fit.set(true);
-                } else {
-                    s.zoom_fit.set(false);
-                    if let Some(&f) = FACTORS.get(idx) {
-                        s.zoom_factor.set(f);
-                    }
-                }
+                s.zoom_fit.set(false);
+                s.zoom_factor.set(pct as f64 / 100.0);
                 s.apply_zoom();
-                if let Some(popover) = s.zoom_button.popover() {
-                    popover.popdown();
-                }
             });
+            application.add_action(&set_zoom);
+
+            let that = this.clone();
+            let zoom_fit = SimpleAction::new("zoom-fit", None);
+            zoom_fit.connect_activate(move |_, _| {
+                let s = that.borrow();
+                s.zoom_fit.set(true);
+                s.apply_zoom();
+            });
+            application.add_action(&zoom_fit);
         }
     }
 }
