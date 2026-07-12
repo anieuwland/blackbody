@@ -14,19 +14,18 @@
   <update_contact>anieuwland@nimmerfort.eu</update_contact>
 
   <description>
-    <p>Blackbody is a thermogram viewer. It allows viewing FLIR and TIFF images, giving control over the render settings.</p>
+    <p>Blackbody is a thermogram viewer. It allows viewing FLIR JPEG, TIFF, and 16-bit centikelvin PNG thermograms, giving control over the render settings.</p>
     <p>Features:</p>
     <ul>
       <li>Loading FLIR thermograms from many cameras, both thermal and optical data</li>
-      <li>Loading single-band TIFFs assumed to be in °C</li>
+      <li>Loading single-band TIFFs and 16-bit centikelvin PNGs</li>
       <li>Investigating temperatures with the mouse</li>
-      <li>Exporting thermal data or renders to files</li>
+      <li>Exporting renders to PNG and thermal data to TIFF or 16-bit centikelvin PNG</li>
       <li>Rendering to embedded color palettes, if present</li>
       <li>Rendering to many different colors palettes, including inferno and turbo</li>
       <li>Specifying the thermal range to render</li>
       <li>Zooming in and out</li>
       <li>Translated to multiple languages</li>
-      <li>Available for Linux and Windows</li>
     </ul>
     <p>Cameras known to work:</p>
     <ul>
