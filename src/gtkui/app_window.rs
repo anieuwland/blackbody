@@ -11,7 +11,7 @@ use gtk4::prelude::*;
 use gtk4::{
     Builder, Button, DrawingArea, EventControllerKey, EventControllerMotion, EventControllerScroll,
     EventControllerScrollFlags, FileFilter, FlowBox, Label, MenuButton, Orientation,
-    Overlay, Scale, ScrolledWindow, SelectionMode, ToggleButton, Tooltip,
+    Overlay, Picture, Scale, ScrolledWindow, SelectionMode, ToggleButton, Tooltip,
 };
 use libadwaita::{ActionRow, PreferencesGroup};
 use libadwaita as adw;
@@ -38,6 +38,7 @@ pub struct AppState {
     palette_box: gtk4::Box,
     palette_idx: Cell<usize>,
     canvas_overlay: Overlay,
+    placeholder: gtk4::Box,
     osd_container: gtk4::CenterBox,
     osd_show_anim: adw::TimedAnimation,
     osd_hide_anim: adw::TimedAnimation,
@@ -90,6 +91,7 @@ impl AppState {
             palette_box: builder.object("palette_box").unwrap(),
             palette_idx: Cell::new(0),
             canvas_overlay: builder.object("canvas_overlay").unwrap(),
+            placeholder: gtk4::Box::new(Orientation::Vertical, 24),
             osd_container,
             osd_show_anim,
             osd_hide_anim,
@@ -136,6 +138,21 @@ impl AppState {
 
         {
             let s = this.borrow();
+            let pic = Picture::for_resource("/eu/nimmerfort/blackbody/resources/placeholder.svg");
+            pic.set_can_shrink(false);
+            let btn = Button::with_label("Open thermogram…");
+            btn.set_action_name(Some("win.open"));
+            btn.add_css_class("suggested-action");
+            btn.set_halign(gtk4::Align::Center);
+            s.placeholder.append(&pic);
+            s.placeholder.append(&btn);
+            s.placeholder.set_halign(gtk4::Align::Center);
+            s.placeholder.set_valign(gtk4::Align::Center);
+            s.canvas_overlay.add_overlay(&s.placeholder);
+        }
+
+        {
+            let s = this.borrow();
             s.osd_container.set_opacity(0.0);
             s.osd_container.set_can_target(false);
             let container = s.osd_container.downgrade();
@@ -178,6 +195,7 @@ impl AppState {
                     self.max_scale.set_value(max as f64);
                     self.min_label.set_text(&format!("{:.1} °C", min));
                     self.max_label.set_text(&format!("{:.1} °C", max));
+                    self.placeholder.set_visible(false);
                     self.zoom_button.set_sensitive(true);
                     self.action_export.set_enabled(true);
                     self.action_render.set_enabled(true);
