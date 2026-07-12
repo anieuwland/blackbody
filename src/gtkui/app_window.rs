@@ -9,7 +9,7 @@ use glib::object::SendWeakRef;
 use glib::MainContext;
 use gtk4::prelude::*;
 use gtk4::{
-    Builder, Button, DrawingArea, EventControllerMotion, EventControllerScroll,
+    Builder, Button, DrawingArea, EventControllerKey, EventControllerMotion, EventControllerScroll,
     EventControllerScrollFlags, FileFilter, FlowBox, Label, MenuButton, Orientation,
     Overlay, Scale, ScrolledWindow, SelectionMode, ToggleButton, Tooltip,
 };
@@ -38,7 +38,7 @@ pub struct AppState {
     palette_box: gtk4::Box,
     palette_idx: Cell<usize>,
     canvas_overlay: Overlay,
-    osd_container: gtk4::Box,
+    osd_container: gtk4::CenterBox,
     osd_show_anim: adw::TimedAnimation,
     osd_hide_anim: adw::TimedAnimation,
     osd_hide_source: Rc<Cell<Option<glib::SourceId>>>,
@@ -57,6 +57,8 @@ pub struct AppState {
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
     thermogram: RefCell<Option<Thermogram>>,
+    dir_files: RefCell<Vec<PathBuf>>,
+    dir_idx: Cell<usize>,
     min_temp: Cell<f32>,
     max_temp: Cell<f32>,
     palette: RefCell<Vec<[f32; 3]>>,
@@ -66,7 +68,7 @@ impl AppState {
     pub fn new(application: &impl IsA<adw::Application>) -> Rc<RefCell<AppState>> {
         let builder = Builder::from_resource(UI);
 
-        let osd_container: gtk4::Box = builder.object("osd_container").unwrap();
+        let osd_container: gtk4::CenterBox = builder.object("osd_container").unwrap();
         let show_target = adw::PropertyAnimationTarget::new(&osd_container, "opacity");
         let osd_show_anim = adw::TimedAnimation::new(&osd_container, 0.0, 1.0, 200, show_target);
         let hide_target = adw::PropertyAnimationTarget::new(&osd_container, "opacity");
@@ -107,6 +109,8 @@ impl AppState {
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
             thermogram: RefCell::new(None),
+            dir_files: RefCell::new(Vec::new()),
+            dir_idx: Cell::new(0),
             min_temp: Cell::new(0.0),
             max_temp: Cell::new(0.0),
             palette: RefCell::new(PALETTES[0].iter().copied().collect()),
@@ -182,6 +186,10 @@ impl AppState {
                     if !has_optical && !self.mode_thermal.is_active() {
                         self.mode_thermal.set_active(true);
                     }
+                    let files = scan_dir_files(path);
+                    let idx = files.iter().position(|p| p == path).unwrap_or(0);
+                    *self.dir_files.borrow_mut() = files;
+                    self.dir_idx.set(idx);
                     self.show_osd();
                     self.draw_render_threaded();
                     self.color_bar.queue_draw();
@@ -459,7 +467,7 @@ impl AppState {
         let s = this.borrow();
         let is_thermal = s.is_thermal_mode();
         s.color_bar.set_sensitive(is_thermal);
-        s.range_bar.set_sensitive(is_thermal);
+        s.range_bar.set_visible(is_thermal);
         s.palette_button.set_sensitive(is_thermal);
 
         // Re-render with the appropriate image
@@ -628,6 +636,21 @@ impl AppState {
         self.info_sidebar.append(&capture_group);
     }
 
+}
+
+fn scan_dir_files(path: &Path) -> Vec<PathBuf> {
+    let Some(dir) = path.parent() else { return vec![] };
+    let Ok(entries) = std::fs::read_dir(dir) else { return vec![] };
+    let mut files: Vec<PathBuf> = entries
+        .filter_map(|e| e.ok())
+        .map(|e| e.path())
+        .filter(|p| {
+            let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
+            matches!(ext.as_str(), "jpg" | "jpeg" | "tif" | "tiff")
+        })
+        .collect();
+    files.sort();
+    files
 }
 
 fn format_file_size(bytes: u64) -> String {
@@ -878,6 +901,29 @@ impl AppState {
                 s.apply_zoom();
             });
             application.add_action(&zoom_fit);
+        }
+        {
+            let that = this.clone();
+            let key_ctrl = EventControllerKey::new();
+            key_ctrl.connect_key_pressed(move |_, key, _, _| {
+                let delta: i32 = match key {
+                    gtk4::gdk::Key::Left => -1,
+                    gtk4::gdk::Key::Right => 1,
+                    _ => return glib::Propagation::Proceed,
+                };
+                let path = {
+                    let s = that.borrow();
+                    let files = s.dir_files.borrow();
+                    if files.is_empty() { return glib::Propagation::Stop; }
+                    let new_idx = (s.dir_idx.get() as i32 + delta)
+                        .clamp(0, files.len() as i32 - 1) as usize;
+                    s.dir_idx.set(new_idx);
+                    files[new_idx].clone()
+                };
+                that.borrow().set_thermogram_from_path(Some(&path));
+                glib::Propagation::Stop
+            });
+            this.borrow().window.add_controller(key_ctrl);
         }
     }
 }

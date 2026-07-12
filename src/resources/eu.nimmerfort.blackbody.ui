@@ -208,15 +208,13 @@
                 </property>
                 <child type="overlay">
                   <!-- Transparent row: positions both OSD pills at the same height -->
-                  <object class="GtkBox" id="osd_container">
-                    <property name="orientation">horizontal</property>
+                  <object class="GtkCenterBox" id="osd_container">
                     <property name="halign">fill</property>
                     <property name="valign">end</property>
-                    <property name="spacing">8</property>
                     <property name="margin-start">16</property>
                     <property name="margin-end">16</property>
                     <property name="margin-bottom">16</property>
-                    <child>
+                    <child type="start">
                       <object class="GtkBox" id="range_bar">
                         <property name="orientation">horizontal</property>
                         <property name="spacing">6</property>
@@ -262,7 +260,7 @@
                         </child>
                       </object>
                     </child>
-                    <child>
+                    <child type="end">
                       <object class="GtkMenuButton" id="zoom_button">
                         <property name="always-show-arrow">true</property>
                         <property name="tooltip-text" translatable="yes">Zoom</property>
