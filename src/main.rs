@@ -16,10 +16,16 @@ pub fn main() -> ExitCode {
     init_env();
 
     let application = adw::Application::new(Some("eu.nimmerfort.blackbody"), Default::default());
-    let state = AppState::new(&application);
-    if let Some(path) = &cli_path {
-        state.borrow().set_thermogram_from_path(Some(path));
-    }
+    application.connect_activate(move |app| {
+        if app.windows().is_empty() {
+            let state = AppState::new(app);
+            if let Some(path) = &cli_path {
+                state.borrow().set_thermogram_from_path(Some(path));
+            }
+        } else {
+            app.windows()[0].present();
+        }
+    });
     application.run()
 }
 

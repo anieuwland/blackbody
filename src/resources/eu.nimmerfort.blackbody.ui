@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <requires lib="adw" version="1"/>
+  <requires lib="adw" version="1.0"/>
 
-  <object class="GMenu" id="app_menu_model">
+  <menu id="app_menu_model">
     <item>
       <attribute name="label" translatable="yes">Export thermal…</attribute>
       <attribute name="action">app.export</attribute>
@@ -16,7 +16,7 @@
       <attribute name="label" translatable="yes">About Blackbody</attribute>
       <attribute name="action">app.about</attribute>
     </item>
-  </object>
+  </menu>
 
   <object class="GtkFileFilter" id="filter_thermograms">
     <mime-types>

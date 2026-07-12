@@ -87,6 +87,10 @@ impl AppState {
         let this = Rc::new(RefCell::new(state));
         AppState::setup_palette_popover(&this);
         AppState::connect_signals(&this, application);
+        // We're inside connect_activate, so GTK is ready — present immediately
+        let app = application.as_ref();
+        app.add_window(&this.borrow().window);
+        this.borrow().window.present();
         this
     }
 
@@ -481,13 +485,6 @@ impl AppState {
 
     fn connect_signals(this: &Rc<RefCell<Self>>, application: &impl IsA<adw::Application>) {
         let application = application.as_ref();
-        {
-            let that = this.clone();
-            application.connect_activate(move |app| {
-                app.add_window(&that.borrow().window);
-                that.borrow().window.present();
-            });
-        }
         {
             let that = this.clone();
             let open = SimpleAction::new("open", None);
