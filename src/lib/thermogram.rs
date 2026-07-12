@@ -28,6 +28,7 @@ use crate::*;
 pub enum Thermogram {
     Flir(FlirThermogram),
     Tiff(TiffThermogram),
+    Png(PngThermogram),
 }
 
 impl Thermogram {
@@ -75,6 +76,12 @@ impl Thermogram {
             return Some(Thermogram::Tiff(tiff));
         }
 
+        // PNG: \x89PNG
+        if magic_numbers == [137, 80, 78, 71] {
+            let png = PngThermogram::from_file(path)?;
+            return Some(Thermogram::Png(png));
+        }
+
         println!("Thermogram format not recognized: {:x?}=={:?}", magic_numbers, magic_numbers);
         return None;
     }
@@ -85,14 +92,14 @@ impl Thermogram {
     pub fn capture_params(&self) -> Option<CaptureParams> {
         match self {
             Thermogram::Flir(t) => Some(t.capture_params()),
-            Thermogram::Tiff(_) => None,
+            Thermogram::Tiff(_) | Thermogram::Png(_) => None,
         }
     }
 
     pub fn camera_metadata(&self) -> Option<&CameraMetadata> {
         match self {
             Thermogram::Flir(t) => t.camera_metadata(),
-            Thermogram::Tiff(_) => None,
+            Thermogram::Tiff(_) | Thermogram::Png(_) => None,
         }
     }
 }
@@ -105,6 +112,7 @@ impl ThermogramTrait for Thermogram {
         match self {
             Thermogram::Flir(t) => t.thermal(),
             Thermogram::Tiff(t) => t.thermal(),
+            Thermogram::Png(t) => t.thermal(),
         }
     }
 
@@ -112,6 +120,7 @@ impl ThermogramTrait for Thermogram {
         match self {
             Thermogram::Flir(t) => t.optical(),
             Thermogram::Tiff(t) => t.optical(),
+            Thermogram::Png(t) => t.optical(),
         }
     }
 
@@ -119,6 +128,7 @@ impl ThermogramTrait for Thermogram {
         match self {
             Thermogram::Flir(t) => t.identifier(),
             Thermogram::Tiff(t) => t.identifier(),
+            Thermogram::Png(t) => t.identifier(),
         }
     }
 
@@ -126,6 +136,7 @@ impl ThermogramTrait for Thermogram {
         match self {
             Thermogram::Flir(t) => t.path(),
             Thermogram::Tiff(t) => t.path(),
+            Thermogram::Png(t) => t.path(),
         }
     }
 
@@ -133,6 +144,7 @@ impl ThermogramTrait for Thermogram {
         match self {
             Thermogram::Flir(t) => t.palette(),
             Thermogram::Tiff(t) => t.palette(),
+            Thermogram::Png(t) => t.palette(),
         }
     }
 }

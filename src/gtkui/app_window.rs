@@ -602,6 +602,7 @@ impl AppState {
         let format_str = match thermogram {
             Thermogram::Flir(_) => "FLIR JPEG",
             Thermogram::Tiff(_) => "TIFF",
+            Thermogram::Png(_) => "PNG (16-bit)",
         };
         add_row(&image_group, "Format", format_str);
         if let Some(path) = thermogram.path() {
@@ -646,7 +647,7 @@ fn scan_dir_files(path: &Path) -> Vec<PathBuf> {
         .map(|e| e.path())
         .filter(|p| {
             let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
-            matches!(ext.as_str(), "jpg" | "jpeg" | "tif" | "tiff")
+            matches!(ext.as_str(), "jpg" | "jpeg" | "tif" | "tiff" | "png")
         })
         .collect();
     files.sort();

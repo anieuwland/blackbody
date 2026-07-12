@@ -58,6 +58,7 @@
     <mime-types>
       <mime-type>image/jpeg</mime-type>
       <mime-type>image/tiff</mime-type>
+      <mime-type>image/png</mime-type>
     </mime-types>
   </object>
   <object class="GtkFileFilter" id="filter_all_files">

@@ -50,11 +50,13 @@
 
 pub mod flir;
 pub mod palettes;
+pub mod png;
 pub mod thermogram;
 pub mod thermogram_trait;
 pub mod tiff;
 
 pub use crate::flir::FlirThermogram;
+pub use crate::png::PngThermogram;
 pub use crate::thermogram::Thermogram;
 pub use crate::thermogram_trait::{CaptureParams, ThermogramTrait};
 pub use crate::tiff::TiffThermogram;
