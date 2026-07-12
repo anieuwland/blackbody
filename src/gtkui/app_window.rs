@@ -176,6 +176,10 @@ impl AppState {
         AppState::connect_signals(&this, application);
         // We're inside connect_activate, so GTK is ready — present immediately
         let app = application.as_ref();
+        app.set_accels_for_action("app.new-window", &["<Control>n"]);
+        app.set_accels_for_action("win.open",       &["<Control>o"]);
+        app.set_accels_for_action("win.export",     &["<Control>e"]);
+        app.set_accels_for_action("win.render",     &["<Control>s"]);
         app.add_window(&this.borrow().window);
         this.borrow().window.present();
         this

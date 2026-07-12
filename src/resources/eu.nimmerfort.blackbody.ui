@@ -42,13 +42,13 @@
         <attribute name="action">app.new-window</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">Open…</attribute>
+        <attribute name="label" translatable="yes">Open thermogram…</attribute>
         <attribute name="action">win.open</attribute>
       </item>
     </section>
     <section>
       <item>
-        <attribute name="label" translatable="yes">Export thermal…</attribute>
+        <attribute name="label" translatable="yes">Export thermogram…</attribute>
         <attribute name="action">win.export</attribute>
       </item>
       <item>
