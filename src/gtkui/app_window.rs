@@ -1,5 +1,5 @@
 use std::cell::{Cell, RefCell};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use cairo::LinearGradient;
@@ -40,6 +40,8 @@ pub struct AppState {
     zoom_list: ListBox,
     zoom_fit: Cell<bool>,
     zoom_factor: Cell<f64>,
+    action_export: SimpleAction,
+    action_render: SimpleAction,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
     thermogram: RefCell<Option<Thermogram>>,
@@ -72,6 +74,8 @@ impl AppState {
             zoom_list: builder.object("zoom_list").unwrap(),
             zoom_fit: Cell::new(true),
             zoom_factor: Cell::new(1.0),
+            action_export: SimpleAction::new("export", None),
+            action_render: SimpleAction::new("render", None),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
             thermogram: RefCell::new(None),
@@ -102,6 +106,8 @@ impl AppState {
                     self.max_label.set_text(&format!("{:.1} °C", max));
                     self.auto_button.set_sensitive(true);
                     self.zoom_button.set_sensitive(true);
+                    self.action_export.set_enabled(true);
+                    self.action_render.set_enabled(true);
                     self.draw_render_threaded();
                     self.color_bar.queue_draw();
                 }
@@ -363,6 +369,93 @@ impl AppState {
         }
     }
 
+    fn show_export_dialog(this: &Rc<RefCell<Self>>) {
+        let window = this.borrow().window.clone();
+        let that = this.clone();
+        let tiff_filter = FileFilter::new();
+        tiff_filter.add_mime_type("image/tiff");
+        tiff_filter.set_name(Some("TIFF"));
+        let filters = gio::ListStore::new::<FileFilter>();
+        filters.append(&tiff_filter);
+        let initial_name = that.borrow().thermogram.borrow().as_ref()
+            .map(|t| {
+                let mut p = PathBuf::from(t.identifier());
+                p.set_extension("tiff");
+                p.file_name().unwrap_or_default().to_string_lossy().into_owned()
+            })
+            .unwrap_or_else(|| "thermogram.tiff".into());
+        let dialog = gtk4::FileDialog::builder()
+            .title("Export thermal")
+            .filters(&filters)
+            .initial_name(&initial_name)
+            .build();
+        dialog.save(Some(&window), gio::Cancellable::NONE, move |result| {
+            if let Ok(file) = result {
+                if let Some(path) = file.path() {
+                    let thermogram = that.borrow().thermogram.borrow().clone();
+                    if let Some(thermogram) = thermogram {
+                        if thermogram.export_thermal(&path).is_none() {
+                            let p = path.to_str().unwrap_or("<invalid path>");
+                            that.borrow().show_error_dialog(&format!("Failed to export to {p}"));
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    fn show_render_dialog(this: &Rc<RefCell<Self>>) {
+        let window = this.borrow().window.clone();
+        let that = this.clone();
+        let png_filter = FileFilter::new();
+        png_filter.add_mime_type("image/png");
+        png_filter.set_name(Some("PNG"));
+        let filters = gio::ListStore::new::<FileFilter>();
+        filters.append(&png_filter);
+        let initial_name = that.borrow().thermogram.borrow().as_ref()
+            .map(|t| {
+                let mut p = PathBuf::from(t.identifier());
+                p.set_extension("png");
+                p.file_name().unwrap_or_default().to_string_lossy().into_owned()
+            })
+            .unwrap_or_else(|| "render.png".into());
+        let dialog = gtk4::FileDialog::builder()
+            .title("Save render")
+            .filters(&filters)
+            .initial_name(&initial_name)
+            .build();
+        dialog.save(Some(&window), gio::Cancellable::NONE, move |result| {
+            if let Ok(file) = result {
+                if let Some(mut path) = file.path() {
+                    path.set_extension("png");
+                    let s = that.borrow();
+                    let thermogram = s.thermogram.borrow().clone();
+                    if let Some(thermogram) = thermogram {
+                        let min = s.min_temp.get();
+                        let max = s.max_temp.get();
+                        let palette = s.palette.borrow().clone();
+                        drop(s);
+                        if thermogram.save_render(path.clone(), min, max, &palette).is_none() {
+                            let p = path.to_str().unwrap_or("<invalid path>");
+                            that.borrow().show_error_dialog(&format!("Failed to save to {p}"));
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    fn show_about_dialog(&self) {
+        adw::AboutDialog::builder()
+            .application_name("Blackbody")
+            .version("2.0.0")
+            .developer_name("Arthur Nieuwland")
+            .website("https://bitbucket.org/nimmerwoner/blackbody/")
+            .license("EUPL-1.2")
+            .build()
+            .present(Some(&self.window));
+    }
+
     fn show_open_dialog(this: &Rc<RefCell<Self>>) {
         let filters = gio::ListStore::new::<FileFilter>();
         filters.append(&this.borrow().filter_thermograms);
@@ -400,6 +493,26 @@ impl AppState {
             let open = SimpleAction::new("open", None);
             open.connect_activate(move |_, _| Self::show_open_dialog(&that));
             application.add_action(&open);
+        }
+        {
+            let action_export = this.borrow().action_export.clone();
+            action_export.set_enabled(false);
+            let that = this.clone();
+            action_export.connect_activate(move |_, _| Self::show_export_dialog(&that));
+            application.add_action(&action_export);
+        }
+        {
+            let action_render = this.borrow().action_render.clone();
+            action_render.set_enabled(false);
+            let that = this.clone();
+            action_render.connect_activate(move |_, _| Self::show_render_dialog(&that));
+            application.add_action(&action_render);
+        }
+        {
+            let that = this.clone();
+            let about = SimpleAction::new("about", None);
+            about.connect_activate(move |_, _| that.borrow().show_about_dialog());
+            application.add_action(&about);
         }
         {
             let that = this.clone();
