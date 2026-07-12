@@ -21,6 +21,9 @@ pub fn main() -> ExitCode {
     );
     // Forward command-line invocations to activate; we read args ourselves via std::env::args()
     application.connect_command_line(|app, _| { app.activate(); 0.into() });
+    application.connect_startup(|_| {
+        adw::StyleManager::default().set_color_scheme(adw::ColorScheme::PreferDark);
+    });
     application.connect_activate(move |app| {
         if app.windows().is_empty() {
             let state = AppState::new(app);
