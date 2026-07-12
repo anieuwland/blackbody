@@ -11,10 +11,15 @@ use libadwaita::prelude::*;
 use crate::gtkui::app_window::AppState;
 
 pub fn main() -> ExitCode {
+    let cli_path: Option<std::path::PathBuf> = std::env::args().nth(1).map(Into::into);
+
     init_env();
 
     let application = adw::Application::new(Some("eu.nimmerfort.blackbody"), Default::default());
-    let _state = AppState::new(&application);
+    let state = AppState::new(&application);
+    if let Some(path) = &cli_path {
+        state.borrow().set_thermogram_from_path(Some(path));
+    }
     application.run()
 }
 
