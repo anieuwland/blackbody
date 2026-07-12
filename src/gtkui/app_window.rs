@@ -13,7 +13,7 @@ use gtk4::{
     EventControllerScrollFlags, FileFilter, FlowBox, Label, MenuButton, Orientation,
     Overlay, Scale, ScrolledWindow, SelectionMode, ToggleButton, Tooltip,
 };
-use libadwaita::{ActionRow, PreferencesDialog, PreferencesGroup, PreferencesPage};
+use libadwaita::{ActionRow, PreferencesGroup};
 use libadwaita as adw;
 use libadwaita::prelude::*;
 
@@ -51,8 +51,9 @@ pub struct AppState {
     mouse_pos: Cell<(f64, f64)>,
     action_export: SimpleAction,
     action_render: SimpleAction,
-    action_info: SimpleAction,
-    info_button: Button,
+    info_button: ToggleButton,
+    info_split_view: adw::OverlaySplitView,
+    info_sidebar: gtk4::Box,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
     thermogram: RefCell<Option<Thermogram>>,
@@ -100,8 +101,9 @@ impl AppState {
             mouse_pos: Cell::new((0.0, 0.0)),
             action_export: SimpleAction::new("export", None),
             action_render: SimpleAction::new("render", None),
-            action_info: SimpleAction::new("info", None),
             info_button: builder.object("info_button").unwrap(),
+            info_split_view: builder.object("info_split_view").unwrap(),
+            info_sidebar: builder.object("info_sidebar").unwrap(),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
             thermogram: RefCell::new(None),
@@ -160,6 +162,7 @@ impl AppState {
                     self.max_temp.set(max);
                     let has_info = thermogram.capture_params().is_some();
                     let has_optical = thermogram.has_optical();
+                    self.populate_info_sidebar(&thermogram);
                     *self.thermogram.borrow_mut() = Some(thermogram);
                     // min_scale is inverted and stores -actual_min_temp, so:
                     //   lower (right end) = -(current max),  upper (left end) = -(min - 20)
@@ -174,7 +177,6 @@ impl AppState {
                     self.zoom_button.set_sensitive(true);
                     self.action_export.set_enabled(true);
                     self.action_render.set_enabled(true);
-                    self.action_info.set_enabled(has_info);
                     self.info_button.set_sensitive(has_info);
                     self.mode_optical.set_sensitive(has_optical);
                     if !has_optical && !self.mode_thermal.is_active() {
@@ -554,51 +556,92 @@ impl AppState {
             .present(Some(&self.window));
     }
 
-    fn show_info_dialog(&self) {
-        let thermogram = self.thermogram.borrow();
-        let Some(thermogram) = thermogram.as_ref() else { return };
+    fn populate_info_sidebar(&self, thermogram: &Thermogram) {
+        while let Some(child) = self.info_sidebar.first_child() {
+            self.info_sidebar.remove(&child);
+        }
 
-        let dialog = PreferencesDialog::builder()
-            .title("Camera Info")
-            .build();
-        let page = PreferencesPage::new();
-
-        // Camera group — EXIF metadata
-        let camera_group = PreferencesGroup::builder().title("Camera").build();
+        // value is title (bold), label is subtitle (dim)
         let add_row = |group: &PreferencesGroup, label: &str, value: &str| {
-            group.add(&ActionRow::builder().title(label).subtitle(value).build());
+            group.add(&ActionRow::builder().title(value).subtitle(label).build());
         };
+
+        // File entry — clicking opens parent directory
+        if let Some(path) = thermogram.path() {
+            let parent_str = path.parent().and_then(|p| p.to_str()).unwrap_or("").to_string();
+            let dir_uri = gio::File::for_path(path.parent().unwrap_or(path)).uri().to_string();
+
+            let open_btn = gtk4::Button::builder()
+                .icon_name("folder-open-symbolic")
+                .valign(gtk4::Align::Center)
+                .css_classes(["flat"])
+                .build();
+            open_btn.connect_clicked(move |_| {
+                gtk4::show_uri(None::<&gtk4::Window>, &dir_uri, 0);
+            });
+
+            let file_group = PreferencesGroup::new();
+            let file_row = ActionRow::builder().title(&parent_str).subtitle("Directory").build();
+            file_row.add_suffix(&open_btn);
+            file_row.set_activatable_widget(Some(&open_btn));
+            file_group.add(&file_row);
+            self.info_sidebar.append(&file_group);
+        }
+
+        let image_group = PreferencesGroup::new();
+        let shape = thermogram.thermal_shape();
+        add_row(&image_group, "Dimensions", &format!("{} × {}", shape[1], shape[0]));
+        let format_str = match thermogram {
+            Thermogram::Flir(_) => "FLIR JPEG",
+            Thermogram::Tiff(_) => "TIFF",
+        };
+        add_row(&image_group, "Format", format_str);
+        if let Some(path) = thermogram.path() {
+            if let Ok(meta) = std::fs::metadata(path) {
+                add_row(&image_group, "File size", &format_file_size(meta.len()));
+                if let Ok(t) = meta.created() {
+                    if let Some(s) = format_system_time(t) { add_row(&image_group, "Created", &s); }
+                }
+                if let Ok(t) = meta.modified() {
+                    if let Some(s) = format_system_time(t) { add_row(&image_group, "Modified", &s); }
+                }
+            }
+        }
+        self.info_sidebar.append(&image_group);
+
+        let camera_group = PreferencesGroup::new();
         if let Some(meta) = thermogram.camera_metadata() {
             if let Some(v) = &meta.make { add_row(&camera_group, "Make", v); }
             if let Some(v) = &meta.model { add_row(&camera_group, "Model", v); }
             if let Some(v) = meta.focal_length { add_row(&camera_group, "Focal length", &format!("{v:.1} mm")); }
             if let Some(v) = &meta.date_time { add_row(&camera_group, "Date/time", v); }
         }
+        self.info_sidebar.append(&camera_group);
 
-        // Capture parameters group
-        let capture_group = PreferencesGroup::builder().title("Capture Parameters").build();
+        let capture_group = PreferencesGroup::new();
         if let Some(cp) = thermogram.capture_params() {
             add_row(&capture_group, "Emissivity", &format!("{:.2}", cp.emissivity));
             add_row(&capture_group, "Object distance", &format!("{:.2} m", cp.object_distance_m));
             add_row(&capture_group, "Reflected temperature", &format!("{:.1} °C", cp.reflected_temp_k - 273.15));
             add_row(&capture_group, "Relative humidity", &format!("{:.0}%", cp.relative_humidity * 100.0));
-
-            // Planck constants group
-            let planck_group = PreferencesGroup::builder().title("Planck Constants").build();
-            add_row(&planck_group, "R1", &format!("{:.4}", cp.planck_r1));
-            add_row(&planck_group, "R2", &format!("{:.8}", cp.planck_r2));
-            add_row(&planck_group, "B", &format!("{:.2}", cp.planck_b));
-            add_row(&planck_group, "F", &format!("{:.2}", cp.planck_f));
-            add_row(&planck_group, "O", &format!("{}", cp.planck_o));
-            page.add(&planck_group);
         }
-
-        page.add(&camera_group);
-        page.add(&capture_group);
-        dialog.add(&page);
-        dialog.present(Some(&self.window));
+        self.info_sidebar.append(&capture_group);
     }
 
+}
+
+fn format_file_size(bytes: u64) -> String {
+    if bytes >= 1_000_000 { format!("{:.1} MB", bytes as f64 / 1_000_000.0) }
+    else if bytes >= 1_000 { format!("{:.0} KB", bytes as f64 / 1_000.0) }
+    else { format!("{bytes} B") }
+}
+
+fn format_system_time(t: std::time::SystemTime) -> Option<String> {
+    let secs = t.duration_since(std::time::UNIX_EPOCH).ok()?.as_secs() as i64;
+    glib::DateTime::from_unix_local(secs).ok()?.format("%Y-%m-%d %H:%M").map(|s| s.to_string()).ok()
+}
+
+impl AppState {
     fn show_open_dialog(this: &Rc<RefCell<Self>>) {
         let filters = gio::ListStore::new::<FileFilter>();
         filters.append(&this.borrow().filter_thermograms);
@@ -649,13 +692,6 @@ impl AppState {
             let about = SimpleAction::new("about", None);
             about.connect_activate(move |_, _| that.borrow().show_about_dialog());
             application.add_action(&about);
-        }
-        {
-            let action_info = this.borrow().action_info.clone();
-            action_info.set_enabled(false);
-            let that = this.clone();
-            action_info.connect_activate(move |_, _| that.borrow().show_info_dialog());
-            application.add_action(&action_info);
         }
         {
             let that = this.clone();

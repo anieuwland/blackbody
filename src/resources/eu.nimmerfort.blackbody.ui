@@ -146,16 +146,7 @@
               </object>
             </child>
 
-            <!-- End: Overflow menu -->
-            <child type="end">
-              <object class="GtkButton" id="info_button">
-                <property name="icon-name">dialog-information-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Camera info</property>
-                <property name="action-name">app.info</property>
-                <property name="sensitive">false</property>
-              </object>
-            </child>
-
+            <!-- End: Overflow menu (rightmost), then info -->
             <child type="end">
               <object class="GtkMenuButton" id="menu_button">
                 <property name="icon-name">open-menu-symbolic</property>
@@ -164,14 +155,41 @@
               </object>
             </child>
 
+            <child type="end">
+              <object class="GtkToggleButton" id="info_button">
+                <property name="icon-name">info-outline-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Camera info</property>
+                <property name="sensitive">false</property>
+              </object>
+            </child>
+
           </object><!-- AdwHeaderBar -->
         </child>
 
         <property name="content">
-          <object class="GtkBox" id="canvas_box">
-            <property name="orientation">horizontal</property>
-            <property name="hexpand">true</property>
-            <property name="vexpand">true</property>
+          <object class="AdwOverlaySplitView" id="info_split_view">
+            <property name="sidebar-position">end</property>
+            <property name="show-sidebar" bind-source="info_button" bind-property="active" bind-flags="bidirectional|sync-create"/>
+            <property name="sidebar">
+              <object class="GtkScrolledWindow">
+                <property name="hscrollbar-policy">never</property>
+                <property name="child">
+                  <object class="GtkBox" id="info_sidebar">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="margin-start">12</property>
+                    <property name="margin-end">12</property>
+                    <property name="margin-top">12</property>
+                    <property name="margin-bottom">12</property>
+                  </object>
+                </property>
+              </object>
+            </property>
+            <property name="content">
+              <object class="GtkBox" id="canvas_box">
+                <property name="orientation">horizontal</property>
+                <property name="hexpand">true</property>
+                <property name="vexpand">true</property>
             <child>
               <object class="GtkOverlay" id="canvas_overlay">
                 <property name="hexpand">true</property>
@@ -282,7 +300,9 @@
                 <property name="margin-bottom">6</property>
               </object>
             </child>
-          </object>
+              </object><!-- GtkBox canvas_box -->
+            </property>
+          </object><!-- AdwOverlaySplitView -->
         </property>
 
       </object><!-- outer AdwToolbarView -->
