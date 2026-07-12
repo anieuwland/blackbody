@@ -8,7 +8,7 @@ use gio::SimpleAction;
 use glib::object::SendWeakRef;
 use glib::{Bytes, MainContext};
 use gtk4::prelude::*;
-use gtk4::{Builder, DrawingArea, FileFilter, Picture, Tooltip};
+use gtk4::{Builder, Button, DrawingArea, FileFilter, Label, Picture, Scale, Tooltip};
 use libadwaita as adw;
 use libadwaita::prelude::*;
 
@@ -21,6 +21,11 @@ pub struct AppState {
     window: adw::ApplicationWindow,
     image: Picture,
     color_bar: DrawingArea,
+    min_scale: Scale,
+    max_scale: Scale,
+    min_label: Label,
+    max_label: Label,
+    auto_button: Button,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
     thermogram: RefCell<Option<Thermogram>>,
@@ -37,6 +42,11 @@ impl AppState {
             window: builder.object("blackbody_window").unwrap(),
             image: builder.object("viewed_image").unwrap(),
             color_bar: builder.object("color_bar").unwrap(),
+            min_scale: builder.object("min_scale").unwrap(),
+            max_scale: builder.object("max_scale").unwrap(),
+            min_label: builder.object("min_label").unwrap(),
+            max_label: builder.object("max_label").unwrap(),
+            auto_button: builder.object("auto_button").unwrap(),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
             thermogram: RefCell::new(None),
@@ -55,9 +65,16 @@ impl AppState {
             match Thermogram::from_file(path) {
                 Some(thermogram) => {
                     self.window.set_title(Some(thermogram.identifier()));
-                    self.min_temp.set(thermogram.min_temp());
-                    self.max_temp.set(thermogram.max_temp());
+                    let min = thermogram.min_temp();
+                    let max = thermogram.max_temp();
+                    self.min_temp.set(min);
+                    self.max_temp.set(max);
                     *self.thermogram.borrow_mut() = Some(thermogram);
+                    self.min_scale.set_value(min as f64);
+                    self.max_scale.set_value(max as f64);
+                    self.min_label.set_text(&format!("{:.1} °C", min));
+                    self.max_label.set_text(&format!("{:.1} °C", max));
+                    self.auto_button.set_sensitive(true);
                     self.draw_render_threaded();
                     self.color_bar.queue_draw();
                 }
@@ -221,6 +238,42 @@ impl AppState {
                 let h = s.color_bar.height() as f64;
                 let palette = s.palette.borrow().clone();
                 Self::draw_color_bar(ctx, w, h, &palette, s.min_temp.get(), s.max_temp.get());
+            });
+        }
+        {
+            // Min scale: update min_temp, label, re-render
+            let that = this.clone();
+            this.borrow().min_scale.connect_value_changed(move |scale| {
+                let v = scale.value() as f32;
+                let s = that.borrow();
+                s.min_temp.set(v);
+                s.min_label.set_text(&format!("{:.1} °C", v));
+                s.draw_render_threaded();
+                s.color_bar.queue_draw();
+            });
+        }
+        {
+            // Max scale: update max_temp, label, re-render
+            let that = this.clone();
+            this.borrow().max_scale.connect_value_changed(move |scale| {
+                let v = scale.value() as f32;
+                let s = that.borrow();
+                s.max_temp.set(v);
+                s.max_label.set_text(&format!("{:.1} °C", v));
+                s.draw_render_threaded();
+                s.color_bar.queue_draw();
+            });
+        }
+        {
+            // Auto button: snap range to image min/max
+            let that = this.clone();
+            this.borrow().auto_button.connect_clicked(move |_| {
+                let thermogram = that.borrow().thermogram.borrow().clone();
+                if let Some(thermogram) = thermogram {
+                    let s = that.borrow();
+                    s.min_scale.set_value(thermogram.min_temp() as f64);
+                    s.max_scale.set_value(thermogram.max_temp() as f64);
+                }
             });
         }
     }

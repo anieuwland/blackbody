@@ -13,6 +13,21 @@
     <patterns><pattern>*</pattern></patterns>
   </object>
 
+  <object class="GtkAdjustment" id="min_temp_adj">
+    <property name="lower">-273.15</property>
+    <property name="upper">1000000</property>
+    <property name="value">0</property>
+    <property name="step-increment">0.5</property>
+    <property name="page-increment">5</property>
+  </object>
+  <object class="GtkAdjustment" id="max_temp_adj">
+    <property name="lower">-273.15</property>
+    <property name="upper">1000000</property>
+    <property name="value">20</property>
+    <property name="step-increment">0.5</property>
+    <property name="page-increment">5</property>
+  </object>
+
   <object class="AdwApplicationWindow" id="blackbody_window">
     <property name="title" translatable="yes">Blackbody</property>
     <property name="default-width">800</property>
@@ -30,28 +45,77 @@
           </object>
         </child>
         <property name="content">
-          <object class="GtkBox" id="canvas_box">
-            <property name="orientation">horizontal</property>
-            <property name="hexpand">true</property>
-            <property name="vexpand">true</property>
-            <child>
-              <object class="GtkScrolledWindow" id="scrolled_window">
+          <object class="AdwToolbarView" id="inner_toolbar_view">
+            <property name="content">
+              <object class="GtkBox" id="canvas_box">
+                <property name="orientation">horizontal</property>
                 <property name="hexpand">true</property>
                 <property name="vexpand">true</property>
-                <property name="child">
-                  <object class="GtkPicture" id="viewed_image">
-                    <property name="content-fit">contain</property>
-                    <property name="can-shrink">true</property>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolled_window">
                     <property name="hexpand">true</property>
                     <property name="vexpand">true</property>
+                    <property name="child">
+                      <object class="GtkPicture" id="viewed_image">
+                        <property name="content-fit">contain</property>
+                        <property name="can-shrink">true</property>
+                        <property name="hexpand">true</property>
+                        <property name="vexpand">true</property>
+                      </object>
+                    </property>
                   </object>
-                </property>
+                </child>
+                <child>
+                  <object class="GtkDrawingArea" id="color_bar">
+                    <property name="width-request">48</property>
+                    <property name="vexpand">true</property>
+                  </object>
+                </child>
               </object>
-            </child>
-            <child>
-              <object class="GtkDrawingArea" id="color_bar">
-                <property name="width-request">48</property>
-                <property name="vexpand">true</property>
+            </property>
+            <child type="bottom">
+              <object class="GtkBox" id="range_bar">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">6</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-top">6</property>
+                <property name="margin-bottom">6</property>
+                <child>
+                  <object class="GtkLabel" id="min_label">
+                    <property name="label">0.0 °C</property>
+                    <property name="width-chars">8</property>
+                    <property name="xalign">0</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkScale" id="min_scale">
+                    <property name="adjustment">min_temp_adj</property>
+                    <property name="draw-value">false</property>
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkScale" id="max_scale">
+                    <property name="adjustment">max_temp_adj</property>
+                    <property name="draw-value">false</property>
+                    <property name="hexpand">true</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="max_label">
+                    <property name="label">20.0 °C</property>
+                    <property name="width-chars">8</property>
+                    <property name="xalign">1</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="auto_button">
+                    <property name="label" translatable="yes">Auto</property>
+                    <property name="tooltip-text" translatable="yes">Snap range to image min/max</property>
+                    <property name="sensitive">false</property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>
