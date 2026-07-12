@@ -30,17 +30,30 @@
           </object>
         </child>
         <property name="content">
-          <object class="GtkScrolledWindow" id="scrolled_window">
+          <object class="GtkBox" id="canvas_box">
+            <property name="orientation">horizontal</property>
             <property name="hexpand">true</property>
             <property name="vexpand">true</property>
-            <property name="child">
-              <object class="GtkPicture" id="viewed_image">
-                <property name="content-fit">contain</property>
-                <property name="can-shrink">true</property>
+            <child>
+              <object class="GtkScrolledWindow" id="scrolled_window">
                 <property name="hexpand">true</property>
                 <property name="vexpand">true</property>
+                <property name="child">
+                  <object class="GtkPicture" id="viewed_image">
+                    <property name="content-fit">contain</property>
+                    <property name="can-shrink">true</property>
+                    <property name="hexpand">true</property>
+                    <property name="vexpand">true</property>
+                  </object>
+                </property>
               </object>
-            </property>
+            </child>
+            <child>
+              <object class="GtkDrawingArea" id="color_bar">
+                <property name="width-request">48</property>
+                <property name="vexpand">true</property>
+              </object>
+            </child>
           </object>
         </property>
       </object>

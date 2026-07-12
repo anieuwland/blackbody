@@ -2,12 +2,13 @@ use std::cell::{Cell, RefCell};
 use std::path::Path;
 use std::rc::Rc;
 
+use cairo::LinearGradient;
 use gdk_pixbuf::Pixbuf;
 use gio::SimpleAction;
 use glib::object::SendWeakRef;
 use glib::{Bytes, MainContext};
 use gtk4::prelude::*;
-use gtk4::{Builder, FileFilter, Picture, Tooltip};
+use gtk4::{Builder, DrawingArea, FileFilter, Picture, Tooltip};
 use libadwaita as adw;
 use libadwaita::prelude::*;
 
@@ -19,6 +20,7 @@ const UI: &str = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui"
 pub struct AppState {
     window: adw::ApplicationWindow,
     image: Picture,
+    color_bar: DrawingArea,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
     thermogram: RefCell<Option<Thermogram>>,
@@ -34,6 +36,7 @@ impl AppState {
         let state = AppState {
             window: builder.object("blackbody_window").unwrap(),
             image: builder.object("viewed_image").unwrap(),
+            color_bar: builder.object("color_bar").unwrap(),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
             thermogram: RefCell::new(None),
@@ -56,6 +59,7 @@ impl AppState {
                     self.max_temp.set(thermogram.max_temp());
                     *self.thermogram.borrow_mut() = Some(thermogram);
                     self.draw_render_threaded();
+                    self.color_bar.queue_draw();
                 }
                 None => {
                     let p = path.to_str().unwrap_or("<invalid path>");
@@ -66,6 +70,38 @@ impl AppState {
                 }
             }
         }
+    }
+
+    fn draw_color_bar(
+        context: &cairo::Context,
+        width: f64,
+        height: f64,
+        palette: &[[f32; 3]],
+        min_temp: f32,
+        max_temp: f32,
+    ) {
+        let gradient = LinearGradient::new(0.0, 0.0, 0.0, height);
+        let step = 1.0 / (palette.len() - 1) as f64;
+        for (i, color) in palette.iter().enumerate() {
+            // Palette index 0 = min (bottom of bar), last = max (top of bar)
+            gradient.add_color_stop_rgb(
+                1.0 - i as f64 * step,
+                color[0] as f64,
+                color[1] as f64,
+                color[2] as f64,
+            );
+        }
+        context.rectangle(0.0, 0.0, width, height);
+        let _ = context.set_source(&gradient);
+        let _ = context.fill();
+
+        // Temperature labels (white, small)
+        context.set_source_rgb(1.0, 1.0, 1.0);
+        context.set_font_size(10.0);
+        let _ = context.move_to(2.0, 12.0);
+        let _ = context.show_text(&format!("{:.1}°", max_temp));
+        let _ = context.move_to(2.0, height - 4.0);
+        let _ = context.show_text(&format!("{:.1}°", min_temp));
     }
 
     fn draw_render_threaded(&self) {
@@ -174,6 +210,17 @@ impl AppState {
             this.borrow().image.set_has_tooltip(true);
             this.borrow().image.connect_query_tooltip(move |_, x, y, _, tooltip| {
                 that.borrow().query_tooltip(x, y, tooltip)
+            });
+        }
+        {
+            // Colour bar draw function
+            let that = this.clone();
+            this.borrow().color_bar.set_draw_func(move |_, ctx, _w, _h| {
+                let s = that.borrow();
+                let w = s.color_bar.width() as f64;
+                let h = s.color_bar.height() as f64;
+                let palette = s.palette.borrow().clone();
+                Self::draw_color_bar(ctx, w, h, &palette, s.min_temp.get(), s.max_temp.get());
             });
         }
     }
