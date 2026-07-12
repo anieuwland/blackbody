@@ -8,7 +8,10 @@ use gio::SimpleAction;
 use glib::object::SendWeakRef;
 use glib::{Bytes, MainContext};
 use gtk4::prelude::*;
-use gtk4::{Builder, Button, DrawingArea, FileFilter, Label, Picture, Scale, ToggleButton, Tooltip};
+use gtk4::{
+    Builder, Button, DrawingArea, FileFilter, FlowBox, Label, MenuButton, Orientation, Picture,
+    Scale, SelectionMode, ToggleButton, Tooltip,
+};
 use libadwaita as adw;
 use libadwaita::prelude::*;
 
@@ -30,6 +33,9 @@ pub struct AppState {
     mode_thermal: ToggleButton,
     mode_optical: ToggleButton,
     mode_pip: ToggleButton,
+    palette_button: MenuButton,
+    palette_box: gtk4::Box,
+    palette_idx: Cell<usize>,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
     thermogram: RefCell<Option<Thermogram>>,
@@ -55,6 +61,9 @@ impl AppState {
             mode_thermal: builder.object("mode_thermal").unwrap(),
             mode_optical: builder.object("mode_optical").unwrap(),
             mode_pip: builder.object("mode_pip").unwrap(),
+            palette_button: builder.object("palette_button").unwrap(),
+            palette_box: builder.object("palette_box").unwrap(),
+            palette_idx: Cell::new(0),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
             thermogram: RefCell::new(None),
@@ -64,6 +73,7 @@ impl AppState {
         };
 
         let this = Rc::new(RefCell::new(state));
+        AppState::setup_palette_popover(&this);
         AppState::connect_signals(&this, application);
         this
     }
@@ -197,6 +207,109 @@ impl AppState {
         true
     }
 
+    fn setup_palette_popover(this: &Rc<RefCell<Self>>) {
+        const GROUPS: &[(&str, &[(&str, usize)])] = &[
+            ("Perceptually uniform", &[
+                ("Turbo", 0),
+                ("Cividis", 1),
+                ("Inferno", 5),
+                ("Magma", 8),
+                ("Viridis", 9),
+            ]),
+            ("Classic", &[
+                ("Grayscale", 3),
+                ("Hot", 4),
+                ("Rainbow", 6),
+                ("Copper", 2),
+            ]),
+            ("Diverging", &[("Coolwarm", 7)]),
+        ];
+
+        // Collect all swatch buttons so we can manage the selection highlight
+        let all_swatches: Rc<RefCell<Vec<Button>>> = Rc::new(RefCell::new(Vec::new()));
+
+        let palette_box = this.borrow().palette_box.clone();
+
+        for (group_name, palettes) in GROUPS {
+            let heading = Label::builder()
+                .label(*group_name)
+                .xalign(0.0)
+                .build();
+            heading.add_css_class("heading");
+            palette_box.append(&heading);
+
+            let flow = FlowBox::builder()
+                .selection_mode(SelectionMode::None)
+                .max_children_per_line(4)
+                .min_children_per_line(2)
+                .build();
+            palette_box.append(&flow);
+
+            for (name, idx) in *palettes {
+                let idx = *idx;
+                let palette_data: Vec<[f32; 3]> = PALETTES[idx].iter().copied().collect();
+
+                // Gradient swatch DrawingArea
+                let swatch = DrawingArea::builder()
+                    .width_request(80)
+                    .height_request(16)
+                    .build();
+                {
+                    let pd = palette_data.clone();
+                    swatch.set_draw_func(move |_, ctx, w, h| {
+                        let g = LinearGradient::new(0.0, 0.0, w as f64, 0.0);
+                        let step = 1.0 / (pd.len() - 1) as f64;
+                        for (i, c) in pd.iter().enumerate() {
+                            g.add_color_stop_rgb(i as f64 * step, c[0] as f64, c[1] as f64, c[2] as f64);
+                        }
+                        ctx.rectangle(0.0, 0.0, w as f64, h as f64);
+                        let _ = ctx.set_source(&g);
+                        let _ = ctx.fill();
+                    });
+                }
+
+                let label = Label::new(Some(name));
+                label.add_css_class("caption");
+
+                let vbox = gtk4::Box::new(Orientation::Vertical, 2);
+                vbox.append(&swatch);
+                vbox.append(&label);
+
+                let btn = Button::builder().child(&vbox).build();
+                btn.add_css_class("flat");
+
+                // Mark first palette (Turbo, idx=0) as initially selected
+                if idx == 0 {
+                    btn.add_css_class("suggested-action");
+                }
+
+                let that = this.clone();
+                let all = all_swatches.clone();
+                let btn_clone = btn.clone();
+                btn.connect_clicked(move |_| {
+                    // Update palette in AppState
+                    {
+                        let s = that.borrow();
+                        s.palette_idx.set(idx);
+                        *s.palette.borrow_mut() = PALETTES[idx].iter().copied().collect();
+                    }
+                    // Update selection highlight
+                    for b in all.borrow().iter() {
+                        b.remove_css_class("suggested-action");
+                    }
+                    btn_clone.add_css_class("suggested-action");
+                    // Re-render
+                    let s = that.borrow();
+                    s.draw_render_threaded();
+                    s.color_bar.queue_draw();
+                });
+
+                all_swatches.borrow_mut().push(btn.clone());
+                flow.insert(&btn, -1);
+            }
+        }
+    }
+
     fn is_thermal_mode(&self) -> bool {
         self.mode_thermal.is_active()
     }
@@ -216,6 +329,7 @@ impl AppState {
         let is_thermal = s.is_thermal_mode();
         s.color_bar.set_visible(is_thermal);
         s.range_bar.set_visible(is_thermal);
+        s.palette_button.set_visible(is_thermal);
 
         // Re-render with the appropriate image
         s.draw_render_threaded();
