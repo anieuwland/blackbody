@@ -5,6 +5,10 @@
 
   <menu id="app_menu_model">
     <item>
+      <attribute name="label" translatable="yes">Open…</attribute>
+      <attribute name="action">app.open</attribute>
+    </item>
+    <item>
       <attribute name="label" translatable="yes">Export thermal…</attribute>
       <attribute name="action">app.export</attribute>
     </item>
@@ -53,12 +57,33 @@
         <child type="top">
           <object class="AdwHeaderBar" id="headerbar">
 
-            <!-- Start: Open button -->
+            <!-- Start: Palette picker (left of mode switcher) -->
             <child>
-              <object class="GtkButton" id="open_button">
-                <property name="icon-name">document-open-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Open thermogram</property>
-                <property name="action-name">app.open</property>
+              <object class="GtkMenuButton" id="palette_button">
+                <property name="icon-name">preferences-color-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Choose colour palette</property>
+                <property name="margin-end">8</property>
+                <property name="popover">
+                  <object class="GtkPopover" id="palette_popover">
+                    <property name="child">
+                      <object class="GtkScrolledWindow">
+                        <property name="max-content-height">400</property>
+                        <property name="propagate-natural-height">true</property>
+                        <property name="propagate-natural-width">true</property>
+                        <property name="child">
+                          <object class="GtkBox" id="palette_box">
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">8</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <property name="margin-top">12</property>
+                            <property name="margin-bottom">12</property>
+                          </object>
+                        </property>
+                      </object>
+                    </property>
+                  </object>
+                </property>
               </object>
             </child>
 
@@ -91,38 +116,19 @@
 
             <!-- End: Overflow menu -->
             <child type="end">
+              <object class="GtkButton" id="info_button">
+                <property name="icon-name">dialog-information-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Camera info</property>
+                <property name="action-name">app.info</property>
+                <property name="sensitive">false</property>
+              </object>
+            </child>
+
+            <child type="end">
               <object class="GtkMenuButton" id="menu_button">
                 <property name="icon-name">open-menu-symbolic</property>
                 <property name="tooltip-text" translatable="yes">Main menu</property>
                 <property name="menu-model">app_menu_model</property>
-              </object>
-            </child>
-
-            <!-- End: Palette picker button -->
-            <child type="end">
-              <object class="GtkMenuButton" id="palette_button">
-                <property name="icon-name">preferences-color-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Choose colour palette</property>
-                <property name="popover">
-                  <object class="GtkPopover" id="palette_popover">
-                    <property name="child">
-                      <object class="GtkScrolledWindow">
-                        <property name="max-content-height">400</property>
-                        <property name="propagate-natural-height">true</property>
-                        <property name="child">
-                          <object class="GtkBox" id="palette_box">
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">8</property>
-                            <property name="margin-start">12</property>
-                            <property name="margin-end">12</property>
-                            <property name="margin-top">12</property>
-                            <property name="margin-bottom">12</property>
-                          </object>
-                        </property>
-                      </object>
-                    </property>
-                  </object>
-                </property>
               </object>
             </child>
 
@@ -177,17 +183,25 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkScale" id="min_scale">
-                        <property name="adjustment">min_temp_adj</property>
-                        <property name="draw-value">false</property>
+                      <object class="GtkBox">
+                        <property name="orientation">horizontal</property>
+                        <property name="spacing">0</property>
                         <property name="hexpand">true</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkScale" id="max_scale">
-                        <property name="adjustment">max_temp_adj</property>
-                        <property name="draw-value">false</property>
-                        <property name="hexpand">true</property>
+                        <child>
+                          <object class="GtkScale" id="min_scale">
+                            <property name="adjustment">min_temp_adj</property>
+                            <property name="draw-value">false</property>
+                            <property name="hexpand">true</property>
+                            <property name="inverted">true</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkScale" id="max_scale">
+                            <property name="adjustment">max_temp_adj</property>
+                            <property name="draw-value">false</property>
+                            <property name="hexpand">true</property>
+                          </object>
+                        </child>
                       </object>
                     </child>
                     <child>

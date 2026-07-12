@@ -56,5 +56,5 @@ pub mod tiff;
 
 pub use crate::flir::FlirThermogram;
 pub use crate::thermogram::Thermogram;
-pub use crate::thermogram_trait::ThermogramTrait;
+pub use crate::thermogram_trait::{CaptureParams, ThermogramTrait};
 pub use crate::tiff::TiffThermogram;

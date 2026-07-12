@@ -1,8 +1,9 @@
+use flyr::camera_metadata::CameraMetadata;
 use flyr::thermogram::FlyrThermogram;
 use ndarray::*;
 use std::path::{Path, PathBuf};
 
-use crate::ThermogramTrait;
+use crate::{CaptureParams, ThermogramTrait};
 
 /// This is the struct and `ThermogramTrait` implementation for FLIR thermograms, using
 /// [flyr](https://crates.io/crates/flyr).
@@ -41,6 +42,27 @@ impl FlirThermogram {
             file_path: file_path.to_path_buf(),
             thermal_buffer,
         })
+    }
+}
+
+impl FlirThermogram {
+    pub fn capture_params(&self) -> CaptureParams {
+        let ci = &self.thermogram.camera_info;
+        CaptureParams {
+            emissivity: ci.emissivity,
+            object_distance_m: ci.object_distance,
+            reflected_temp_k: ci.reflected_apparent_temperature,
+            relative_humidity: ci.relative_humidity,
+            planck_r1: ci.planck_r1,
+            planck_r2: ci.planck_r2,
+            planck_b: ci.planck_b,
+            planck_f: ci.planck_f,
+            planck_o: ci.planck_o,
+        }
+    }
+
+    pub fn camera_metadata(&self) -> Option<&CameraMetadata> {
+        self.thermogram.camera_metadata.as_ref()
     }
 }
 

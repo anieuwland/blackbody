@@ -2,6 +2,22 @@ use std::cmp::{Ordering, PartialOrd};
 use std::fs::File;
 use std::path::PathBuf;
 
+/// Capture parameters and Planck constants from the camera info record.
+#[derive(Clone, Debug)]
+pub struct CaptureParams {
+    pub emissivity: f32,
+    pub object_distance_m: f32,
+    /// Reflected apparent temperature in Kelvin.
+    pub reflected_temp_k: f32,
+    /// Relative humidity (0.0–1.0).
+    pub relative_humidity: f32,
+    pub planck_r1: f32,
+    pub planck_r2: f32,
+    pub planck_b: f32,
+    pub planck_f: f32,
+    pub planck_o: i32,
+}
+
 use image::{save_buffer, ColorType};
 use ndarray::*;
 use tiff::encoder::*;

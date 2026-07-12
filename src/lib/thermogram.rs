@@ -3,6 +3,8 @@ use std::fs::File;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 
+use flyr::camera_metadata::CameraMetadata;
+
 use crate::*;
 
 /// The wrapper enum through which most processing of thermograms is recommend to
@@ -77,6 +79,22 @@ impl Thermogram {
         return None;
     }
 
+}
+
+impl Thermogram {
+    pub fn capture_params(&self) -> Option<CaptureParams> {
+        match self {
+            Thermogram::Flir(t) => Some(t.capture_params()),
+            Thermogram::Tiff(_) => None,
+        }
+    }
+
+    pub fn camera_metadata(&self) -> Option<&CameraMetadata> {
+        match self {
+            Thermogram::Flir(t) => t.camera_metadata(),
+            Thermogram::Tiff(_) => None,
+        }
+    }
 }
 
 /// The `ThermogramTrait` implemented for the `Thermogram` enum. Method calls are forwarded to the

@@ -12,6 +12,7 @@ use gtk4::{
     Builder, Button, DrawingArea, FileFilter, FlowBox, Label, ListBox, MenuButton, Orientation,
     Picture, Scale, SelectionMode, ToggleButton, Tooltip,
 };
+use libadwaita::{ActionRow, PreferencesDialog, PreferencesGroup, PreferencesPage};
 use libadwaita as adw;
 use libadwaita::prelude::*;
 
@@ -42,6 +43,8 @@ pub struct AppState {
     zoom_factor: Cell<f64>,
     action_export: SimpleAction,
     action_render: SimpleAction,
+    action_info: SimpleAction,
+    info_button: Button,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
     thermogram: RefCell<Option<Thermogram>>,
@@ -76,6 +79,8 @@ impl AppState {
             zoom_factor: Cell::new(1.0),
             action_export: SimpleAction::new("export", None),
             action_render: SimpleAction::new("render", None),
+            action_info: SimpleAction::new("info", None),
+            info_button: builder.object("info_button").unwrap(),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
             thermogram: RefCell::new(None),
@@ -85,6 +90,21 @@ impl AppState {
         };
 
         let this = Rc::new(RefCell::new(state));
+
+        // Remove the trough margin on the touching sides so the two scales appear as one.
+        let css = gtk4::CssProvider::new();
+        css.load_from_string(
+            "scale.range-min trough { margin-right: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
+             scale.range-max trough { margin-left:  0; border-top-left-radius:  0; border-bottom-left-radius:  0; }",
+        );
+        gtk4::style_context_add_provider_for_display(
+            &gtk4::gdk::Display::default().unwrap(),
+            &css,
+            gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION,
+        );
+        this.borrow().min_scale.add_css_class("range-min");
+        this.borrow().max_scale.add_css_class("range-max");
+
         AppState::setup_palette_popover(&this);
         AppState::connect_signals(&this, application);
         // We're inside connect_activate, so GTK is ready — present immediately
@@ -103,8 +123,16 @@ impl AppState {
                     let max = thermogram.max_temp();
                     self.min_temp.set(min);
                     self.max_temp.set(max);
+                    let has_info = thermogram.capture_params().is_some();
+                    let has_optical = thermogram.has_optical();
                     *self.thermogram.borrow_mut() = Some(thermogram);
-                    self.min_scale.set_value(min as f64);
+                    // min_scale is inverted and stores -actual_min_temp, so:
+                    //   lower (right end) = -(current max),  upper (left end) = -(min - 20)
+                    self.min_scale.adjustment().set_lower(-(max as f64));
+                    self.min_scale.adjustment().set_upper((20.0 - min) as f64);
+                    self.max_scale.adjustment().set_lower(min as f64);
+                    self.max_scale.adjustment().set_upper((max + 20.0) as f64);
+                    self.min_scale.set_value(-(min as f64));
                     self.max_scale.set_value(max as f64);
                     self.min_label.set_text(&format!("{:.1} °C", min));
                     self.max_label.set_text(&format!("{:.1} °C", max));
@@ -112,6 +140,12 @@ impl AppState {
                     self.zoom_button.set_sensitive(true);
                     self.action_export.set_enabled(true);
                     self.action_render.set_enabled(true);
+                    self.action_info.set_enabled(has_info);
+                    self.info_button.set_sensitive(has_info);
+                    self.mode_optical.set_sensitive(has_optical);
+                    if !has_optical && !self.mode_thermal.is_active() {
+                        self.mode_thermal.set_active(true);
+                    }
                     self.draw_render_threaded();
                     self.color_bar.queue_draw();
                 }
@@ -276,7 +310,8 @@ impl AppState {
 
             let flow = FlowBox::builder()
                 .selection_mode(SelectionMode::None)
-                .max_children_per_line(4)
+                .homogeneous(true)
+                .max_children_per_line(3)
                 .min_children_per_line(2)
                 .build();
             palette_box.append(&flow);
@@ -364,8 +399,8 @@ impl AppState {
 
         let s = this.borrow();
         let is_thermal = s.is_thermal_mode();
-        s.color_bar.set_visible(is_thermal);
-        s.range_bar.set_visible(is_thermal);
+        s.color_bar.set_sensitive(is_thermal);
+        s.range_bar.set_sensitive(is_thermal);
         s.palette_button.set_visible(is_thermal);
 
         // Re-render with the appropriate image
@@ -462,6 +497,51 @@ impl AppState {
             .present(Some(&self.window));
     }
 
+    fn show_info_dialog(&self) {
+        let thermogram = self.thermogram.borrow();
+        let Some(thermogram) = thermogram.as_ref() else { return };
+
+        let dialog = PreferencesDialog::builder()
+            .title("Camera Info")
+            .build();
+        let page = PreferencesPage::new();
+
+        // Camera group — EXIF metadata
+        let camera_group = PreferencesGroup::builder().title("Camera").build();
+        let add_row = |group: &PreferencesGroup, label: &str, value: &str| {
+            group.add(&ActionRow::builder().title(label).subtitle(value).build());
+        };
+        if let Some(meta) = thermogram.camera_metadata() {
+            if let Some(v) = &meta.make { add_row(&camera_group, "Make", v); }
+            if let Some(v) = &meta.model { add_row(&camera_group, "Model", v); }
+            if let Some(v) = meta.focal_length { add_row(&camera_group, "Focal length", &format!("{v:.1} mm")); }
+            if let Some(v) = &meta.date_time { add_row(&camera_group, "Date/time", v); }
+        }
+
+        // Capture parameters group
+        let capture_group = PreferencesGroup::builder().title("Capture Parameters").build();
+        if let Some(cp) = thermogram.capture_params() {
+            add_row(&capture_group, "Emissivity", &format!("{:.2}", cp.emissivity));
+            add_row(&capture_group, "Object distance", &format!("{:.2} m", cp.object_distance_m));
+            add_row(&capture_group, "Reflected temperature", &format!("{:.1} °C", cp.reflected_temp_k - 273.15));
+            add_row(&capture_group, "Relative humidity", &format!("{:.0}%", cp.relative_humidity * 100.0));
+
+            // Planck constants group
+            let planck_group = PreferencesGroup::builder().title("Planck Constants").build();
+            add_row(&planck_group, "R1", &format!("{:.4}", cp.planck_r1));
+            add_row(&planck_group, "R2", &format!("{:.8}", cp.planck_r2));
+            add_row(&planck_group, "B", &format!("{:.2}", cp.planck_b));
+            add_row(&planck_group, "F", &format!("{:.2}", cp.planck_f));
+            add_row(&planck_group, "O", &format!("{}", cp.planck_o));
+            page.add(&planck_group);
+        }
+
+        page.add(&camera_group);
+        page.add(&capture_group);
+        dialog.add(&page);
+        dialog.present(Some(&self.window));
+    }
+
     fn show_open_dialog(this: &Rc<RefCell<Self>>) {
         let filters = gio::ListStore::new::<FileFilter>();
         filters.append(&this.borrow().filter_thermograms);
@@ -514,6 +594,13 @@ impl AppState {
             application.add_action(&about);
         }
         {
+            let action_info = this.borrow().action_info.clone();
+            action_info.set_enabled(false);
+            let that = this.clone();
+            action_info.connect_activate(move |_, _| that.borrow().show_info_dialog());
+            application.add_action(&action_info);
+        }
+        {
             let that = this.clone();
             this.borrow().image.set_has_tooltip(true);
             this.borrow().image.connect_query_tooltip(move |_, x, y, _, tooltip| {
@@ -543,25 +630,27 @@ impl AppState {
             });
         }
         {
-            // Min scale: update min_temp, label, re-render
+            // min_scale stores -actual_min; negate to recover temperature.
             let that = this.clone();
             this.borrow().min_scale.connect_value_changed(move |scale| {
-                let v = scale.value() as f32;
+                let actual = -(scale.value() as f32);
                 let s = that.borrow();
-                s.min_temp.set(v);
-                s.min_label.set_text(&format!("{:.1} °C", v));
+                s.min_temp.set(actual);
+                s.min_label.set_text(&format!("{:.1} °C", actual));
+                s.max_scale.adjustment().set_lower(actual as f64);
                 s.draw_render_threaded();
                 s.color_bar.queue_draw();
             });
         }
         {
-            // Max scale: update max_temp, label, re-render
+            // max_scale stores actual_max; update min_scale's lower (= -actual_max).
             let that = this.clone();
             this.borrow().max_scale.connect_value_changed(move |scale| {
-                let v = scale.value() as f32;
+                let actual = scale.value() as f32;
                 let s = that.borrow();
-                s.max_temp.set(v);
-                s.max_label.set_text(&format!("{:.1} °C", v));
+                s.max_temp.set(actual);
+                s.max_label.set_text(&format!("{:.1} °C", actual));
+                s.min_scale.adjustment().set_lower(-(actual as f64));
                 s.draw_render_threaded();
                 s.color_bar.queue_draw();
             });
@@ -573,8 +662,14 @@ impl AppState {
                 let thermogram = that.borrow().thermogram.borrow().clone();
                 if let Some(thermogram) = thermogram {
                     let s = that.borrow();
-                    s.min_scale.set_value(thermogram.min_temp() as f64);
-                    s.max_scale.set_value(thermogram.max_temp() as f64);
+                    let min = thermogram.min_temp() as f64;
+                    let max = thermogram.max_temp() as f64;
+                    // Reset inner bounds first so set_value is never clamped.
+                    // min_scale stores -actual_min, so its lower (right) = -max.
+                    s.min_scale.adjustment().set_lower(-max);
+                    s.max_scale.adjustment().set_lower(min);
+                    s.min_scale.set_value(-min);
+                    s.max_scale.set_value(max);
                 }
             });
         }
