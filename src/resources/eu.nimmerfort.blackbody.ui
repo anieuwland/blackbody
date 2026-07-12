@@ -6,52 +6,62 @@
   <menu id="zoom_menu_model">
     <item>
       <attribute name="label" translatable="yes">Fit</attribute>
-      <attribute name="action">app.zoom-fit</attribute>
+      <attribute name="action">win.zoom-fit</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">50%</attribute>
-      <attribute name="action">app.set-zoom</attribute>
+      <attribute name="action">win.set-zoom</attribute>
       <attribute name="target" type="i">50</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">67%</attribute>
-      <attribute name="action">app.set-zoom</attribute>
+      <attribute name="action">win.set-zoom</attribute>
       <attribute name="target" type="i">67</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">100%</attribute>
-      <attribute name="action">app.set-zoom</attribute>
+      <attribute name="action">win.set-zoom</attribute>
       <attribute name="target" type="i">100</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">200%</attribute>
-      <attribute name="action">app.set-zoom</attribute>
+      <attribute name="action">win.set-zoom</attribute>
       <attribute name="target" type="i">200</attribute>
     </item>
     <item>
       <attribute name="label" translatable="yes">400%</attribute>
-      <attribute name="action">app.set-zoom</attribute>
+      <attribute name="action">win.set-zoom</attribute>
       <attribute name="target" type="i">400</attribute>
     </item>
   </menu>
 
   <menu id="app_menu_model">
-    <item>
-      <attribute name="label" translatable="yes">Open…</attribute>
-      <attribute name="action">app.open</attribute>
-    </item>
-    <item>
-      <attribute name="label" translatable="yes">Export thermal…</attribute>
-      <attribute name="action">app.export</attribute>
-    </item>
-    <item>
-      <attribute name="label" translatable="yes">Save render…</attribute>
-      <attribute name="action">app.render</attribute>
-    </item>
-    <item>
-      <attribute name="label" translatable="yes">About Blackbody</attribute>
-      <attribute name="action">app.about</attribute>
-    </item>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">New window</attribute>
+        <attribute name="action">app.new-window</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Open…</attribute>
+        <attribute name="action">win.open</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Export thermal…</attribute>
+        <attribute name="action">win.export</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Save render…</attribute>
+        <attribute name="action">win.render</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">About Blackbody</attribute>
+        <attribute name="action">app.about</attribute>
+      </item>
+    </section>
   </menu>
 
   <object class="GtkFileFilter" id="filter_thermograms">

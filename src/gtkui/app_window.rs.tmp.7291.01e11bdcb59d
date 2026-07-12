@@ -691,26 +691,25 @@ impl AppState {
 
     fn connect_signals(this: &Rc<RefCell<Self>>, application: &impl IsA<adw::Application>) {
         let application = application.as_ref();
-        let window = this.borrow().window.clone();
         {
             let that = this.clone();
             let open = SimpleAction::new("open", None);
             open.connect_activate(move |_, _| Self::show_open_dialog(&that));
-            window.add_action(&open);
+            this.borrow().window.add_action(&open);
         }
         {
             let action_export = this.borrow().action_export.clone();
             action_export.set_enabled(false);
             let that = this.clone();
             action_export.connect_activate(move |_, _| Self::show_export_dialog(&that));
-            window.add_action(&action_export);
+            this.borrow().window.add_action(&action_export);
         }
         {
             let action_render = this.borrow().action_render.clone();
             action_render.set_enabled(false);
             let that = this.clone();
             action_render.connect_activate(move |_, _| Self::show_render_dialog(&that));
-            window.add_action(&action_render);
+            this.borrow().window.add_action(&action_render);
         }
         {
             let that = this.clone();
@@ -719,7 +718,7 @@ impl AppState {
             application.add_action(&about);
         }
         {
-            let app = application.upcast_ref::<adw::Application>().clone();
+            let app = application.clone();
             let new_window = SimpleAction::new("new-window", None);
             new_window.connect_activate(move |_, _| { AppState::new(&app); });
             application.add_action(&new_window);
@@ -899,7 +898,7 @@ impl AppState {
                 s.zoom_factor.set(pct as f64 / 100.0);
                 s.apply_zoom();
             });
-            window.add_action(&set_zoom);
+            application.add_action(&set_zoom);
 
             let that = this.clone();
             let zoom_fit = SimpleAction::new("zoom-fit", None);
@@ -908,7 +907,7 @@ impl AppState {
                 s.zoom_fit.set(true);
                 s.apply_zoom();
             });
-            window.add_action(&zoom_fit);
+            application.add_action(&zoom_fit);
         }
         {
             let that = this.clone();
