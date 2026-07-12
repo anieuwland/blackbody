@@ -9,8 +9,8 @@ use glib::object::SendWeakRef;
 use glib::{Bytes, MainContext};
 use gtk4::prelude::*;
 use gtk4::{
-    Builder, Button, DrawingArea, FileFilter, FlowBox, Label, MenuButton, Orientation, Picture,
-    Scale, SelectionMode, ToggleButton, Tooltip,
+    Builder, Button, DrawingArea, FileFilter, FlowBox, Label, ListBox, MenuButton, Orientation,
+    Picture, Scale, SelectionMode, ToggleButton, Tooltip,
 };
 use libadwaita as adw;
 use libadwaita::prelude::*;
@@ -36,6 +36,10 @@ pub struct AppState {
     palette_button: MenuButton,
     palette_box: gtk4::Box,
     palette_idx: Cell<usize>,
+    zoom_button: MenuButton,
+    zoom_list: ListBox,
+    zoom_fit: Cell<bool>,
+    zoom_factor: Cell<f64>,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
     thermogram: RefCell<Option<Thermogram>>,
@@ -64,6 +68,10 @@ impl AppState {
             palette_button: builder.object("palette_button").unwrap(),
             palette_box: builder.object("palette_box").unwrap(),
             palette_idx: Cell::new(0),
+            zoom_button: builder.object("zoom_button").unwrap(),
+            zoom_list: builder.object("zoom_list").unwrap(),
+            zoom_fit: Cell::new(true),
+            zoom_factor: Cell::new(1.0),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
             thermogram: RefCell::new(None),
@@ -93,6 +101,7 @@ impl AppState {
                     self.min_label.set_text(&format!("{:.1} °C", min));
                     self.max_label.set_text(&format!("{:.1} °C", max));
                     self.auto_button.set_sensitive(true);
+                    self.zoom_button.set_sensitive(true);
                     self.draw_render_threaded();
                     self.color_bar.queue_draw();
                 }
@@ -104,6 +113,23 @@ impl AppState {
                     ));
                 }
             }
+        }
+    }
+
+    fn apply_zoom(&self) {
+        if self.zoom_fit.get() {
+            self.image.set_can_shrink(true);
+            self.image.set_size_request(-1, -1);
+            self.zoom_button.set_icon_name("zoom-fit-best-symbolic");
+        } else {
+            let factor = self.zoom_factor.get();
+            if let Some(p) = self.image.paintable() {
+                let w = (p.intrinsic_width() as f64 * factor) as i32;
+                let h = (p.intrinsic_height() as f64 * factor) as i32;
+                self.image.set_can_shrink(false);
+                self.image.set_size_request(w, h);
+            }
+            self.zoom_button.set_icon_name("zoom-in-symbolic");
         }
     }
 
@@ -318,7 +344,6 @@ impl AppState {
         // Mutual exclusion: activate the clicked button, deactivate others
         {
             let s = this.borrow();
-            // Block all signals temporarily to avoid recursion
             for tb in [&s.mode_thermal, &s.mode_optical, &s.mode_pip] {
                 tb.set_active(false);
             }
@@ -438,6 +463,28 @@ impl AppState {
                     let s = that.borrow();
                     s.min_scale.set_value(thermogram.min_temp() as f64);
                     s.max_scale.set_value(thermogram.max_temp() as f64);
+                }
+            });
+        }
+        {
+            // Zoom list: row activated selects zoom level
+            // ponytail: toggle on button click skipped; popover covers the use case
+            let that = this.clone();
+            this.borrow().zoom_list.connect_row_activated(move |_, row| {
+                const FACTORS: &[f64] = &[0.0, 0.25, 0.50, 1.0, 1.5, 2.0];
+                let idx = row.index() as usize;
+                let s = that.borrow();
+                if idx == 0 {
+                    s.zoom_fit.set(true);
+                } else {
+                    s.zoom_fit.set(false);
+                    if let Some(&f) = FACTORS.get(idx) {
+                        s.zoom_factor.set(f);
+                    }
+                }
+                s.apply_zoom();
+                if let Some(popover) = s.zoom_button.popover() {
+                    popover.popdown();
                 }
             });
         }
