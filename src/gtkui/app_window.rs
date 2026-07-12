@@ -11,7 +11,7 @@ use gtk4::prelude::*;
 use gtk4::{
     Builder, Button, DrawingArea, EventControllerMotion, EventControllerScroll,
     EventControllerScrollFlags, FileFilter, FlowBox, Label, MenuButton, Orientation,
-    Scale, ScrolledWindow, SelectionMode, ToggleButton, Tooltip,
+    Overlay, Scale, ScrolledWindow, SelectionMode, ToggleButton, Tooltip,
 };
 use libadwaita::{ActionRow, PreferencesDialog, PreferencesGroup, PreferencesPage};
 use libadwaita as adw;
@@ -37,6 +37,11 @@ pub struct AppState {
     palette_button: MenuButton,
     palette_box: gtk4::Box,
     palette_idx: Cell<usize>,
+    canvas_overlay: Overlay,
+    osd_container: gtk4::Box,
+    osd_show_anim: adw::TimedAnimation,
+    osd_hide_anim: adw::TimedAnimation,
+    osd_hide_source: Rc<Cell<Option<glib::SourceId>>>,
     scrolled_window: ScrolledWindow,
     zoom_button: MenuButton,
     zoom_label: Label,
@@ -60,6 +65,12 @@ impl AppState {
     pub fn new(application: &impl IsA<adw::Application>) -> Rc<RefCell<AppState>> {
         let builder = Builder::from_resource(UI);
 
+        let osd_container: gtk4::Box = builder.object("osd_container").unwrap();
+        let show_target = adw::PropertyAnimationTarget::new(&osd_container, "opacity");
+        let osd_show_anim = adw::TimedAnimation::new(&osd_container, 0.0, 1.0, 200, show_target);
+        let hide_target = adw::PropertyAnimationTarget::new(&osd_container, "opacity");
+        let osd_hide_anim = adw::TimedAnimation::new(&osd_container, 1.0, 0.0, 1000, hide_target);
+
         let state = AppState {
             window: builder.object("blackbody_window").unwrap(),
             image: builder.object("viewed_image").unwrap(),
@@ -75,6 +86,11 @@ impl AppState {
             palette_button: builder.object("palette_button").unwrap(),
             palette_box: builder.object("palette_box").unwrap(),
             palette_idx: Cell::new(0),
+            canvas_overlay: builder.object("canvas_overlay").unwrap(),
+            osd_container,
+            osd_show_anim,
+            osd_hide_anim,
+            osd_hide_source: Rc::new(Cell::new(None)),
             scrolled_window: builder.object("scrolled_window").unwrap(),
             zoom_button: builder.object("zoom_button").unwrap(),
             zoom_label: builder.object("zoom_label").unwrap(),
@@ -111,6 +127,18 @@ impl AppState {
         );
         this.borrow().min_scale.add_css_class("range-min");
         this.borrow().max_scale.add_css_class("range-max");
+
+        {
+            let s = this.borrow();
+            s.osd_container.set_opacity(0.0);
+            s.osd_container.set_can_target(false);
+            let container = s.osd_container.downgrade();
+            s.osd_hide_anim.connect_done(move |_| {
+                if let Some(c) = container.upgrade() {
+                    c.set_can_target(false);
+                }
+            });
+        }
 
         AppState::setup_palette_popover(&this);
         AppState::connect_signals(&this, application);
@@ -152,6 +180,7 @@ impl AppState {
                     if !has_optical && !self.mode_thermal.is_active() {
                         self.mode_thermal.set_active(true);
                     }
+                    self.show_osd();
                     self.draw_render_threaded();
                     self.color_bar.queue_draw();
                 }
@@ -396,6 +425,36 @@ impl AppState {
 
     fn is_thermal_mode(&self) -> bool {
         self.mode_thermal.is_active()
+    }
+
+    fn show_osd(&self) {
+        if self.image_bgra.lock().unwrap().is_none() { return; }
+        if let Some(id) = self.osd_hide_source.replace(None) {
+            id.remove();
+        }
+        self.osd_hide_anim.pause();
+        self.osd_show_anim.set_value_from(self.osd_container.opacity());
+        self.osd_container.set_can_target(true);
+        self.osd_show_anim.play();
+        self.schedule_osd_hide(std::time::Duration::from_secs(3));
+    }
+
+    fn schedule_osd_hide(&self, delay: std::time::Duration) {
+        if let Some(id) = self.osd_hide_source.replace(None) {
+            id.remove();
+        }
+        let shared = Rc::clone(&self.osd_hide_source);
+        let show_anim = self.osd_show_anim.clone();
+        let hide_anim = self.osd_hide_anim.clone();
+        let container = self.osd_container.downgrade();
+        let id = glib::timeout_add_local(delay, move || {
+            shared.replace(None);
+            show_anim.pause();
+            hide_anim.set_value_from(container.upgrade().map(|c| c.opacity()).unwrap_or(1.0));
+            hide_anim.play();
+            glib::ControlFlow::Break
+        });
+        self.osd_hide_source.set(Some(id));
     }
 
     fn apply_mode(this: &Rc<RefCell<Self>>, button: &ToggleButton) {
@@ -754,6 +813,15 @@ impl AppState {
                 that.borrow().mouse_pos.set((x, y));
             });
             this.borrow().scrolled_window.add_controller(motion);
+        }
+        {
+            // OSD fade: show on mouse motion, hide after idle
+            let that = this.clone();
+            let osd_motion = EventControllerMotion::new();
+            osd_motion.connect_motion(move |_, _, _| {
+                that.borrow().show_osd();
+            });
+            this.borrow().canvas_overlay.add_controller(osd_motion);
         }
         {
             let that = this.clone();

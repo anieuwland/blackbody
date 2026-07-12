@@ -190,7 +190,7 @@
                 </property>
                 <child type="overlay">
                   <!-- Transparent row: positions both OSD pills at the same height -->
-                  <object class="GtkBox">
+                  <object class="GtkBox" id="osd_container">
                     <property name="orientation">horizontal</property>
                     <property name="halign">fill</property>
                     <property name="valign">end</property>
