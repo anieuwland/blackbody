@@ -124,7 +124,7 @@ impl AppState {
             dir_idx: Cell::new(0),
             min_temp: Cell::new(0.0),
             max_temp: Cell::new(0.0),
-            palette: RefCell::new(PALETTES[0].iter().copied().collect()),
+            palette: RefCell::new(PALETTES[3].iter().copied().collect()), // grayscale until thermogram loaded
         };
 
         let this = Rc::new(RefCell::new(state));
@@ -200,6 +200,7 @@ impl AppState {
                     self.populate_info_sidebar(&thermogram);
                     let embedded_palette = thermogram.palette();
                     *self.thermogram.borrow_mut() = Some(thermogram);
+                    *self.palette.borrow_mut() = PALETTES[self.palette_idx.get()].iter().copied().collect();
                     if let Some(this) = self.self_ref.borrow().upgrade() {
                         Self::update_embedded_palette(&this, embedded_palette);
                     }
