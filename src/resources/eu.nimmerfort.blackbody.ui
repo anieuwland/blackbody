@@ -281,7 +281,7 @@
                             <property name="spacing">4</property>
                             <child>
                               <object class="GtkImage">
-                                <property name="icon-name">zoom-in-symbolic</property>
+                                <property name="icon-name">system-search-symbolic</property>
                               </object>
                             </child>
                             <child>
