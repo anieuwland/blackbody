@@ -100,36 +100,6 @@
         <child type="top">
           <object class="AdwHeaderBar" id="headerbar">
 
-            <!-- Start: Palette picker (left of mode switcher) -->
-            <child>
-              <object class="GtkMenuButton" id="palette_button">
-                <property name="icon-name">preferences-color-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Choose colour palette</property>
-                <property name="margin-end">8</property>
-                <property name="popover">
-                  <object class="GtkPopover" id="palette_popover">
-                    <property name="child">
-                      <object class="GtkScrolledWindow">
-                        <property name="max-content-height">400</property>
-                        <property name="propagate-natural-height">true</property>
-                        <property name="propagate-natural-width">true</property>
-                        <property name="child">
-                          <object class="GtkBox" id="palette_box">
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">8</property>
-                            <property name="margin-start">12</property>
-                            <property name="margin-end">12</property>
-                            <property name="margin-top">12</property>
-                            <property name="margin-bottom">12</property>
-                          </object>
-                        </property>
-                      </object>
-                    </property>
-                  </object>
-                </property>
-              </object>
-            </child>
-
             <!-- Start: Mode switcher [T][O][P] -->
             <child>
               <object class="GtkBox" id="mode_box">
@@ -171,6 +141,34 @@
                 <property name="icon-name">info-outline-symbolic</property>
                 <property name="tooltip-text" translatable="yes">Camera info</property>
                 <property name="sensitive">false</property>
+              </object>
+            </child>
+
+            <child type="end">
+              <object class="GtkMenuButton" id="palette_button">
+                <property name="icon-name">preferences-color-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Choose colour palette</property>
+                <property name="popover">
+                  <object class="GtkPopover" id="palette_popover">
+                    <property name="child">
+                      <object class="GtkScrolledWindow">
+                        <property name="max-content-height">400</property>
+                        <property name="propagate-natural-height">true</property>
+                        <property name="propagate-natural-width">true</property>
+                        <property name="child">
+                          <object class="GtkBox" id="palette_box">
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">8</property>
+                            <property name="margin-start">12</property>
+                            <property name="margin-end">12</property>
+                            <property name="margin-top">12</property>
+                            <property name="margin-bottom">12</property>
+                          </object>
+                        </property>
+                      </object>
+                    </property>
+                  </object>
+                </property>
               </object>
             </child>
 
@@ -230,6 +228,7 @@
                         <property name="orientation">horizontal</property>
                         <property name="spacing">6</property>
                         <property name="hexpand">true</property>
+                        <property name="margin-end">16</property>
                         <style><class name="osd"/></style>
                         <child>
                           <object class="GtkLabel" id="min_label">

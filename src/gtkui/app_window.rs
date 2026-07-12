@@ -39,6 +39,10 @@ pub struct AppState {
     palette_idx: Cell<usize>,
     canvas_overlay: Overlay,
     placeholder: gtk4::Box,
+    all_swatches: Rc<RefCell<Vec<Button>>>,
+    embedded_section: gtk4::Box,
+    embedded_swatch: RefCell<Option<Button>>,
+    self_ref: RefCell<std::rc::Weak<RefCell<AppState>>>,
     osd_container: gtk4::CenterBox,
     osd_show_anim: adw::TimedAnimation,
     osd_hide_anim: adw::TimedAnimation,
@@ -92,6 +96,10 @@ impl AppState {
             palette_idx: Cell::new(0),
             canvas_overlay: builder.object("canvas_overlay").unwrap(),
             placeholder: gtk4::Box::new(Orientation::Vertical, 24),
+            all_swatches: Rc::new(RefCell::new(Vec::new())),
+            embedded_section: gtk4::Box::new(Orientation::Vertical, 8),
+            embedded_swatch: RefCell::new(None),
+            self_ref: RefCell::new(std::rc::Weak::new()),
             osd_container,
             osd_show_anim,
             osd_hide_anim,
@@ -119,6 +127,7 @@ impl AppState {
         };
 
         let this = Rc::new(RefCell::new(state));
+        *this.borrow().self_ref.borrow_mut() = Rc::downgrade(&this);
 
         // Remove the trough margin on the touching sides so the two scales appear as one.
         let css = gtk4::CssProvider::new();
@@ -184,7 +193,11 @@ impl AppState {
                     let has_info = thermogram.capture_params().is_some();
                     let has_optical = thermogram.has_optical();
                     self.populate_info_sidebar(&thermogram);
+                    let embedded_palette = thermogram.palette();
                     *self.thermogram.borrow_mut() = Some(thermogram);
+                    if let Some(this) = self.self_ref.borrow().upgrade() {
+                        Self::update_embedded_palette(&this, embedded_palette);
+                    }
                     // min_scale is inverted and stores -actual_min_temp, so:
                     //   lower (right end) = -(current max),  upper (left end) = -(min - 20)
                     self.min_scale.adjustment().set_lower(-(max as f64));
@@ -332,6 +345,80 @@ impl AppState {
         true
     }
 
+    fn update_embedded_palette(this: &Rc<RefCell<Self>>, palette: Option<Vec<[f32; 3]>>) {
+        let embedded_section = this.borrow().embedded_section.clone();
+        while let Some(child) = embedded_section.first_child() {
+            embedded_section.remove(&child);
+        }
+        *this.borrow().embedded_swatch.borrow_mut() = None;
+
+        let Some(palette_data) = palette else {
+            embedded_section.set_visible(false);
+            return;
+        };
+
+        let heading = Label::builder().label("Embedded").xalign(0.0).build();
+        heading.add_css_class("heading");
+
+        let swatch = DrawingArea::builder().width_request(80).height_request(16).build();
+        {
+            let pd = palette_data.clone();
+            swatch.set_draw_func(move |_, ctx, w, h| {
+                let g = LinearGradient::new(0.0, 0.0, w as f64, 0.0);
+                let step = 1.0 / (pd.len() - 1) as f64;
+                for (i, c) in pd.iter().enumerate() {
+                    g.add_color_stop_rgb(i as f64 * step, c[0] as f64, c[1] as f64, c[2] as f64);
+                }
+                ctx.rectangle(0.0, 0.0, w as f64, h as f64);
+                let _ = ctx.set_source(&g);
+                let _ = ctx.fill();
+            });
+        }
+
+        let name_label = Label::new(Some("Camera palette"));
+        name_label.add_css_class("caption");
+
+        let vbox = gtk4::Box::new(Orientation::Vertical, 2);
+        vbox.append(&swatch);
+        vbox.append(&name_label);
+
+        let btn = Button::builder().child(&vbox).build();
+        btn.add_css_class("flat");
+
+        // Default to embedded palette: apply now and mark selected
+        *this.borrow().palette.borrow_mut() = palette_data.clone();
+
+        let all = this.borrow().all_swatches.clone();
+        let that = this.clone();
+        let btn_clone = btn.clone();
+        btn.connect_clicked(move |_| {
+            *that.borrow().palette.borrow_mut() = palette_data.clone();
+            for b in all.borrow().iter() {
+                b.remove_css_class("suggested-action");
+            }
+            btn_clone.add_css_class("suggested-action");
+            that.borrow().draw_render_threaded();
+            that.borrow().color_bar.queue_draw();
+        });
+        for b in this.borrow().all_swatches.borrow().iter() {
+            b.remove_css_class("suggested-action");
+        }
+        btn.add_css_class("suggested-action");
+
+        let flow = FlowBox::builder()
+            .selection_mode(SelectionMode::None)
+            .homogeneous(true)
+            .max_children_per_line(3)
+            .min_children_per_line(2)
+            .build();
+        flow.insert(&btn, -1);
+
+        *this.borrow().embedded_swatch.borrow_mut() = Some(btn);
+        embedded_section.append(&heading);
+        embedded_section.append(&flow);
+        embedded_section.set_visible(true);
+    }
+
     fn setup_palette_popover(this: &Rc<RefCell<Self>>) {
         const GROUPS: &[(&str, &[(&str, usize)])] = &[
             ("Perceptually uniform", &[
@@ -350,10 +437,12 @@ impl AppState {
             ("Diverging", &[("Coolwarm", 7)]),
         ];
 
-        // Collect all swatch buttons so we can manage the selection highlight
-        let all_swatches: Rc<RefCell<Vec<Button>>> = Rc::new(RefCell::new(Vec::new()));
-
+        let all_swatches = this.borrow().all_swatches.clone();
         let palette_box = this.borrow().palette_box.clone();
+
+        let embedded_section = this.borrow().embedded_section.clone();
+        embedded_section.set_visible(false);
+        palette_box.prepend(&embedded_section);
 
         for (group_name, palettes) in GROUPS {
             let heading = Label::builder()
@@ -421,6 +510,9 @@ impl AppState {
                     }
                     // Update selection highlight
                     for b in all.borrow().iter() {
+                        b.remove_css_class("suggested-action");
+                    }
+                    if let Some(b) = that.borrow().embedded_swatch.borrow().as_ref() {
                         b.remove_css_class("suggested-action");
                     }
                     btn_clone.add_css_class("suggested-action");
@@ -594,7 +686,7 @@ impl AppState {
 
         // File entry — clicking opens parent directory
         if let Some(path) = thermogram.path() {
-            let parent_str = path.parent().and_then(|p| p.to_str()).unwrap_or("").to_string();
+            let parent_str = path.parent().and_then(|p| p.file_name()).and_then(|n| n.to_str()).unwrap_or("").to_string();
             let dir_uri = gio::File::for_path(path.parent().unwrap_or(path)).uri().to_string();
 
             let open_btn = gtk4::Button::builder()
@@ -641,7 +733,7 @@ impl AppState {
             if let Some(v) = &meta.make { add_row(&camera_group, "Make", v); }
             if let Some(v) = &meta.model { add_row(&camera_group, "Model", v); }
             if let Some(v) = meta.focal_length { add_row(&camera_group, "Focal length", &format!("{v:.1} mm")); }
-            if let Some(v) = &meta.date_time { add_row(&camera_group, "Date/time", v); }
+            if let Some(v) = &meta.date_time { add_row(&camera_group, "Photographed", &format_exif_datetime(v)); }
         }
         self.info_sidebar.append(&camera_group);
 
@@ -674,13 +766,23 @@ fn scan_dir_files(path: &Path) -> Vec<PathBuf> {
 
 fn format_file_size(bytes: u64) -> String {
     if bytes >= 1_000_000 { format!("{:.1} MB", bytes as f64 / 1_000_000.0) }
-    else if bytes >= 1_000 { format!("{:.0} KB", bytes as f64 / 1_000.0) }
+    else if bytes >= 1_000 { format!("{:.0} kB", bytes as f64 / 1_000.0) }
     else { format!("{bytes} B") }
 }
 
 fn format_system_time(t: std::time::SystemTime) -> Option<String> {
     let secs = t.duration_since(std::time::UNIX_EPOCH).ok()?.as_secs() as i64;
     glib::DateTime::from_unix_local(secs).ok()?.format("%Y-%m-%d %H:%M").map(|s| s.to_string()).ok()
+}
+
+fn format_exif_datetime(s: &str) -> String {
+    // EXIF stores "YYYY:MM:DD HH:MM:SS" — reformat to "YYYY-MM-DD HH:MM"
+    let b = s.as_bytes();
+    if b.len() >= 16 && b[4] == b':' && b[7] == b':' {
+        format!("{}-{}-{} {}", &s[0..4], &s[5..7], &s[8..10], &s[11..16])
+    } else {
+        s.to_string()
+    }
 }
 
 impl AppState {
