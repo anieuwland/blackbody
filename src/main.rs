@@ -15,7 +15,12 @@ pub fn main() -> ExitCode {
 
     init_env();
 
-    let application = adw::Application::new(Some("eu.nimmerfort.blackbody"), Default::default());
+    let application = adw::Application::new(
+        Some("eu.nimmerfort.blackbody"),
+        gio::ApplicationFlags::HANDLES_COMMAND_LINE,
+    );
+    // Forward command-line invocations to activate; we read args ourselves via std::env::args()
+    application.connect_command_line(|app, _| { app.activate(); 0.into() });
     application.connect_activate(move |app| {
         if app.windows().is_empty() {
             let state = AppState::new(app);
