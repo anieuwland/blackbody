@@ -8,7 +8,7 @@ use gio::SimpleAction;
 use glib::object::SendWeakRef;
 use glib::{Bytes, MainContext};
 use gtk4::prelude::*;
-use gtk4::{Builder, Button, DrawingArea, FileFilter, Label, Picture, Scale, Tooltip};
+use gtk4::{Builder, Button, DrawingArea, FileFilter, Label, Picture, Scale, ToggleButton, Tooltip};
 use libadwaita as adw;
 use libadwaita::prelude::*;
 
@@ -21,11 +21,15 @@ pub struct AppState {
     window: adw::ApplicationWindow,
     image: Picture,
     color_bar: DrawingArea,
+    range_bar: gtk4::Box,
     min_scale: Scale,
     max_scale: Scale,
     min_label: Label,
     max_label: Label,
     auto_button: Button,
+    mode_thermal: ToggleButton,
+    mode_optical: ToggleButton,
+    mode_pip: ToggleButton,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
     thermogram: RefCell<Option<Thermogram>>,
@@ -47,6 +51,10 @@ impl AppState {
             min_label: builder.object("min_label").unwrap(),
             max_label: builder.object("max_label").unwrap(),
             auto_button: builder.object("auto_button").unwrap(),
+            range_bar: builder.object("range_bar").unwrap(),
+            mode_thermal: builder.object("mode_thermal").unwrap(),
+            mode_optical: builder.object("mode_optical").unwrap(),
+            mode_pip: builder.object("mode_pip").unwrap(),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
             thermogram: RefCell::new(None),
@@ -125,11 +133,16 @@ impl AppState {
         let min = self.min_temp.get();
         let max = self.max_temp.get();
         let palette: Vec<[f32; 3]> = self.palette.borrow().clone();
+        let thermal_mode = self.is_thermal_mode();
         let img_ref = SendWeakRef::from(self.image.downgrade());
 
         if let Some(thermogram) = self.thermogram.borrow().clone() {
             std::thread::spawn(move || {
-                let image = thermogram.render(min, max, &palette);
+                let image = if !thermal_mode {
+                    thermogram.optical().unwrap_or_else(|| thermogram.render(min, max, &palette))
+                } else {
+                    thermogram.render(min, max, &palette)
+                };
                 if let Some(bytes) = image.as_slice() {
                     let h = image.shape()[0] as i32;
                     let w = image.shape()[1] as i32;
@@ -184,6 +197,33 @@ impl AppState {
         true
     }
 
+    fn is_thermal_mode(&self) -> bool {
+        self.mode_thermal.is_active()
+    }
+
+    fn apply_mode(this: &Rc<RefCell<Self>>, button: &ToggleButton) {
+        // Mutual exclusion: activate the clicked button, deactivate others
+        {
+            let s = this.borrow();
+            // Block all signals temporarily to avoid recursion
+            for tb in [&s.mode_thermal, &s.mode_optical, &s.mode_pip] {
+                tb.set_active(false);
+            }
+            button.set_active(true);
+        }
+
+        let s = this.borrow();
+        let is_thermal = s.is_thermal_mode();
+        s.color_bar.set_visible(is_thermal);
+        s.range_bar.set_visible(is_thermal);
+
+        // Re-render with the appropriate image
+        s.draw_render_threaded();
+        if is_thermal {
+            s.color_bar.queue_draw();
+        }
+    }
+
     fn show_open_dialog(this: &Rc<RefCell<Self>>) {
         let filters = gio::ListStore::new::<FileFilter>();
         filters.append(&this.borrow().filter_thermograms);
@@ -227,6 +267,17 @@ impl AppState {
             this.borrow().image.set_has_tooltip(true);
             this.borrow().image.connect_query_tooltip(move |_, x, y, _, tooltip| {
                 that.borrow().query_tooltip(x, y, tooltip)
+            });
+        }
+        {
+            // Mode toggles: T / O / P
+            let that = this.clone();
+            this.borrow().mode_thermal.connect_toggled(move |btn| {
+                if btn.is_active() { Self::apply_mode(&that, btn); }
+            });
+            let that = this.clone();
+            this.borrow().mode_optical.connect_toggled(move |btn| {
+                if btn.is_active() { Self::apply_mode(&that, btn); }
             });
         }
         {

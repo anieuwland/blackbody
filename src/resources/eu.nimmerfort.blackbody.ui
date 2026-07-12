@@ -42,6 +42,31 @@
                 <property name="tooltip-text" translatable="yes">Open thermogram</property>
               </object>
             </child>
+            <child>
+              <object class="GtkBox" id="mode_box">
+                <style><class name="linked"/></style>
+                <child>
+                  <object class="GtkToggleButton" id="mode_thermal">
+                    <property name="label" translatable="yes">T</property>
+                    <property name="active">true</property>
+                    <property name="tooltip-text" translatable="yes">Thermal view</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="mode_optical">
+                    <property name="label" translatable="yes">O</property>
+                    <property name="tooltip-text" translatable="yes">Optical view</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="mode_pip">
+                    <property name="label" translatable="yes">P</property>
+                    <property name="sensitive">false</property>
+                    <property name="tooltip-text" translatable="yes">Picture-in-picture</property>
+                  </object>
+                </child>
+              </object>
+            </child>
           </object>
         </child>
         <property name="content">
