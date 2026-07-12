@@ -218,14 +218,7 @@ impl AppState {
         }
     }
 
-    fn draw_color_bar(
-        context: &cairo::Context,
-        width: f64,
-        height: f64,
-        palette: &[[f32; 3]],
-        min_temp: f32,
-        max_temp: f32,
-    ) {
+    fn draw_color_bar(context: &cairo::Context, width: f64, height: f64, palette: &[[f32; 3]]) {
         let gradient = LinearGradient::new(0.0, 0.0, 0.0, height);
         let step = 1.0 / (palette.len() - 1) as f64;
         for (i, color) in palette.iter().enumerate() {
@@ -240,14 +233,6 @@ impl AppState {
         context.rectangle(0.0, 0.0, width, height);
         let _ = context.set_source(&gradient);
         let _ = context.fill();
-
-        // Temperature labels (white, small)
-        context.set_source_rgb(1.0, 1.0, 1.0);
-        context.set_font_size(10.0);
-        let _ = context.move_to(2.0, 12.0);
-        let _ = context.show_text(&format!("{:.1}°", max_temp));
-        let _ = context.move_to(2.0, height - 4.0);
-        let _ = context.show_text(&format!("{:.1}°", min_temp));
     }
 
     fn draw_render_threaded(&self) {
@@ -698,7 +683,21 @@ impl AppState {
                 let w = s.color_bar.width() as f64;
                 let h = s.color_bar.height() as f64;
                 let palette = s.palette.borrow().clone();
-                Self::draw_color_bar(ctx, w, h, &palette, s.min_temp.get(), s.max_temp.get());
+                Self::draw_color_bar(ctx, w, h, &palette);
+            });
+        }
+        {
+            // Colour bar tooltip: map y-position to temperature
+            let that = this.clone();
+            this.borrow().color_bar.set_has_tooltip(true);
+            this.borrow().color_bar.connect_query_tooltip(move |widget, _, y, _, tooltip| {
+                let s = that.borrow();
+                let h = widget.height();
+                if h == 0 { return false; }
+                let position = 1.0 - y as f32 / h as f32;
+                let temp = s.min_temp.get() + position * (s.max_temp.get() - s.min_temp.get());
+                tooltip.set_text(Some(&format!("{:.1} °C", temp)));
+                true
             });
         }
         {
