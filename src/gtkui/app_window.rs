@@ -414,7 +414,7 @@ impl AppState {
         let is_thermal = s.is_thermal_mode();
         s.color_bar.set_sensitive(is_thermal);
         s.range_bar.set_sensitive(is_thermal);
-        s.palette_button.set_visible(is_thermal);
+        s.palette_button.set_sensitive(is_thermal);
 
         // Re-render with the appropriate image
         s.draw_render_threaded();
