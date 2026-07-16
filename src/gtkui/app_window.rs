@@ -42,9 +42,14 @@ pub struct AppState {
     palette_button: MenuButton,
     palette_box: gtk4::Box,
     palette_idx: Cell<usize>,
+    /// Whether the user's current choice is the file's embedded camera palette
+    /// (true) or a standard palette from `PALETTES` (false). Sticky across
+    /// file loads so browsing a directory doesn't reset an explicit choice.
+    use_embedded_palette: Cell<bool>,
     canvas_overlay: Overlay,
     placeholder: gtk4::Box,
-    all_swatches: Rc<RefCell<Vec<Button>>>,
+    /// Standard-palette swatch buttons, keyed by their `PALETTES` index.
+    all_swatches: Rc<RefCell<Vec<(usize, Button)>>>,
     embedded_section: gtk4::Box,
     embedded_swatch: RefCell<Option<Button>>,
     self_ref: RefCell<std::rc::Weak<RefCell<AppState>>>,
@@ -108,6 +113,7 @@ impl AppState {
             palette_button: builder.object("palette_button").unwrap(),
             palette_box: builder.object("palette_box").unwrap(),
             palette_idx: Cell::new(0),
+            use_embedded_palette: Cell::new(true),
             canvas_overlay: builder.object("canvas_overlay").unwrap(),
             placeholder: gtk4::Box::new(Orientation::Vertical, 24),
             all_swatches: Rc::new(RefCell::new(Vec::new())),
@@ -414,6 +420,17 @@ impl AppState {
 
         let Some(palette_data) = palette else {
             embedded_section.set_visible(false);
+            // No embedded palette to honour: the standard palette (already
+            // applied by set_thermogram_from_path) is in effect — make sure
+            // its swatch carries the highlight.
+            let s = this.borrow();
+            for (idx, b) in s.all_swatches.borrow().iter() {
+                if *idx == s.palette_idx.get() {
+                    b.add_css_class("suggested-action");
+                } else {
+                    b.remove_css_class("suggested-action");
+                }
+            }
             return;
         };
 
@@ -445,25 +462,31 @@ impl AppState {
         let btn = Button::builder().child(&vbox).build();
         btn.add_css_class("flat");
 
-        // Default to embedded palette: apply now and mark selected
-        *this.borrow().palette.borrow_mut() = palette_data.clone();
+        // Only apply the embedded palette if the user's current choice is
+        // "camera palette"; an explicit standard palette stays selected
+        // (and highlighted) when browsing between files.
+        if this.borrow().use_embedded_palette.get() {
+            *this.borrow().palette.borrow_mut() = palette_data.clone();
+            for (_, b) in this.borrow().all_swatches.borrow().iter() {
+                b.remove_css_class("suggested-action");
+            }
+            btn.add_css_class("suggested-action");
+        }
 
         let all = this.borrow().all_swatches.clone();
         let that = this.clone();
         let btn_clone = btn.clone();
         btn.connect_clicked(move |_| {
-            *that.borrow().palette.borrow_mut() = palette_data.clone();
-            for b in all.borrow().iter() {
+            let s = that.borrow();
+            s.use_embedded_palette.set(true);
+            *s.palette.borrow_mut() = palette_data.clone();
+            for (_, b) in all.borrow().iter() {
                 b.remove_css_class("suggested-action");
             }
             btn_clone.add_css_class("suggested-action");
-            that.borrow().draw_render_threaded();
-            that.borrow().color_bar.queue_draw();
+            s.draw_render_threaded();
+            s.color_bar.queue_draw();
         });
-        for b in this.borrow().all_swatches.borrow().iter() {
-            b.remove_css_class("suggested-action");
-        }
-        btn.add_css_class("suggested-action");
 
         let flow = FlowBox::builder()
             .selection_mode(SelectionMode::None)
@@ -566,10 +589,11 @@ impl AppState {
                     {
                         let s = that.borrow();
                         s.palette_idx.set(idx);
+                        s.use_embedded_palette.set(false);
                         *s.palette.borrow_mut() = PALETTES[idx].to_vec();
                     }
                     // Update selection highlight
-                    for b in all.borrow().iter() {
+                    for (_, b) in all.borrow().iter() {
                         b.remove_css_class("suggested-action");
                     }
                     if let Some(b) = that.borrow().embedded_swatch.borrow().as_ref() {
@@ -582,7 +606,7 @@ impl AppState {
                     s.color_bar.queue_draw();
                 });
 
-                all_swatches.borrow_mut().push(btn.clone());
+                all_swatches.borrow_mut().push((idx, btn.clone()));
                 flow.insert(&btn, -1);
             }
         }
