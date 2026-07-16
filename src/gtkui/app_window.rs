@@ -345,30 +345,25 @@ impl AppState {
     }
 
     fn query_tooltip(&self, x: i32, y: i32, tooltip: &Tooltip) -> bool {
+        // Temperature readout only makes sense on the thermal render: the
+        // optical and PIP images have different dimensions and geometry.
+        if !self.is_thermal_mode() {
+            return false;
+        }
         let thermogram = self.thermogram.borrow();
         let Some(thermogram) = thermogram.as_ref() else { return false };
 
         let shape = thermogram.thermal_shape(); // [height, width]
-        let img_w = shape[1] as f64;
-        let img_h = shape[0] as f64;
-
-        // Compute the actual painted image rect inside the GtkPicture widget
-        // (content-fit = contain: image is centred, scaled to fit while keeping aspect ratio)
-        let widget_w = self.image.width() as f64;
-        let widget_h = self.image.height() as f64;
-        let scale = (widget_w / img_w).min(widget_h / img_h);
-        let painted_w = img_w * scale;
-        let painted_h = img_h * scale;
-        let offset_x = (widget_w - painted_w) / 2.0;
-        let offset_y = (widget_h - painted_h) / 2.0;
-
-        // Map widget coordinates to image coordinates
-        let ix = ((x as f64 - offset_x) / scale) as usize;
-        let iy = ((y as f64 - offset_y) / scale) as usize;
-
-        if ix >= shape[1] || iy >= shape[0] {
+        let Some((ix, iy)) = widget_to_image(
+            x as f64,
+            y as f64,
+            shape[1],
+            shape[0],
+            self.image.width() as f64,
+            self.image.height() as f64,
+        ) else {
             return false;
-        }
+        };
 
         let temp = thermogram.thermal()[[iy, ix]];
         tooltip.set_text(Some(&format!("{:.1} °C", temp)));
@@ -879,6 +874,37 @@ fn describe_measurement(m: &Measurement) -> (&'static str, &str, String) {
     }
 }
 
+/// Scale and top-left offset of an img_w×img_h image fitted into a widget
+/// (content-fit = contain: centred, scaled to fit, aspect ratio kept).
+fn fit_transform(img_w: f64, img_h: f64, widget_w: f64, widget_h: f64) -> (f64, f64, f64) {
+    let scale = (widget_w / img_w).min(widget_h / img_h);
+    let off_x = (widget_w - img_w * scale) / 2.0;
+    let off_y = (widget_h - img_h * scale) / 2.0;
+    (scale, off_x, off_y)
+}
+
+/// Map a widget-space position to image pixel coordinates, or `None` when the
+/// position falls in the letterbox margins around the painted image.
+fn widget_to_image(
+    x: f64,
+    y: f64,
+    img_w: usize,
+    img_h: usize,
+    widget_w: f64,
+    widget_h: f64,
+) -> Option<(usize, usize)> {
+    let (scale, off_x, off_y) = fit_transform(img_w as f64, img_h as f64, widget_w, widget_h);
+    let ix = (x - off_x) / scale;
+    let iy = (y - off_y) / scale;
+    // The < 0 check must happen in floating point: a negative value cast to
+    // usize saturates to 0, silently mapping margins onto row/column 0.
+    if ix < 0.0 || iy < 0.0 {
+        return None;
+    }
+    let (ix, iy) = (ix as usize, iy as usize);
+    (ix < img_w && iy < img_h).then_some((ix, iy))
+}
+
 fn scan_dir_files(path: &Path) -> Vec<PathBuf> {
     let Some(dir) = path.parent() else { return vec![] };
     let Ok(entries) = std::fs::read_dir(dir) else { return vec![] };
@@ -1053,11 +1079,8 @@ impl AppState {
                 let Ok(surface) = cairo::ImageSurface::create_for_data(
                     bytes_clone, cairo::Format::Rgb24, img_w, img_h, stride,
                 ) else { return };
-                let scale = (width as f64 / img_w as f64).min(height as f64 / img_h as f64);
-                let draw_w = img_w as f64 * scale;
-                let draw_h = img_h as f64 * scale;
-                let off_x = (width as f64 - draw_w) / 2.0;
-                let off_y = (height as f64 - draw_h) / 2.0;
+                let (scale, off_x, off_y) =
+                    fit_transform(img_w as f64, img_h as f64, width as f64, height as f64);
                 let _ = ctx.save();
                 ctx.translate(off_x, off_y);
                 ctx.scale(scale, scale);
@@ -1261,5 +1284,27 @@ impl AppState {
             });
             this.borrow().window.add_controller(key_ctrl);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::widget_to_image;
+
+    #[test]
+    fn maps_painted_area_and_rejects_margins() {
+        // 100×50 image in a 200×200 widget: scale 2, painted 200×100, y-offset 50.
+        assert_eq!(widget_to_image(0.0, 50.0, 100, 50, 200.0, 200.0), Some((0, 0)));
+        assert_eq!(widget_to_image(0.0, 100.0, 100, 50, 200.0, 200.0), Some((0, 25)));
+        assert_eq!(widget_to_image(199.0, 149.0, 100, 50, 200.0, 200.0), Some((99, 49)));
+
+        // Letterbox margins above/below the image previously saturated the
+        // negative offset to 0 and reported row 0 temperatures.
+        assert_eq!(widget_to_image(10.0, 40.0, 100, 50, 200.0, 200.0), None);
+        assert_eq!(widget_to_image(10.0, 151.0, 100, 50, 200.0, 200.0), None);
+
+        // 50×100 image in the same widget: x margins instead.
+        assert_eq!(widget_to_image(40.0, 10.0, 50, 100, 200.0, 200.0), None);
+        assert_eq!(widget_to_image(160.0, 10.0, 50, 100, 200.0, 200.0), None);
     }
 }
