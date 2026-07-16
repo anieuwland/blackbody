@@ -1,6 +1,6 @@
 use libblackbody::palettes;
 
-pub const PALETTES: [[[f32; 3]; 256]; 10] = [
+pub static PALETTES: [[[f32; 3]; 256]; 10] = [
     palettes::TURBO,
     palettes::CIVIDIS,
     palettes::COPPER,

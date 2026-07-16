@@ -29,8 +29,8 @@ impl FlirThermogram {
     /// In case of success, `Some<FlirThermogram>` is returned, otherwise `None`. Values are in
     /// centigrades, as specified by the `ThermogramTrait` contract.
     pub fn from_file(file_path: &Path) -> Option<FlirThermogram> {
-        let thermogram = FlirThermogram::read_thermal(file_path);
-        thermogram
+        
+        FlirThermogram::read_thermal(file_path)
     }
 
     fn read_thermal(file_path: &Path) -> Option<FlirThermogram> {
@@ -140,6 +140,18 @@ impl From<&FlirThermogram> for Array<f32, Ix2> {
     }
 }
 
+fn ycc_to_rgb(y: u8, cb: u8, cr: u8) -> [f32; 3] {
+    let r = y as f32 + 1.4075 * (cr as f32 - 128f32);
+    let g = y as f32 - 0.3455 * (cb as f32 - 128f32) - (0.7169 * (cr as f32 - 128f32));
+    let b = y as f32 + 1.7790 * (cb as f32 - 128f32);
+
+    let r = r.clamp(0f32, 255f32) / 255f32;
+    let g = g.clamp(0f32, 255f32) / 255f32;
+    let b = b.clamp(0f32, 255f32) / 255f32;
+
+    [r, g, b]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -189,16 +201,4 @@ mod tests {
         // Optical is 640x480 vs 120x90 thermal; RGB channels last.
         assert_eq!(img.shape(), &[480, 640, 3]);
     }
-}
-
-fn ycc_to_rgb(y: u8, cb: u8, cr: u8) -> [f32; 3] {
-    let r = y as f32 + 1.4075 * (cr as f32 - 128f32);
-    let g = y as f32 - 0.3455 * (cb as f32 - 128f32) - (0.7169 * (cr as f32 - 128f32));
-    let b = y as f32 + 1.7790 * (cb as f32 - 128f32);
-
-    let r = r.clamp(0f32, 255f32) / 255f32;
-    let g = g.clamp(0f32, 255f32) / 255f32;
-    let b = b.clamp(0f32, 255f32) / 255f32;
-
-    return [r, g, b];
 }

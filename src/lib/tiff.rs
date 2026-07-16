@@ -57,26 +57,6 @@ impl TiffThermogram {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    /// A file with a TIFF magic number but corrupt contents must yield None,
-    /// not panic — Thermogram::from_file routes it here on magic number alone.
-    #[test]
-    fn corrupt_tiff_returns_none() {
-        let path = std::env::temp_dir().join("blackbody_corrupt_test.tif");
-        std::fs::write(&path, b"II*\0this is not a valid tiff body").unwrap();
-        assert!(TiffThermogram::from_file(&path).is_none());
-        let _ = std::fs::remove_file(&path);
-    }
-
-    #[test]
-    fn missing_file_returns_none() {
-        assert!(TiffThermogram::from_file(Path::new("/nonexistent/no.tif")).is_none());
-    }
-}
-
 impl From<&TiffThermogram> for Array<f32, Ix2> {
     fn from(thermogram: &TiffThermogram) -> Array<f32, Ix2> {
         thermogram.thermal().clone()
@@ -104,5 +84,25 @@ impl ThermogramTrait for TiffThermogram {
 
     fn palette(&self) -> Option<Vec<[f32; 3]>> {
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A file with a TIFF magic number but corrupt contents must yield None,
+    /// not panic — Thermogram::from_file routes it here on magic number alone.
+    #[test]
+    fn corrupt_tiff_returns_none() {
+        let path = std::env::temp_dir().join("blackbody_corrupt_test.tif");
+        std::fs::write(&path, b"II*\0this is not a valid tiff body").unwrap();
+        assert!(TiffThermogram::from_file(&path).is_none());
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn missing_file_returns_none() {
+        assert!(TiffThermogram::from_file(Path::new("/nonexistent/no.tif")).is_none());
     }
 }

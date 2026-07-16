@@ -12,6 +12,9 @@ use crate::*;
 ///
 /// The enum itself, and all thermogram formats it wraps, implement [`ThermogramTrait`];
 /// consult its documentation for the available methods.
+// Boxing the Flir variant to silence large_enum_variant would break the
+// published API; the size gap only matters for moves, which are rare here.
+#[allow(clippy::large_enum_variant)]
 #[derive(Clone, Debug)]
 pub enum Thermogram {
     Flir(FlirThermogram),
@@ -73,7 +76,7 @@ impl Thermogram {
         }
 
         println!("Thermogram format not recognized: {:x?}=={:?}", magic_numbers, magic_numbers);
-        return None;
+        None
     }
 
 }

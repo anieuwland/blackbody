@@ -1,3 +1,8 @@
+// The colormap tables are generated data; some values happen to lie near
+// mathematical constants (e.g. 0.318… ≈ 1/π), which trips clippy's
+// deny-by-default approx_constant lint.
+#![allow(clippy::approx_constant)]
+
 // Perceptually uniform sequential
 mod cividis;
 pub use cividis::CIVIDIS;

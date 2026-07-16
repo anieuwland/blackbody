@@ -61,9 +61,9 @@ pub trait ThermogramTrait {
     ///
     /// # Arguments
     /// * `min_temp` - The temperature value, and all values below it, that needs to be mapped to
-    ///     the first color in the palette.
+    ///   the first color in the palette.
     /// * `max_temp` - The temperature value, and all values above it, that needs to be mapped to
-    ///     the last color in the palette.
+    ///   the last color in the palette.
     /// * `palette` - A collection of 256 colors to which the 256 bins will be mapped.
     ///
     /// # Returns
@@ -127,7 +127,7 @@ pub trait ThermogramTrait {
 
     fn export_thermal(&self, path: &PathBuf) -> Option<()> {
         // TODO Return LibblackbodyErrorEnum with finegrained failure info instead of Option
-        let thermal = self.thermal().iter().map(|v| *v).collect::<Vec<f32>>();
+        let thermal = self.thermal().iter().copied().collect::<Vec<f32>>();
 
         let width = self.thermal_shape()[1] as u32;
         let height = self.thermal_shape()[0] as u32;
@@ -169,10 +169,10 @@ pub trait ThermogramTrait {
         let render = self.render(min_temp, max_temp, palette);
         let width = render.shape()[1] as u32;
         let height = render.shape()[0] as u32;
-        let render = render.iter().map(|v| *v).collect::<Vec<u8>>();
+        let render = render.iter().copied().collect::<Vec<u8>>();
 
         // TODO Return LibblackbodyErrorEnum with finegrained failure info instead of Option
-        save_buffer(path, &render.as_slice(), width, height, ColorType::Rgb8).ok()
+        save_buffer(path, render.as_slice(), width, height, ColorType::Rgb8).ok()
     }
 
     /// Gives the shape of the thermal data, in the order of [height, width].

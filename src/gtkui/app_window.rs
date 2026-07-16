@@ -23,6 +23,9 @@ use libblackbody::{Measurement, Thermogram, ThermogramTrait};
 
 const UI: &str = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui";
 
+/// BGRA pixels plus width and height, shared with the render thread.
+type SharedImage = Arc<Mutex<Option<(Vec<u8>, i32, i32)>>>;
+
 pub struct AppState {
     window: adw::ApplicationWindow,
     image: DrawingArea,
@@ -53,7 +56,7 @@ pub struct AppState {
     zoom_label: Label,
     zoom_fit: Cell<bool>,
     zoom_factor: Cell<f64>,
-    image_bgra: Arc<Mutex<Option<(Vec<u8>, i32, i32)>>>,
+    image_bgra: SharedImage,
     mouse_pos: Cell<(f64, f64)>,
     action_export: SimpleAction,
     action_render: SimpleAction,
@@ -130,7 +133,7 @@ impl AppState {
             dir_idx: Cell::new(0),
             min_temp: Cell::new(0.0),
             max_temp: Cell::new(0.0),
-            palette: RefCell::new(PALETTES[3].iter().copied().collect()), // grayscale until thermogram loaded
+            palette: RefCell::new(PALETTES[3].to_vec()), // grayscale until thermogram loaded
         };
 
         let this = Rc::new(RefCell::new(state));
@@ -209,7 +212,7 @@ impl AppState {
                     self.populate_measurements_sidebar(&thermogram);
                     let embedded_palette = thermogram.palette();
                     *self.thermogram.borrow_mut() = Some(thermogram);
-                    *self.palette.borrow_mut() = PALETTES[self.palette_idx.get()].iter().copied().collect();
+                    *self.palette.borrow_mut() = PALETTES[self.palette_idx.get()].to_vec();
                     if let Some(this) = self.self_ref.borrow().upgrade() {
                         Self::update_embedded_palette(&this, embedded_palette);
                     }
@@ -489,7 +492,7 @@ impl AppState {
 
             for (name, idx) in *palettes {
                 let idx = *idx;
-                let palette_data: Vec<[f32; 3]> = PALETTES[idx].iter().copied().collect();
+                let palette_data: Vec<[f32; 3]> = PALETTES[idx].to_vec();
 
                 // Gradient swatch DrawingArea
                 let swatch = DrawingArea::builder()
@@ -533,7 +536,7 @@ impl AppState {
                     {
                         let s = that.borrow();
                         s.palette_idx.set(idx);
-                        *s.palette.borrow_mut() = PALETTES[idx].iter().copied().collect();
+                        *s.palette.borrow_mut() = PALETTES[idx].to_vec();
                     }
                     // Update selection highlight
                     for b in all.borrow().iter() {
@@ -1114,7 +1117,7 @@ impl AppState {
                                 // Build the path under a warped CTM, restore before stroking
                                 // so the line width stays uniform.
                                 let _ = ctx.save();
-                                ctx.translate(px(params[0] as u16), py(params[1] as u16));
+                                ctx.translate(px(params[0]), py(params[1]));
                                 ctx.rotate(uy.atan2(ux));
                                 ctx.scale(ru * scale, rv * scale);
                                 ctx.arc(0.0, 0.0, 1.0, 0.0, std::f64::consts::TAU);
