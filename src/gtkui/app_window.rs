@@ -71,7 +71,8 @@ pub struct AppState {
     info_split_view: adw::OverlaySplitView,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
-    thermogram: RefCell<Option<Thermogram>>,
+    /// Arc so render threads share the (large) thermogram instead of deep-copying it.
+    thermogram: RefCell<Option<Arc<Thermogram>>>,
     dir_files: RefCell<Vec<PathBuf>>,
     dir_idx: Cell<usize>,
     min_temp: Cell<f32>,
@@ -215,7 +216,7 @@ impl AppState {
                     self.populate_info_sidebar(&thermogram);
                     self.populate_measurements_sidebar(&thermogram);
                     let embedded_palette = thermogram.palette();
-                    *self.thermogram.borrow_mut() = Some(thermogram);
+                    *self.thermogram.borrow_mut() = Some(Arc::new(thermogram));
                     *self.palette.borrow_mut() = PALETTES[self.palette_idx.get()].to_vec();
                     if let Some(this) = self.self_ref.borrow().upgrade() {
                         Self::update_embedded_palette(&this, embedded_palette);
