@@ -11,8 +11,6 @@ use libadwaita::prelude::*;
 use crate::gtkui::app_window::AppState;
 
 pub fn main() -> ExitCode {
-    let cli_path: Option<std::path::PathBuf> = std::env::args().nth(1).map(Into::into);
-
     println!("Launching Blackbody {}", config::VERSION);
     init_env();
 
@@ -20,17 +18,24 @@ pub fn main() -> ExitCode {
         Some("eu.nimmerfort.blackbody"),
         gio::ApplicationFlags::HANDLES_COMMAND_LINE,
     );
-    // Forward command-line invocations to activate; we read args ourselves via std::env::args()
-    application.connect_command_line(|app, _| { app.activate(); 0.into() });
+    // Runs in the primary instance for every invocation, including ones forwarded
+    // from a second launch — so a file argument always opens, in a new window.
+    application.connect_command_line(|app, cmdline| {
+        match cmdline.arguments().get(1) {
+            Some(arg) => {
+                let state = AppState::new(app);
+                state.borrow().set_thermogram_from_path(Some(std::path::Path::new(arg)));
+            }
+            None => app.activate(),
+        }
+        0.into()
+    });
     application.connect_startup(|_| {
         adw::StyleManager::default().set_color_scheme(adw::ColorScheme::PreferDark);
     });
-    application.connect_activate(move |app| {
+    application.connect_activate(|app| {
         if app.windows().is_empty() {
-            let state = AppState::new(app);
-            if let Some(path) = &cli_path {
-                state.borrow().set_thermogram_from_path(Some(path));
-            }
+            AppState::new(app);
         } else {
             app.windows()[0].present();
         }
