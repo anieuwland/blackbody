@@ -65,6 +65,12 @@ impl FlirThermogram {
         self.thermogram.camera_metadata.as_ref()
     }
 
+    /// Measurement tools (spots, areas, lines, …) embedded in the file.
+    /// Coordinates are in thermal-image pixels.
+    pub fn measurements(&self) -> &[flyr::measurement_info::Measurement] {
+        &self.thermogram.measurements
+    }
+
     pub fn has_pip(&self) -> bool {
         self.thermogram.pip_info.is_some() && self.thermogram.embedded_image.is_some()
     }

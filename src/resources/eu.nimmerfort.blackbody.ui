@@ -145,6 +145,14 @@
             </child>
 
             <child type="end">
+              <object class="GtkToggleButton" id="measurements_button">
+                <property name="icon-name">find-location-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Measurements</property>
+                <property name="sensitive">false</property>
+              </object>
+            </child>
+
+            <child type="end">
               <object class="GtkMenuButton" id="palette_button">
                 <property name="icon-name">preferences-color-symbolic</property>
                 <property name="tooltip-text" translatable="yes">Choose colour palette</property>
@@ -178,18 +186,33 @@
         <property name="content">
           <object class="AdwOverlaySplitView" id="info_split_view">
             <property name="sidebar-position">end</property>
-            <property name="show-sidebar" bind-source="info_button" bind-property="active" bind-flags="bidirectional|sync-create"/>
             <property name="sidebar">
               <object class="GtkScrolledWindow">
                 <property name="hscrollbar-policy">never</property>
                 <property name="child">
-                  <object class="GtkBox" id="info_sidebar">
+                  <object class="GtkBox">
                     <property name="orientation">vertical</property>
-                    <property name="spacing">12</property>
-                    <property name="margin-start">12</property>
-                    <property name="margin-end">12</property>
-                    <property name="margin-top">12</property>
-                    <property name="margin-bottom">12</property>
+                    <child>
+                      <object class="GtkBox" id="info_sidebar">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">12</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                        <property name="margin-top">12</property>
+                        <property name="margin-bottom">12</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="measurements_sidebar">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">12</property>
+                        <property name="margin-start">12</property>
+                        <property name="margin-end">12</property>
+                        <property name="margin-top">12</property>
+                        <property name="margin-bottom">12</property>
+                        <property name="visible">false</property>
+                      </object>
+                    </child>
                   </object>
                 </property>
               </object>

@@ -19,7 +19,7 @@ use libadwaita as adw;
 use libadwaita::prelude::*;
 
 use crate::gtkui::palettes::PALETTES;
-use libblackbody::{Thermogram, ThermogramTrait};
+use libblackbody::{Measurement, Thermogram, ThermogramTrait};
 
 const UI: &str = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui";
 
@@ -59,6 +59,10 @@ pub struct AppState {
     action_render: SimpleAction,
     info_button: ToggleButton,
     info_sidebar: gtk4::Box,
+    measurements_button: ToggleButton,
+    measurements_sidebar: gtk4::Box,
+    draw_measurements: Rc<Cell<bool>>,
+    info_split_view: adw::OverlaySplitView,
     filter_thermograms: FileFilter,
     filter_all_files: FileFilter,
     thermogram: RefCell<Option<Thermogram>>,
@@ -115,6 +119,10 @@ impl AppState {
             action_render: SimpleAction::new("render", None),
             info_button: builder.object("info_button").unwrap(),
             info_sidebar: builder.object("info_sidebar").unwrap(),
+            measurements_button: builder.object("measurements_button").unwrap(),
+            measurements_sidebar: builder.object("measurements_sidebar").unwrap(),
+            draw_measurements: Rc::new(Cell::new(true)),
+            info_split_view: builder.object("info_split_view").unwrap(),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
             thermogram: RefCell::new(None),
@@ -196,7 +204,9 @@ impl AppState {
                     let has_info = thermogram.capture_params().is_some();
                     let has_optical = thermogram.has_optical();
                     let has_pip = thermogram.has_pip();
+                    let has_measurements = !thermogram.measurements().is_empty();
                     self.populate_info_sidebar(&thermogram);
+                    self.populate_measurements_sidebar(&thermogram);
                     let embedded_palette = thermogram.palette();
                     *self.thermogram.borrow_mut() = Some(thermogram);
                     *self.palette.borrow_mut() = PALETTES[self.palette_idx.get()].iter().copied().collect();
@@ -218,6 +228,10 @@ impl AppState {
                     self.action_export.set_enabled(true);
                     self.action_render.set_enabled(true);
                     self.info_button.set_sensitive(has_info);
+                    self.measurements_button.set_sensitive(has_measurements);
+                    if !has_measurements && self.measurements_button.is_active() {
+                        self.measurements_button.set_active(false);
+                    }
                     self.mode_optical.set_sensitive(has_optical);
                     self.mode_pip.set_sensitive(has_pip);
                     if (!has_optical && self.mode_optical.is_active())
@@ -787,6 +801,81 @@ impl AppState {
         self.info_sidebar.append(&capture_group);
     }
 
+    fn populate_measurements_sidebar(&self, thermogram: &Thermogram) {
+        while let Some(child) = self.measurements_sidebar.first_child() {
+            self.measurements_sidebar.remove(&child);
+        }
+
+        let measurements = thermogram.measurements();
+        if measurements.is_empty() {
+            return;
+        }
+
+        let switch = adw::SwitchRow::builder()
+            .title("Show in image")
+            .active(self.draw_measurements.get())
+            .build();
+        let flag = self.draw_measurements.clone();
+        let image = self.image.clone();
+        switch.connect_active_notify(move |sw| {
+            flag.set(sw.is_active());
+            image.queue_draw();
+        });
+        let switch_group = PreferencesGroup::new();
+        switch_group.add(&switch);
+        self.measurements_sidebar.append(&switch_group);
+
+        let group = PreferencesGroup::new();
+        for m in measurements {
+            let (kind, label, coords) = describe_measurement(m);
+            let subtitle = match label {
+                "" => format!("{kind} {coords}"),
+                l => format!("{kind} ‘{l}’ {coords}"),
+            };
+            let value = match thermogram.measurement_stats(m) {
+                Some(s) if s.min == s.max => format!("{:.1} °C", s.avg),
+                Some(s) => format!("avg {:.1} °C · {:.1} – {:.1} °C", s.avg, s.min, s.max),
+                None => "—".into(),
+            };
+            group.add(&ActionRow::builder().title(&value).subtitle(subtitle.trim_end()).build());
+        }
+        self.measurements_sidebar.append(&group);
+    }
+
+    /// One of the two sidebar toggles changed: keep them mutually exclusive and
+    /// show the sidebar when either is active.
+    fn apply_sidebar(this: &Rc<RefCell<Self>>, button: &ToggleButton) {
+        let s = this.borrow();
+        if button.is_active() {
+            for tb in [&s.info_button, &s.measurements_button] {
+                if *tb != *button {
+                    tb.set_active(false);
+                }
+            }
+        }
+        s.info_sidebar.set_visible(s.info_button.is_active());
+        s.measurements_sidebar.set_visible(s.measurements_button.is_active());
+        s.info_split_view
+            .set_show_sidebar(s.info_button.is_active() || s.measurements_button.is_active());
+    }
+
+}
+
+/// (kind, user-assigned label, coordinate string) for a measurement's sidebar row.
+fn describe_measurement(m: &Measurement) -> (&'static str, &str, String) {
+    match m {
+        Measurement::Spot { label, x, y } => ("Spot", label, format!("({x}, {y})")),
+        Measurement::Endpoint { label, x, y } => ("Endpoint", label, format!("({x}, {y})")),
+        Measurement::Area { label, x1, y1, x2, y2 } => {
+            ("Area", label, format!("({x1}, {y1}) – ({x2}, {y2})"))
+        }
+        Measurement::Line { label, x1, y1, x2, y2 } => {
+            ("Line", label, format!("({x1}, {y1}) – ({x2}, {y2})"))
+        }
+        Measurement::Ellipse { label, .. } => ("Ellipse", label, String::new()),
+        Measurement::Alarm { label, .. } => ("Alarm", label, String::new()),
+        Measurement::Difference { label, .. } => ("Difference", label, String::new()),
+    }
 }
 
 fn scan_dir_files(path: &Path) -> Vec<PathBuf> {
@@ -907,6 +996,26 @@ impl AppState {
             });
         }
         {
+            // Sidebar toggles: measurements / info share one panel
+            let that = this.clone();
+            this.borrow().info_button.connect_toggled(move |btn| {
+                Self::apply_sidebar(&that, btn);
+            });
+            let that = this.clone();
+            this.borrow().measurements_button.connect_toggled(move |btn| {
+                Self::apply_sidebar(&that, btn);
+            });
+            // Sidebar dismissed some other way (e.g. tap outside in overlay mode):
+            // untoggle both buttons so they stay in sync.
+            let that = this.clone();
+            this.borrow().info_split_view.connect_show_sidebar_notify(move |sv| {
+                if !sv.shows_sidebar() {
+                    that.borrow().info_button.set_active(false);
+                    that.borrow().measurements_button.set_active(false);
+                }
+            });
+        }
+        {
             // Colour bar draw function
             let that = this.clone();
             this.borrow().color_bar.set_draw_func(move |_, ctx, _w, _h| {
@@ -937,6 +1046,7 @@ impl AppState {
             // image is scaled to fit. In zoom mode size_request sets the area to exactly
             // the desired pixel size, so the image fills it 1:1.
             let surface_arc = this.borrow().image_bgra.clone();
+            let that = this.clone();
             this.borrow().image.set_draw_func(move |_, ctx, width, height| {
                 let data = surface_arc.lock().unwrap();
                 let Some((bytes, img_w, img_h)) = data.as_ref() else { return };
@@ -958,6 +1068,46 @@ impl AppState {
                 let _ = ctx.set_source_surface(&surface, 0.0, 0.0);
                 let _ = ctx.paint();
                 let _ = ctx.restore();
+
+                // ponytail: measurement coords are thermal pixels, which map 1:1 onto the
+                // thermal render only; add the PIP transform if overlays are wanted there.
+                let s = that.borrow();
+                if !s.draw_measurements.get() || !s.is_thermal_mode() {
+                    return;
+                }
+                let thermogram = s.thermogram.borrow();
+                let Some(thermogram) = thermogram.as_ref() else { return };
+                let px = |v: u16| off_x + (v as f64 + 0.5) * scale;
+                let py = |v: u16| off_y + (v as f64 + 0.5) * scale;
+                let arm = 6.0f64.max(0.5 * scale);
+                for m in thermogram.measurements() {
+                    match m {
+                        Measurement::Spot { x, y, .. } | Measurement::Endpoint { x, y, .. } => {
+                            let (cx, cy) = (px(*x), py(*y));
+                            ctx.move_to(cx - arm, cy);
+                            ctx.line_to(cx + arm, cy);
+                            ctx.move_to(cx, cy - arm);
+                            ctx.line_to(cx, cy + arm);
+                        }
+                        Measurement::Area { x1, y1, x2, y2, .. } => {
+                            ctx.rectangle(px(*x1), py(*y1), px(*x2) - px(*x1), py(*y2) - py(*y1));
+                        }
+                        Measurement::Line { x1, y1, x2, y2, .. } => {
+                            ctx.move_to(px(*x1), py(*y1));
+                            ctx.line_to(px(*x2), py(*y2));
+                        }
+                        Measurement::Ellipse { .. }
+                        | Measurement::Alarm { .. }
+                        | Measurement::Difference { .. } => {}
+                    }
+                }
+                // Dark casing under a white core keeps markers visible on any palette.
+                ctx.set_source_rgba(0.0, 0.0, 0.0, 0.8);
+                ctx.set_line_width(3.0);
+                let _ = ctx.stroke_preserve();
+                ctx.set_source_rgb(1.0, 1.0, 1.0);
+                ctx.set_line_width(1.5);
+                let _ = ctx.stroke();
             });
         }
         {

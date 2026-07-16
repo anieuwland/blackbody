@@ -103,6 +103,14 @@ impl Thermogram {
         }
     }
 
+    /// Measurement tools embedded in the file, in thermal-image pixel coordinates.
+    pub fn measurements(&self) -> &[flyr::measurement_info::Measurement] {
+        match self {
+            Thermogram::Flir(t) => t.measurements(),
+            Thermogram::Tiff(_) | Thermogram::Png(_) => &[],
+        }
+    }
+
     pub fn has_pip(&self) -> bool {
         match self {
             Thermogram::Flir(t) => t.has_pip(),
