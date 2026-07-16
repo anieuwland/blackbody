@@ -21,8 +21,8 @@
 //!
 //! let file_path = Path::new("/home/user/FLIR0123.jpg");
 //! match Thermogram::from_file(file_path) {
-//!     None => println!("Failed opening thermogram {:?}", file_path),
-//!     Some(thermogram) => {
+//!     Err(e) => println!("Failed opening thermogram {:?}: {}", file_path, e),
+//!     Ok(thermogram) => {
 //!         println!("Successfully opened thermogram {:?}", file_path);
 //!         // Do something with `thermogram`
 //!         // ...
@@ -39,6 +39,7 @@
 //! # Issue tracking
 //! Issue tracking happens in the [Blackbody repository](https://bitbucket.org/nimmerwoner/blackbody/issues/).
 
+pub mod error;
 pub mod flir;
 pub mod palettes;
 pub mod png;
@@ -46,6 +47,7 @@ pub mod thermogram;
 pub mod thermogram_trait;
 pub mod tiff;
 
+pub use crate::error::Error;
 pub use crate::flir::FlirThermogram;
 pub use flyr::measurement_info::Measurement;
 pub use crate::png::PngThermogram;

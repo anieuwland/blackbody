@@ -23,6 +23,7 @@ use ndarray::*;
 use tiff::encoder::*;
 
 use crate::palettes;
+use crate::Error;
 use crate::Measurement;
 
 /// Temperature statistics over a measurement tool's pixels, in celsius.
@@ -107,46 +108,33 @@ pub trait ThermogramTrait {
         self.render(self.min_temp(), self.max_temp(), &palettes::TURBO)
     }
 
-    /// Export thermal data to a tiff file.
-    ///
-    /// # Arguments
-    /// `path` - Where to save the thermogram export to. Regardless of the file extension, a tiff
-    ///     file is created.
-    ///
-    /// # Returns
-    /// `Some<()>` in case of success, otherwise `None`.
-    fn export_thermal_png(&self, path: &PathBuf) -> Option<()> {
+    /// Export thermal data to a 16-bit grayscale PNG in centikelvin.
+    fn export_thermal_png(&self, path: &PathBuf) -> Result<(), Error> {
         let w = self.thermal_shape()[1] as u32;
         let h = self.thermal_shape()[0] as u32;
         let pixels: Vec<u16> = self.thermal().iter()
             .map(|&c| (c * 100.0 + 27315.0).clamp(0.0, 65535.0) as u16)
             .collect();
-        image::ImageBuffer::<image::Luma<u16>, _>::from_raw(w, h, pixels)?
-            .save(path).ok()
+        image::ImageBuffer::<image::Luma<u16>, _>::from_raw(w, h, pixels)
+            .ok_or_else(|| Error::Encode("pixel buffer does not match dimensions".into()))?
+            .save(path)
+            .map_err(|e| Error::Encode(e.to_string()))
     }
 
-    fn export_thermal(&self, path: &PathBuf) -> Option<()> {
-        // TODO Return LibblackbodyErrorEnum with finegrained failure info instead of Option
+    /// Export thermal data to a 32-bit float tiff file.
+    ///
+    /// # Arguments
+    /// `path` - Where to save the thermogram export to. Regardless of the file extension, a tiff
+    ///   file is created.
+    fn export_thermal(&self, path: &PathBuf) -> Result<(), Error> {
         let thermal = self.thermal().iter().copied().collect::<Vec<f32>>();
-
         let width = self.thermal_shape()[1] as u32;
         let height = self.thermal_shape()[0] as u32;
 
-        // File::create(path)
-        //     .and_then(|mut file| TiffEncoder::new(&mut file))
-        //     .and_then(|mut tiff| tiff.write_image::<colortype::Gray32Float>(width, height, &thermal))
-        //     .ok()
-
-        match File::create(path) {
-            // TODO Return error codes and handle in Blackbody
-            Ok(mut file) => match TiffEncoder::new(&mut file) {
-                Ok(mut tiff) => {
-                    tiff.write_image::<colortype::Gray32Float>(width, height, &thermal).ok()
-                }
-                _ => None,
-            },
-            _ => None,
-        }
+        let mut file = File::create(path)?;
+        let mut tiff = TiffEncoder::new(&mut file).map_err(|e| Error::Encode(e.to_string()))?;
+        tiff.write_image::<colortype::Gray32Float>(width, height, &thermal)
+            .map_err(|e| Error::Encode(e.to_string()))
     }
 
     /// Save render to file.
@@ -156,23 +144,20 @@ pub trait ThermogramTrait {
     /// `min_temp` - The minimum temperature for the render, see `render(..)`.
     /// `max_temp` - The maximum temperature for the render, see `render(..)`.
     /// `palette` - The color palette to render the thermogram with, see `render(..)`.
-    ///
-    /// # Returns
-    /// `Some<()>` in case of success, otherwise `None`.
     fn save_render(
         &self,
         path: PathBuf,
         min_temp: f32,
         max_temp: f32,
         palette: &[[f32; 3]],
-    ) -> Option<()> {
+    ) -> Result<(), Error> {
         let render = self.render(min_temp, max_temp, palette);
         let width = render.shape()[1] as u32;
         let height = render.shape()[0] as u32;
         let render = render.iter().copied().collect::<Vec<u8>>();
 
-        // TODO Return LibblackbodyErrorEnum with finegrained failure info instead of Option
-        save_buffer(path, render.as_slice(), width, height, ColorType::Rgb8).ok()
+        save_buffer(path, render.as_slice(), width, height, ColorType::Rgb8)
+            .map_err(|e| Error::Encode(e.to_string()))
     }
 
     /// Gives the shape of the thermal data, in the order of [height, width].

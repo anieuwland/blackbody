@@ -29,8 +29,9 @@ impl Thermogram {
     /// * `path` - A path to a thermogram file.
     ///
     /// # Returns
-    /// In case of success an `Some<Thermogram>`, otherwise `None`. A `Thermogam` implements
-    /// `ThermogramTrait`, forwarding them to the wrapped struct.
+    /// In case of success an `Ok(Thermogram)`, otherwise an [`Error`] describing whether the
+    /// file could not be read, was of an unrecognized format, or failed to decode. A
+    /// `Thermogram` implements `ThermogramTrait`, forwarding calls to the wrapped struct.
     ///
     /// # Examples
     /// ```rust
@@ -39,46 +40,41 @@ impl Thermogram {
     ///
     /// let file_path = Path::new("/home/user/FLIR0123.jpg");
     /// match Thermogram::from_file(file_path) {
-    ///     None => println!("Failed opening thermogram {:?}", file_path),
-    ///     Some(thermogram) => {
+    ///     Err(e) => println!("Failed opening thermogram {:?}: {}", file_path, e),
+    ///     Ok(thermogram) => {
     ///         println!("Successfully opened thermogram {:?}", file_path);
     ///         // Do something with `thermogram`
     ///         // ...
     ///     },
     /// }
     /// ```
-    pub fn from_file(path: &Path) -> Option<Self> {
-        let mut file = File::open(path).ok()?;
-        let mut magic_numbers = [0u8; 4];
-        let count = file.read(&mut magic_numbers).ok()?;
-
-        if magic_numbers.len() != count {
-            println!("Read insufficient bytes to determine type of {:?}", path);
-            return None;
-        }
+    pub fn from_file(path: &Path) -> Result<Self, Error> {
+        let mut file = File::open(path)?;
+        let mut magic = [0u8; 4];
+        file.read_exact(&mut magic)?;
 
         // TODO JPG: Other magic numbers
-        if magic_numbers[..3] == [255, 216, 255] {
-            let flir = FlirThermogram::from_file(path)?;
-            return Some(Thermogram::Flir(flir));
+        if magic[..3] == [255, 216, 255] {
+            return FlirThermogram::from_file(path).map(Thermogram::Flir).ok_or_else(|| {
+                Error::Decode("not a FLIR JPEG, or the camera model is unsupported".into())
+            });
         }
 
-        let tiff = &magic_numbers[..4];
-        if tiff == [73, 73, 42, 0] || tiff == [77, 77, 0, 42] {
-            let tiff = TiffThermogram::from_file(path)?;
-            return Some(Thermogram::Tiff(tiff));
+        if magic == [73, 73, 42, 0] || magic == [77, 77, 0, 42] {
+            return TiffThermogram::from_file(path)
+                .map(Thermogram::Tiff)
+                .ok_or_else(|| Error::Decode("corrupt or unsupported TIFF".into()));
         }
 
         // PNG: \x89PNG
-        if magic_numbers == [137, 80, 78, 71] {
-            let png = PngThermogram::from_file(path)?;
-            return Some(Thermogram::Png(png));
+        if magic == [137, 80, 78, 71] {
+            return PngThermogram::from_file(path)
+                .map(Thermogram::Png)
+                .ok_or_else(|| Error::Decode("not a 16-bit grayscale PNG".into()));
         }
 
-        println!("Thermogram format not recognized: {:x?}=={:?}", magic_numbers, magic_numbers);
-        None
+        Err(Error::UnrecognizedFormat(magic))
     }
-
 }
 
 impl Thermogram {
@@ -173,5 +169,34 @@ impl ThermogramTrait for Thermogram {
 impl From<&Thermogram> for Array<f32, Ix2> {
     fn from(thermogram: &Thermogram) -> Array<f32, Ix2> {
         thermogram.thermal().clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn missing_file_is_io_error() {
+        let r = Thermogram::from_file(Path::new("/nonexistent/no.jpg"));
+        assert!(matches!(r, Err(Error::Io(_))));
+    }
+
+    #[test]
+    fn unknown_format_reports_magic_number() {
+        let path = std::env::temp_dir().join("blackbody_unknown_format_test");
+        std::fs::write(&path, b"text file, not a thermogram").unwrap();
+        let r = Thermogram::from_file(&path);
+        let _ = std::fs::remove_file(&path);
+        assert!(matches!(r, Err(Error::UnrecognizedFormat(m)) if &m == b"text"));
+    }
+
+    #[test]
+    fn corrupt_tiff_is_decode_error() {
+        let path = std::env::temp_dir().join("blackbody_corrupt_enum_test.tif");
+        std::fs::write(&path, b"II*\0this is not a valid tiff body").unwrap();
+        let r = Thermogram::from_file(&path);
+        let _ = std::fs::remove_file(&path);
+        assert!(matches!(r, Err(Error::Decode(_))));
     }
 }

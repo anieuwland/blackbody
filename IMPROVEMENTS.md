@@ -27,7 +27,7 @@ From a full review of the non-generated code (2026-07-16). Verified against `car
 ## P4 — Hygiene and UX polish
 
 - [x] **13. About dialog hardcodes "2.0.0"** (`src/gtkui/app_window.rs:723`) while Meson already generates `config::VERSION`. Use it.
-- [ ] **14. Library error handling.** The lib prints errors to stdout (`thermogram.rs:63,85`), `identifier()` panics on non-UTF8 filenames (`flir.rs:121`, `tiff.rs:118` — the `FIXME` already knows), and the `Option<()>` export returns swallow failure causes (existing TODOs). One small error type across the lib closes all three.
+- [x] **14. Library error handling.** The lib prints errors to stdout (`thermogram.rs:63,85`), `identifier()` panics on non-UTF8 filenames (`flir.rs:121`, `tiff.rs:118` — the `FIXME` already knows), and the `Option<()>` export returns swallow failure causes (existing TODOs). One small error type across the lib closes all three.
 - [x] **15. Error dialog title is always "Could not open file"** even for export/save failures (`show_error_dialog`). Take the title as a parameter.
 - [ ] **16. Export dialog extension handling.** Typing `foo.tif` with the TIFF filter yields `foo.tif.tiff` because only the exact string `tiff` is accepted (`src/gtkui/app_window.rs:650`). Accept `tif`/`tiff`; consider unifying with the newer `FileDialog` API used by "save render" (the last `#[allow(deprecated)]` holdout).
 - [ ] **17. Tests require a sibling `flyr-rs` checkout** (`src/lib/flir.rs:155` uses `../flyr-rs/thermograms/…`), so `cargo test` fails on a standalone clone. Vendor the three fixture JPEGs or gate the tests on the path existing.

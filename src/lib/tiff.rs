@@ -73,9 +73,7 @@ impl ThermogramTrait for TiffThermogram {
     }
 
     fn identifier(&self) -> &str {
-        // FIXME unwraps
-        let file_name = self.file_path.file_name();
-        file_name.unwrap().to_str().unwrap()
+        self.file_path.file_name().and_then(|n| n.to_str()).unwrap_or("<thermogram>")
     }
 
     fn path(&self) -> Option<&PathBuf> {

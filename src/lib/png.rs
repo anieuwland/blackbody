@@ -35,7 +35,7 @@ impl ThermogramTrait for PngThermogram {
     fn thermal(&self) -> &Array<f32, Ix2> { &self.thermal }
     fn optical(&self) -> Option<Array<u8, Ix3>> { None }
     fn identifier(&self) -> &str {
-        self.file_path.file_name().and_then(|n| n.to_str()).unwrap_or("")
+        self.file_path.file_name().and_then(|n| n.to_str()).unwrap_or("<thermogram>")
     }
     fn path(&self) -> Option<&PathBuf> { Some(&self.file_path) }
     fn palette(&self) -> Option<Vec<[f32; 3]>> { None }

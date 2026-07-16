@@ -207,7 +207,7 @@ impl AppState {
     pub fn set_thermogram_from_path(&self, path: Option<&Path>) {
         if let Some(path) = path {
             match Thermogram::from_file(path) {
-                Some(thermogram) => {
+                Ok(thermogram) => {
                     self.window.set_title(Some(thermogram.identifier()));
                     let min = thermogram.min_temp();
                     let max = thermogram.max_temp();
@@ -259,11 +259,11 @@ impl AppState {
                     self.draw_render_threaded();
                     self.color_bar.queue_draw();
                 }
-                None => {
+                Err(e) => {
                     let p = path.to_str().unwrap_or("<invalid path>");
                     self.show_error_dialog("Could not open file", &format!(
                         "Failed to open file. The file may be corrupted or the camera \
-                         unsupported.\n\nFile: {p}"
+                         unsupported.\n\nFile: {p}\nCause: {e}"
                     ));
                 }
             }
@@ -684,14 +684,17 @@ impl AppState {
                     };
                     let thermogram = that.borrow().thermogram.borrow().clone();
                     if let Some(thermogram) = thermogram {
-                        let ok = if ext == "png" {
+                        let result = if ext == "png" {
                             thermogram.export_thermal_png(&path)
                         } else {
                             thermogram.export_thermal(&path)
                         };
-                        if ok.is_none() {
+                        if let Err(e) = result {
                             let p = path.to_str().unwrap_or("<invalid path>");
-                            that.borrow().show_error_dialog("Export failed", &format!("Failed to export to {p}"));
+                            that.borrow().show_error_dialog(
+                                "Export failed",
+                                &format!("Failed to export to {p}\nCause: {e}"),
+                            );
                         }
                     }
                 }
@@ -731,9 +734,12 @@ impl AppState {
                         let max = s.max_temp.get();
                         let palette = s.palette.borrow().clone();
                         drop(s);
-                        if thermogram.save_render(path.clone(), min, max, &palette).is_none() {
+                        if let Err(e) = thermogram.save_render(path.clone(), min, max, &palette) {
                             let p = path.to_str().unwrap_or("<invalid path>");
-                            that.borrow().show_error_dialog("Save failed", &format!("Failed to save to {p}"));
+                            that.borrow().show_error_dialog(
+                                "Save failed",
+                                &format!("Failed to save to {p}\nCause: {e}"),
+                            );
                         }
                     }
                 }
