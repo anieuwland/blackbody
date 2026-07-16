@@ -744,7 +744,7 @@ impl AppState {
     fn show_about_dialog(&self) {
         adw::AboutDialog::builder()
             .application_name("Blackbody")
-            .version("2.0.0")
+            .version(crate::config::VERSION)
             .developer_name("Arthur Nieuwland")
             .website("https://bitbucket.org/nimmerwoner/blackbody/")
             .license("EUPL-1.2")
