@@ -187,6 +187,39 @@ impl AppState {
         }
 
         {
+            // Clicking the controls must not move keyboard focus onto them: a
+            // focused Scale consumes Left/Right/Home/End itself, breaking the
+            // directory navigation keys after adjusting temperature or zoom
+            // with the mouse. Pointer interaction doesn't need focus, and
+            // keyboard users can still Tab to the sliders.
+            let s = this.borrow();
+            let controls: [&gtk4::Widget; 9] = [
+                s.min_scale.upcast_ref(),
+                s.max_scale.upcast_ref(),
+                s.zoom_button.upcast_ref(),
+                s.palette_button.upcast_ref(),
+                s.mode_thermal.upcast_ref(),
+                s.mode_optical.upcast_ref(),
+                s.mode_pip.upcast_ref(),
+                s.info_button.upcast_ref(),
+                s.measurements_button.upcast_ref(),
+            ];
+            for w in controls {
+                w.set_focus_on_click(false);
+            }
+
+            // And clicking the thermogram itself focuses it, so navigation
+            // keys always come back when the user clicks the image.
+            s.image.set_focusable(true);
+            let image = s.image.clone();
+            let click = gtk4::GestureClick::new();
+            click.connect_pressed(move |_, _, _, _| {
+                image.grab_focus();
+            });
+            s.scrolled_window.add_controller(click);
+        }
+
+        {
             let s = this.borrow();
             s.osd_container.set_opacity(0.0);
             s.osd_container.set_can_target(false);
