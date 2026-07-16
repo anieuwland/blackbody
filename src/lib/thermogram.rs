@@ -10,20 +10,8 @@ use crate::*;
 /// The wrapper enum through which most processing of thermograms is recommend to
 /// happen. Use `Thermogram::from_file()` to read files.
 ///
-/// The enum itself, and all thermogram formats it wraps, implement `ThermogramTrait`. Below
-/// several of its methods are listed. Consult the documentation of `ThermogramTrait` for
-/// more details.
-///
-/// ```rust
-/// pub trait ThermogramTrait {
-///     fn thermal(&self) -> &Array<f32, Ix2>;  // Extract the thermal data
-///     fn optical(&self) -> &Array<u8, Ix3>>;  // Extract embedded photos, if present
-///     fn identifier(&self) -> &str;  // A uniquely identifying string for this thermogram
-///     fn render(&self min_temp: f32, max_temp: f32, palette: [[f32; 3]; 256]) -> Array<u8, Ix3>;  // Thermal data render using the given palette
-///     fn render_defaults(&self) -> Array<u8, Ix3>;  // Thermal data rendered using the minimum and maximum thermal value and the `palette::TURBO` palette.
-///     fn thermal_shape(&self) -> [usize; 2];  // The [height, width] of the thermal data
-/// }
-/// ```
+/// The enum itself, and all thermogram formats it wraps, implement [`ThermogramTrait`];
+/// consult its documentation for the available methods.
 #[derive(Clone, Debug)]
 pub enum Thermogram {
     Flir(FlirThermogram),
@@ -43,9 +31,11 @@ impl Thermogram {
     ///
     /// # Examples
     /// ```rust
-    /// let file_path = "/home/user/FLIR0123.jpg";
-    /// let r_thermogram = Thermogram::from_file(&file_path);
-    /// match r_thermogram {
+    /// use libblackbody::Thermogram;
+    /// use std::path::Path;
+    ///
+    /// let file_path = Path::new("/home/user/FLIR0123.jpg");
+    /// match Thermogram::from_file(file_path) {
     ///     None => println!("Failed opening thermogram {:?}", file_path),
     ///     Some(thermogram) => {
     ///         println!("Successfully opened thermogram {:?}", file_path);

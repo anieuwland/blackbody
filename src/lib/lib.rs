@@ -16,9 +16,11 @@
 //! according to the specification of `ThermogramTrait`.
 //!
 //! ```rust
-//! let file_path = "/home/user/FLIR0123.jpg";
-//! let r_thermogram = Thermogram::from_file(&file_path);
-//! match r_thermogram {
+//! use libblackbody::Thermogram;
+//! use std::path::Path;
+//!
+//! let file_path = Path::new("/home/user/FLIR0123.jpg");
+//! match Thermogram::from_file(file_path) {
 //!     None => println!("Failed opening thermogram {:?}", file_path),
 //!     Some(thermogram) => {
 //!         println!("Successfully opened thermogram {:?}", file_path);
@@ -28,22 +30,11 @@
 //! }
 //! ```
 //!
-//! The file is allowed to be a TIFF or a FLIR jpeg.
+//! The file is allowed to be a TIFF, a 16-bit grayscale PNG or a FLIR jpeg.
 //!
 //! # Interface of a thermogram
-//! The methods listed below are available and recommended for use. Consult the documentation of the
-//! trait for more details on the functions.
-//!
-//! ```rust
-//! pub trait ThermogramTrait {
-//!     fn thermal(&self) -> &Array<f32, Ix2>;  // Extract the thermal data
-//!     fn optical(&self) -> &Array<u8, Ix3>>;  // Extract embedded photos, if present
-//!     fn identifier(&self) -> &str;  // A uniquely identifying string for this thermogram
-//!     fn render(&self min_temp: f32, max_temp: f32, palette: [[f32; 3]; 256]) -> Array<u8, Ix3>;  // Thermal data render using the given palette
-//!     fn render_defaults(&self) -> Array<u8, Ix3>;  // Thermal data rendered using default settings
-//!     fn thermal_shape(&self) -> [usize; 2];  // The [height, width] of the thermal data
-//! }
-//! ```
+//! See [`ThermogramTrait`] for the methods available on a thermogram: extracting thermal data,
+//! the embedded optical photo, rendering with a palette, exporting, and measurement statistics.
 //!
 //! # Issue tracking
 //! Issue tracking happens in the [Blackbody repository](https://bitbucket.org/nimmerwoner/blackbody/issues/).

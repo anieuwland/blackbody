@@ -35,17 +35,6 @@ pub struct TempStats {
 }
 
 /// All supported thermogram formats implement this trait.
-///
-/// ```rust
-/// pub trait ThermogramTrait {
-///     fn thermal(&self) -> &Array<f32, Ix2>;  // Extract the thermal data
-///     fn optical(&self) -> &Array<u8, Ix3>>;  // Extract embedded photos, if present
-///     fn identifier(&self) -> &str;  // A uniquely identifying string for this thermogram
-///     fn render(&self min_temp: f32, max_temp: f32, palette: [[f32; 3]; 256]) -> Array<u8, Ix3>;  // Thermal data render using the given palette
-///     fn render_defaults(&self) -> Array<u8, Ix3>;  // Thermal data rendered using the minimum and maximum thermal value and the `palette::TURBO` palette.
-///     fn thermal_shape(&self) -> [usize; 2];  // The [height, width] of the thermal data
-/// }
-/// ```
 pub trait ThermogramTrait {
     /// Returns a reference to the 2D array of thermal data in celsius.
     fn thermal(&self) -> &Array<f32, Ix2>;
