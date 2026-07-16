@@ -5,6 +5,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
 use cairo::LinearGradient;
+use gettextrs::gettext;
 use gio::SimpleAction;
 use glib::object::SendWeakRef;
 use glib::MainContext;
@@ -174,7 +175,7 @@ impl AppState {
             let s = this.borrow();
             let pic = Picture::for_resource("/eu/nimmerfort/blackbody/resources/placeholder.svg");
             pic.set_can_shrink(false);
-            let btn = Button::with_label("Open thermogram…");
+            let btn = Button::with_label(&gettext("Open thermogram…"));
             btn.set_action_name(Some("win.open"));
             btn.add_css_class("suggested-action");
             btn.set_halign(gtk4::Align::Center);
@@ -267,10 +268,14 @@ impl AppState {
                 }
                 Err(e) => {
                     let p = path.to_str().unwrap_or("<invalid path>");
-                    self.show_error_dialog("Could not open file", &format!(
-                        "Failed to open file. The file may be corrupted or the camera \
-                         unsupported.\n\nFile: {p}\nCause: {e}"
-                    ));
+                    self.show_error_dialog(
+                        &gettext("Could not open file"),
+                        &tr(
+                            "Failed to open file. The file may be corrupted or the camera \
+                             unsupported.\n\nFile: {}\nCause: {}",
+                            &[p, &e.to_string()],
+                        ),
+                    );
                 }
             }
         }
@@ -296,7 +301,7 @@ impl AppState {
             self.image.set_halign(gtk4::Align::Fill);
             self.image.set_valign(gtk4::Align::Fill);
             self.image.set_size_request(-1, -1);
-            self.zoom_label.set_text("Fit");
+            self.zoom_label.set_text(&gettext("Fit"));
         } else {
             let factor = self.zoom_factor.get();
             if let Some(surface) = self.current_surface() {
@@ -434,7 +439,7 @@ impl AppState {
             return;
         };
 
-        let heading = Label::builder().label("Embedded").xalign(0.0).build();
+        let heading = Label::builder().label(gettext("Embedded")).xalign(0.0).build();
         heading.add_css_class("heading");
 
         let swatch = DrawingArea::builder().width_request(80).height_request(16).build();
@@ -452,7 +457,7 @@ impl AppState {
             });
         }
 
-        let name_label = Label::new(Some("Camera palette"));
+        let name_label = Label::new(Some(&gettext("Camera palette")));
         name_label.add_css_class("caption");
 
         let vbox = gtk4::Box::new(Orientation::Vertical, 2);
@@ -529,7 +534,7 @@ impl AppState {
 
         for (group_name, palettes) in GROUPS {
             let heading = Label::builder()
-                .label(*group_name)
+                .label(gettext(*group_name))
                 .xalign(0.0)
                 .build();
             heading.add_css_class("heading");
@@ -566,7 +571,7 @@ impl AppState {
                     });
                 }
 
-                let label = Label::new(Some(name));
+                let label = Label::new(Some(&gettext(*name)));
                 label.add_css_class("caption");
 
                 let vbox = gtk4::Box::new(Orientation::Vertical, 2);
@@ -671,20 +676,20 @@ impl AppState {
         let that = this.clone();
         let tiff_filter = FileFilter::new();
         tiff_filter.add_mime_type("image/tiff");
-        tiff_filter.set_name(Some("TIFF (32-bit float)"));
+        tiff_filter.set_name(Some(gettext("TIFF (32-bit float)").as_str()));
         let png_filter = FileFilter::new();
         png_filter.add_mime_type("image/png");
-        png_filter.set_name(Some("PNG (16-bit)"));
+        png_filter.set_name(Some(gettext("PNG (16-bit)").as_str()));
         let initial_name = that.borrow().thermogram.borrow().as_ref()
             .map(|t| Path::new(t.identifier()).file_stem()
                 .and_then(|s| s.to_str()).unwrap_or("thermogram").to_string())
             .unwrap_or_else(|| "thermogram".into());
         let dialog = FileChooserNative::new(
-            Some("Export thermogram…"),
+            Some(gettext("Export thermogram…").as_str()),
             Some(&window),
             FileChooserAction::Save,
-            Some("Export"),
-            Some("Cancel"),
+            Some(gettext("Export").as_str()),
+            Some(gettext("Cancel").as_str()),
         );
         dialog.add_filter(&tiff_filter);
         dialog.add_filter(&png_filter);
@@ -706,8 +711,8 @@ impl AppState {
                         if let Err(e) = result {
                             let p = path.to_str().unwrap_or("<invalid path>");
                             that.borrow().show_error_dialog(
-                                "Export failed",
-                                &format!("Failed to export to {p}\nCause: {e}"),
+                                &gettext("Export failed"),
+                                &tr("Failed to export to {}\nCause: {}", &[p, &e.to_string()]),
                             );
                         }
                     }
@@ -733,7 +738,7 @@ impl AppState {
             })
             .unwrap_or_else(|| "render.png".into());
         let dialog = gtk4::FileDialog::builder()
-            .title("Save render")
+            .title(gettext("Save render"))
             .filters(&filters)
             .initial_name(&initial_name)
             .build();
@@ -751,8 +756,8 @@ impl AppState {
                         if let Err(e) = thermogram.save_render(path.clone(), min, max, &palette) {
                             let p = path.to_str().unwrap_or("<invalid path>");
                             that.borrow().show_error_dialog(
-                                "Save failed",
-                                &format!("Failed to save to {p}\nCause: {e}"),
+                                &gettext("Save failed"),
+                                &tr("Failed to save to {}\nCause: {}", &[p, &e.to_string()]),
                             );
                         }
                     }
@@ -797,7 +802,7 @@ impl AppState {
             });
 
             let file_group = PreferencesGroup::new();
-            let file_row = ActionRow::builder().title(&parent_str).subtitle("Directory").build();
+            let file_row = ActionRow::builder().title(&parent_str).subtitle(gettext("Directory")).build();
             file_row.add_suffix(&open_btn);
             file_row.set_activatable_widget(Some(&open_btn));
             file_group.add(&file_row);
@@ -806,21 +811,21 @@ impl AppState {
 
         let image_group = PreferencesGroup::new();
         let shape = thermogram.thermal_shape();
-        add_row(&image_group, "Dimensions", &format!("{} × {}", shape[1], shape[0]));
+        add_row(&image_group, &gettext("Dimensions"), &format!("{} × {}", shape[1], shape[0]));
         let format_str = match thermogram {
             Thermogram::Flir(_) => "FLIR JPEG",
             Thermogram::Tiff(_) => "TIFF",
             Thermogram::Png(_) => "PNG (16-bit)",
         };
-        add_row(&image_group, "Format", format_str);
+        add_row(&image_group, &gettext("Format"), format_str);
         if let Some(path) = thermogram.path() {
             if let Ok(meta) = std::fs::metadata(path) {
-                add_row(&image_group, "File size", &format_file_size(meta.len()));
+                add_row(&image_group, &gettext("File size"), &format_file_size(meta.len()));
                 if let Ok(t) = meta.created() {
-                    if let Some(s) = format_system_time(t) { add_row(&image_group, "Created", &s); }
+                    if let Some(s) = format_system_time(t) { add_row(&image_group, &gettext("Created"), &s); }
                 }
                 if let Ok(t) = meta.modified() {
-                    if let Some(s) = format_system_time(t) { add_row(&image_group, "Modified", &s); }
+                    if let Some(s) = format_system_time(t) { add_row(&image_group, &gettext("Modified"), &s); }
                 }
             }
         }
@@ -828,19 +833,19 @@ impl AppState {
 
         let camera_group = PreferencesGroup::new();
         if let Some(meta) = thermogram.camera_metadata() {
-            if let Some(v) = &meta.make { add_row(&camera_group, "Make", v); }
-            if let Some(v) = &meta.model { add_row(&camera_group, "Model", v); }
-            if let Some(v) = meta.focal_length { add_row(&camera_group, "Focal length", &format!("{v:.1} mm")); }
-            if let Some(v) = &meta.date_time { add_row(&camera_group, "Photographed", &format_exif_datetime(v)); }
+            if let Some(v) = &meta.make { add_row(&camera_group, &gettext("Make"), v); }
+            if let Some(v) = &meta.model { add_row(&camera_group, &gettext("Model"), v); }
+            if let Some(v) = meta.focal_length { add_row(&camera_group, &gettext("Focal length"), &format!("{v:.1} mm")); }
+            if let Some(v) = &meta.date_time { add_row(&camera_group, &gettext("Photographed"), &format_exif_datetime(v)); }
         }
         self.info_sidebar.append(&camera_group);
 
         let capture_group = PreferencesGroup::new();
         if let Some(cp) = thermogram.capture_params() {
-            add_row(&capture_group, "Emissivity", &format!("{:.2}", cp.emissivity));
-            add_row(&capture_group, "Object distance", &format!("{:.2} m", cp.object_distance_m));
-            add_row(&capture_group, "Reflected temperature", &format!("{:.1} °C", cp.reflected_temp_k - 273.15));
-            add_row(&capture_group, "Relative humidity", &format!("{:.0}%", cp.relative_humidity * 100.0));
+            add_row(&capture_group, &gettext("Emissivity"), &format!("{:.2}", cp.emissivity));
+            add_row(&capture_group, &gettext("Object distance"), &format!("{:.2} m", cp.object_distance_m));
+            add_row(&capture_group, &gettext("Reflected temperature"), &format!("{:.1} °C", cp.reflected_temp_k - 273.15));
+            add_row(&capture_group, &gettext("Relative humidity"), &format!("{:.0}%", cp.relative_humidity * 100.0));
         }
         self.info_sidebar.append(&capture_group);
     }
@@ -856,7 +861,7 @@ impl AppState {
         }
 
         let switch = adw::SwitchRow::builder()
-            .title("Show in image")
+            .title(gettext("Show in image"))
             .active(self.draw_measurements.get())
             .build();
         let flag = self.draw_measurements.clone();
@@ -872,6 +877,7 @@ impl AppState {
         let group = PreferencesGroup::new();
         for m in measurements {
             let (kind, label, coords) = describe_measurement(m);
+            let kind = gettext(kind);
             let subtitle = match label {
                 "" => format!("{kind} {coords}"),
                 l => format!("{kind} ‘{l}’ {coords}"),
@@ -927,6 +933,16 @@ fn describe_measurement(m: &Measurement) -> (&'static str, &str, String) {
         Measurement::Alarm { label, .. } => ("Alarm", label, String::new()),
         Measurement::Difference { label, .. } => ("Difference", label, String::new()),
     }
+}
+
+/// gettext with `{}` placeholders substituted in order, so translators see
+/// one complete sentence instead of fragments.
+fn tr(msgid: &str, args: &[&str]) -> String {
+    let mut s = gettext(msgid);
+    for a in args {
+        s = s.replacen("{}", a, 1);
+    }
+    s
 }
 
 /// Scale and top-left offset of an img_w×img_h image fitted into a widget
@@ -1020,7 +1036,7 @@ impl AppState {
         filters.append(&this.borrow().filter_thermograms);
         filters.append(&this.borrow().filter_all_files);
         let dialog = gtk4::FileDialog::builder()
-            .title("Open thermogram")
+            .title(gettext("Open thermogram"))
             .filters(&filters)
             .build();
         let window = this.borrow().window.clone();
@@ -1034,7 +1050,7 @@ impl AppState {
 
     fn show_error_dialog(&self, title: &str, msg: &str) {
         let dialog = adw::AlertDialog::new(Some(title), Some(msg));
-        dialog.add_response("close", "Close");
+        dialog.add_response("close", &gettext("Close"));
         dialog.present(Some(&self.window));
     }
 

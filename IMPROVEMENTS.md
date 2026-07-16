@@ -32,7 +32,7 @@ From a full review of the non-generated code (2026-07-16). Verified against `car
 - [x] **16. Export dialog extension handling.** Typing `foo.tif` with the TIFF filter yields `foo.tif.tiff` because only the exact string `tiff` is accepted (`src/gtkui/app_window.rs:650`). Accept `tif`/`tiff`; consider unifying with the newer `FileDialog` API used by "save render" (the last `#[allow(deprecated)]` holdout).
 - [ ] **17. Tests require a sibling `flyr-rs` checkout** (`src/lib/flir.rs:155` uses `../flyr-rs/thermograms/…`), so `cargo test` fails on a standalone clone. Vendor the three fixture JPEGs or gate the tests on the path existing.
 - [x] **18. Arrow-key browsing resets the palette on every image.** `set_thermogram_from_path` lets an embedded camera palette override the user's explicit selection each load. Make the user's choice sticky until they pick "Camera palette".
-- [ ] **19. i18n is plumbed but unused in Rust code.** gettext is initialized and the `.ui` is marked translatable, but every string in `app_window.rs` (sidebar labels, dialog titles) is a bare literal. Wrap them in `gettext()` if translations are a goal; otherwise drop the gettext init.
+- [x] **19. i18n is plumbed but unused in Rust code.** gettext is initialized and the `.ui` is marked translatable, but every string in `app_window.rs` (sidebar labels, dialog titles) is a bare literal. Wrap them in `gettext()` if translations are a goal; otherwise drop the gettext init.
 
 ## Suggested order
 

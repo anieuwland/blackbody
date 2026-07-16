@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: blackbody\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-12 21:46+0200\n"
+"POT-Creation-Date: 2026-07-16 22:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -239,7 +239,7 @@ msgstr ""
 msgid "A running jet engine (15°C - 95°C, palette emphasizing warmth)"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:8
+#: src/resources/eu.nimmerfort.blackbody.ui:8 src/gtkui/app_window.rs:304
 msgid "Fit"
 msgstr ""
 
@@ -267,11 +267,11 @@ msgstr ""
 msgid "New window"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:45
+#: src/resources/eu.nimmerfort.blackbody.ui:45 src/gtkui/app_window.rs:178
 msgid "Open thermogram…"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:51
+#: src/resources/eu.nimmerfort.blackbody.ui:51 src/gtkui/app_window.rs:688
 msgid "Export thermogram…"
 msgstr ""
 
@@ -295,30 +295,142 @@ msgstr ""
 msgid "O"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:117
+#: src/resources/eu.nimmerfort.blackbody.ui:118
 msgid "Optical view"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:122
+#: src/resources/eu.nimmerfort.blackbody.ui:123
 msgid "P"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:124
+#: src/resources/eu.nimmerfort.blackbody.ui:126
 msgid "Picture-in-picture"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:134
+#: src/resources/eu.nimmerfort.blackbody.ui:136
 msgid "Main menu"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:142
+#: src/resources/eu.nimmerfort.blackbody.ui:144
 msgid "Camera info"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:150
+#: src/resources/eu.nimmerfort.blackbody.ui:152
+msgid "Measurements"
+msgstr ""
+
+#: src/resources/eu.nimmerfort.blackbody.ui:160
 msgid "Choose colour palette"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:276
+#: src/resources/eu.nimmerfort.blackbody.ui:301
 msgid "Zoom"
+msgstr ""
+
+#: src/gtkui/app_window.rs:272
+msgid "Could not open file"
+msgstr ""
+
+#: src/gtkui/app_window.rs:442
+msgid "Embedded"
+msgstr ""
+
+#: src/gtkui/app_window.rs:460
+msgid "Camera palette"
+msgstr ""
+
+#: src/gtkui/app_window.rs:679
+msgid "TIFF (32-bit float)"
+msgstr ""
+
+#: src/gtkui/app_window.rs:682
+msgid "PNG (16-bit)"
+msgstr ""
+
+#: src/gtkui/app_window.rs:691
+msgid "Export"
+msgstr ""
+
+#: src/gtkui/app_window.rs:692
+msgid "Cancel"
+msgstr ""
+
+#: src/gtkui/app_window.rs:714
+msgid "Export failed"
+msgstr ""
+
+#: src/gtkui/app_window.rs:741
+msgid "Save render"
+msgstr ""
+
+#: src/gtkui/app_window.rs:759
+msgid "Save failed"
+msgstr ""
+
+#: src/gtkui/app_window.rs:805
+msgid "Directory"
+msgstr ""
+
+#: src/gtkui/app_window.rs:814
+msgid "Dimensions"
+msgstr ""
+
+#: src/gtkui/app_window.rs:820
+msgid "Format"
+msgstr ""
+
+#: src/gtkui/app_window.rs:823
+msgid "File size"
+msgstr ""
+
+#: src/gtkui/app_window.rs:825
+msgid "Created"
+msgstr ""
+
+#: src/gtkui/app_window.rs:828
+msgid "Modified"
+msgstr ""
+
+#: src/gtkui/app_window.rs:836
+msgid "Make"
+msgstr ""
+
+#: src/gtkui/app_window.rs:837
+msgid "Model"
+msgstr ""
+
+#: src/gtkui/app_window.rs:838
+msgid "Focal length"
+msgstr ""
+
+#: src/gtkui/app_window.rs:839
+msgid "Photographed"
+msgstr ""
+
+#: src/gtkui/app_window.rs:845
+msgid "Emissivity"
+msgstr ""
+
+#: src/gtkui/app_window.rs:846
+msgid "Object distance"
+msgstr ""
+
+#: src/gtkui/app_window.rs:847
+msgid "Reflected temperature"
+msgstr ""
+
+#: src/gtkui/app_window.rs:848
+msgid "Relative humidity"
+msgstr ""
+
+#: src/gtkui/app_window.rs:864
+msgid "Show in image"
+msgstr ""
+
+#: src/gtkui/app_window.rs:1039
+msgid "Open thermogram"
+msgstr ""
+
+#: src/gtkui/app_window.rs:1053
+msgid "Close"
 msgstr ""
