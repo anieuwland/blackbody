@@ -866,11 +866,18 @@ fn describe_measurement(m: &Measurement) -> (&'static str, &str, String) {
     match m {
         Measurement::Spot { label, x, y } => ("Spot", label, format!("({x}, {y})")),
         Measurement::Endpoint { label, x, y } => ("Endpoint", label, format!("({x}, {y})")),
-        Measurement::Area { label, x1, y1, x2, y2 } => {
-            ("Area", label, format!("({x1}, {y1}) – ({x2}, {y2})"))
+        // Area params are x, y, width, height (flyr 0.7 misnames w/h as x2/y2)
+        Measurement::Area { label, x1, y1, x2: w, y2: h } => {
+            ("Area", label, format!("({x1}, {y1}) {w} × {h} px"))
         }
         Measurement::Line { label, x1, y1, x2, y2 } => {
             ("Line", label, format!("({x1}, {y1}) – ({x2}, {y2})"))
+        }
+        Measurement::Ellipse { label, params } if params.len() >= 6 => {
+            let (xc, yc) = (params[0] as f64, params[1] as f64);
+            let ru = (params[2] as f64 - xc).hypot(params[3] as f64 - yc);
+            let rv = (params[4] as f64 - xc).hypot(params[5] as f64 - yc);
+            ("Ellipse", label, format!("({}, {}) r {ru:.0} × {rv:.0} px", params[0], params[1]))
         }
         Measurement::Ellipse { label, .. } => ("Ellipse", label, String::new()),
         Measurement::Alarm { label, .. } => ("Alarm", label, String::new()),
@@ -1089,12 +1096,30 @@ impl AppState {
                             ctx.move_to(cx, cy - arm);
                             ctx.line_to(cx, cy + arm);
                         }
-                        Measurement::Area { x1, y1, x2, y2, .. } => {
-                            ctx.rectangle(px(*x1), py(*y1), px(*x2) - px(*x1), py(*y2) - py(*y1));
+                        // Area params are x, y, width, height (flyr 0.7 misnames w/h as x2/y2)
+                        Measurement::Area { x1, y1, x2: w, y2: h, .. } => {
+                            ctx.rectangle(px(*x1), py(*y1), *w as f64 * scale, *h as f64 * scale);
                         }
                         Measurement::Line { x1, y1, x2, y2, .. } => {
                             ctx.move_to(px(*x1), py(*y1));
                             ctx.line_to(px(*x2), py(*y2));
+                        }
+                        // Ellipse params: centre, then the two semi-axis endpoints
+                        Measurement::Ellipse { params, .. } if params.len() >= 6 => {
+                            let (xc, yc) = (params[0] as f64, params[1] as f64);
+                            let (ux, uy) = (params[2] as f64 - xc, params[3] as f64 - yc);
+                            let (vx, vy) = (params[4] as f64 - xc, params[5] as f64 - yc);
+                            let (ru, rv) = (ux.hypot(uy), vx.hypot(vy));
+                            if ru > 0.0 && rv > 0.0 {
+                                // Build the path under a warped CTM, restore before stroking
+                                // so the line width stays uniform.
+                                let _ = ctx.save();
+                                ctx.translate(px(params[0] as u16), py(params[1] as u16));
+                                ctx.rotate(uy.atan2(ux));
+                                ctx.scale(ru * scale, rv * scale);
+                                ctx.arc(0.0, 0.0, 1.0, 0.0, std::f64::consts::TAU);
+                                let _ = ctx.restore();
+                            }
                         }
                         Measurement::Ellipse { .. }
                         | Measurement::Alarm { .. }

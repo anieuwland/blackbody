@@ -209,16 +209,44 @@ pub trait ThermogramTrait {
             Measurement::Spot { x, y, .. } | Measurement::Endpoint { x, y, .. } => {
                 vec![temp_at(*x as usize, *y as usize)]
             }
-            Measurement::Area { x1, y1, x2, y2, .. } => {
-                let (xa, xb) = (*x1.min(x2) as usize, *x1.max(x2) as usize);
-                let (ya, yb) = (*y1.min(y2) as usize, *y1.max(y2) as usize);
-                (ya..=yb)
-                    .flat_map(|y| (xa..=xb).map(move |x| (x, y)))
-                    .map(|(x, y)| temp_at(x, y))
+            // FLIR area params are x, y, width, height (verified against camera-rendered
+            // overlays and exiftool); flyr 0.7 misnames width/height as x2/y2.
+            Measurement::Area { x1: x, y1: y, x2: width, y2: height, .. } => {
+                let (x, y) = (*x as usize, *y as usize);
+                (y..y + *height as usize)
+                    .flat_map(|py| (x..x + *width as usize).map(move |px| (px, py)))
+                    .map(|(px, py)| temp_at(px, py))
                     .collect()
             }
             Measurement::Line { x1, y1, x2, y2, .. } => {
                 line_points(*x1, *y1, *x2, *y2).map(|(x, y)| temp_at(x, y)).collect()
+            }
+            // Ellipse params are centre, then the endpoints of the two semi-axes:
+            // xc, yc, x1, y1, x2, y2 (verified against a camera-rendered overlay).
+            Measurement::Ellipse { params, .. } if params.len() >= 6 => {
+                let (xc, yc) = (params[0] as f32, params[1] as f32);
+                let (ux, uy) = (params[2] as f32 - xc, params[3] as f32 - yc);
+                let (vx, vy) = (params[4] as f32 - xc, params[5] as f32 - yc);
+                let (u2, v2) = (ux * ux + uy * uy, vx * vx + vy * vy);
+                if u2 == 0.0 || v2 == 0.0 {
+                    return None;
+                }
+                // A pixel is inside iff its offset d from the centre, decomposed onto the
+                // semi-axes as a = d·u/|u|², b = d·v/|v|², satisfies a² + b² ≤ 1.
+                let r = u2.sqrt().max(v2.sqrt()).ceil() as isize;
+                let (xc_i, yc_i) = (xc as isize, yc as isize);
+                ((yc_i - r).max(0)..=(yc_i + r).min(h as isize - 1))
+                    .flat_map(|py| {
+                        ((xc_i - r).max(0)..=(xc_i + r).min(w as isize - 1)).map(move |px| (px, py))
+                    })
+                    .filter(|&(px, py)| {
+                        let (dx, dy) = (px as f32 - xc, py as f32 - yc);
+                        let a = (dx * ux + dy * uy) / u2;
+                        let b = (dx * vx + dy * vy) / v2;
+                        a * a + b * b <= 1.0
+                    })
+                    .map(|(px, py)| temp_at(px as usize, py as usize))
+                    .collect()
             }
             // ponytail: raw-parameter tools are skipped; decode their geometry
             // when a camera that uses them shows up.
@@ -227,6 +255,9 @@ pub trait ThermogramTrait {
             }
         };
 
+        if temps.is_empty() {
+            return None;
+        }
         let n = temps.len() as f32;
         let min = temps.iter().cloned().fold(f32::MAX, f32::min);
         let max = temps.iter().cloned().fold(f32::MIN, f32::max);
@@ -285,9 +316,10 @@ mod tests {
         let spot = t.measurement_stats(&Measurement::Spot { label: "".into(), x: 2, y: 1 }).unwrap();
         assert_eq!((spot.min, spot.max, spot.avg), (12.0, 12.0, 12.0));
 
+        // Area params are x, y, width, height: a 2×1 box at (1, 0)
         let area = Measurement::Area { label: "".into(), x1: 1, y1: 0, x2: 2, y2: 1 };
         let a = t.measurement_stats(&area).unwrap();
-        assert_eq!((a.min, a.max, a.avg), (1.0, 12.0, 6.5));
+        assert_eq!((a.min, a.max, a.avg), (1.0, 2.0, 1.5));
 
         let line = Measurement::Line { label: "".into(), x1: 0, y1: 0, x2: 2, y2: 0 };
         let l = t.measurement_stats(&line).unwrap();
@@ -299,5 +331,21 @@ mod tests {
 
         let ellipse = Measurement::Ellipse { label: "".into(), params: vec![] };
         assert!(t.measurement_stats(&ellipse).is_none());
+    }
+
+    #[test]
+    fn measurement_stats_ellipse() {
+        // 5x5 grid with value y*10 + x
+        let t = Fake(Array::from_shape_fn((5, 5), |(y, x)| (y * 10 + x) as f32));
+
+        // Circle: centre (2, 2), semi-axis endpoints (3, 2) and (2, 1) → radius 1.
+        // Inside: (2,2), (1,2), (3,2), (2,1), (2,3) → 22, 21, 23, 12, 32.
+        let circle = Measurement::Ellipse { label: "".into(), params: vec![2, 2, 3, 2, 2, 1] };
+        let c = t.measurement_stats(&circle).unwrap();
+        assert_eq!((c.min, c.max, c.avg), (12.0, 32.0, 22.0));
+
+        // Degenerate axis → no stats
+        let flat = Measurement::Ellipse { label: "".into(), params: vec![2, 2, 3, 2, 2, 2] };
+        assert!(t.measurement_stats(&flat).is_none());
     }
 }
