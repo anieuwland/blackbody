@@ -1,6 +1,7 @@
 use std::cell::{Cell, RefCell};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 
 use cairo::LinearGradient;
@@ -57,6 +58,8 @@ pub struct AppState {
     zoom_fit: Cell<bool>,
     zoom_factor: Cell<f64>,
     image_bgra: SharedImage,
+    /// Bumped per render request; stale render threads compare and drop out.
+    render_generation: Arc<AtomicU64>,
     mouse_pos: Cell<(f64, f64)>,
     action_export: SimpleAction,
     action_render: SimpleAction,
@@ -117,6 +120,7 @@ impl AppState {
             zoom_fit: Cell::new(true),
             zoom_factor: Cell::new(1.0),
             image_bgra: Arc::new(Mutex::new(None)),
+            render_generation: Arc::new(AtomicU64::new(0)),
             mouse_pos: Cell::new((0.0, 0.0)),
             action_export: SimpleAction::new("export", None),
             action_render: SimpleAction::new("render", None),
@@ -310,8 +314,17 @@ impl AppState {
         let img_ref = SendWeakRef::from(self.image.downgrade());
         let surface_arc = self.image_bgra.clone();
 
+        // Render threads finish in arbitrary order (a slider drag spawns many);
+        // only the thread matching the latest generation may publish its result,
+        // otherwise a slow older render would overwrite a newer one.
+        let generation = self.render_generation.clone();
+        let my_gen = generation.fetch_add(1, Ordering::Relaxed) + 1;
+
         if let Some(thermogram) = self.thermogram.borrow().clone() {
             std::thread::spawn(move || {
+                if generation.load(Ordering::Relaxed) != my_gen {
+                    return; // superseded while queued; skip the expensive render
+                }
                 let image = if pip_mode {
                     thermogram
                         .picture_in_picture(min, max, &palette)
@@ -334,6 +347,9 @@ impl AppState {
                         bgra[j + 2] = pixel[0]; // R
                     }
                     MainContext::default().invoke(move || {
+                        if generation.load(Ordering::Relaxed) != my_gen {
+                            return; // a newer render already published
+                        }
                         *surface_arc.lock().unwrap() = Some((bgra, w, h));
                         if let Some(img) = img_ref.upgrade() {
                             img.queue_draw();
