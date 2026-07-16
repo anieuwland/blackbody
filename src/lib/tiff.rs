@@ -32,69 +32,48 @@ impl TiffThermogram {
     /// In case of success, `Some<FlirThermogram>` is returned, otherwise `None`. Values are in
     /// centigrades, as specified by the `ThermogramTrait` contract.
     pub fn from_file(file_path: &Path) -> Option<Self> {
-        match Self::_read_thermal(file_path) {
-            Some(thermal) => {
-                return Some(Self { thermal: thermal, file_path: (*file_path).to_path_buf() });
-            }
-            _ => return None,
-        }
+        let thermal = Self::read_thermal(file_path)?;
+        Some(Self { thermal, file_path: file_path.to_path_buf() })
     }
 
-    fn _read_thermal(file_path: &Path) -> Option<Array<f32, Ix2>> {
-        return Self::_read_thermal_libtiff(file_path);
+    /// Decodes the first image in the TIFF. Any decode failure (corrupt file,
+    /// unexpected sample count) yields `None` rather than a panic.
+    fn read_thermal(file_path: &Path) -> Option<Array<f32, Ix2>> {
+        let file = File::open(file_path).ok()?;
+        let mut tiff = tiff::decoder::Decoder::new(file).ok()?;
+        let (width, height) = tiff.dimensions().ok()?;
+        let dims = (height as usize, width as usize);
+        let to_array = |values: Vec<f32>| Array::from_shape_vec(dims, values).ok();
+        let centikelvin_to_celsius = |values: Vec<f32>| to_array(values).map(|a| (a - 27315.0) / 100.0);
+
+        match tiff.read_image().ok()? {
+            DecodingResult::U8(v) => to_array(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::U16(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::U32(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::U64(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::F32(v) => to_array(v),
+            DecodingResult::F64(v) => to_array(v.into_iter().map(|x| x as f32).collect()),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A file with a TIFF magic number but corrupt contents must yield None,
+    /// not panic — Thermogram::from_file routes it here on magic number alone.
+    #[test]
+    fn corrupt_tiff_returns_none() {
+        let path = std::env::temp_dir().join("blackbody_corrupt_test.tif");
+        std::fs::write(&path, b"II*\0this is not a valid tiff body").unwrap();
+        assert!(TiffThermogram::from_file(&path).is_none());
+        let _ = std::fs::remove_file(&path);
     }
 
-    fn _read_thermal_libtiff(file_path: &Path) -> Option<Array<f32, Ix2>> {
-        let file = File::open(file_path).unwrap();
-        let mut tiff = tiff::decoder::Decoder::new(file).unwrap();
-        let tiff_dims = tiff.dimensions().unwrap();
-        let arr_dims = Dim((tiff_dims.1 as usize, tiff_dims.0 as usize));
-        let vec_to_ndarray = |values| {
-            let thermal = ndarray::ArrayBase::from(values);
-            let thermal = thermal.into_shape_with_order(arr_dims).unwrap();
-            thermal
-        };
-
-        match tiff.read_image() {
-            Ok(image) => match image {
-                DecodingResult::U8(values) => {
-                    let f32_values: Vec<f32> =
-                        values.into_iter().map(|integer| integer as f32).collect();
-
-                    let thermal = vec_to_ndarray(f32_values);
-                    Some(thermal)
-                }
-                DecodingResult::U16(values) => {
-                    let f32_values: Vec<f32> =
-                        values.into_iter().map(|integer| integer as f32).collect();
-
-                    let thermal = vec_to_ndarray(f32_values);
-                    let thermal = thermal - 27315.0;
-                    Some(thermal / 100.0)
-                }
-                DecodingResult::U32(values) => {
-                    let f32_values: Vec<f32> =
-                        values.into_iter().map(|integer| integer as f32).collect();
-
-                    let thermal = vec_to_ndarray(f32_values);
-                    let thermal = thermal - 27315.0;
-                    Some(thermal / 100.0)
-                }
-                DecodingResult::U64(values) => {
-                    let f32_values: Vec<f32> =
-                        values.into_iter().map(|integer| integer as f32).collect();
-
-                    let thermal = vec_to_ndarray(f32_values);
-                    let thermal = thermal - 27315.0;
-                    Some(thermal / 100.0)
-                }
-                DecodingResult::F32(values) => Some(vec_to_ndarray(values)),
-                DecodingResult::F64(values) => {
-                    Some(vec_to_ndarray(values.iter().map(|v| *v as f32).collect()))
-                }
-            },
-            _ => None,
-        }
+    #[test]
+    fn missing_file_returns_none() {
+        assert!(TiffThermogram::from_file(Path::new("/nonexistent/no.tif")).is_none());
     }
 }
 
