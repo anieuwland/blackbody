@@ -195,6 +195,7 @@ impl AppState {
                     self.max_temp.set(max);
                     let has_info = thermogram.capture_params().is_some();
                     let has_optical = thermogram.has_optical();
+                    let has_pip = thermogram.has_pip();
                     self.populate_info_sidebar(&thermogram);
                     let embedded_palette = thermogram.palette();
                     *self.thermogram.borrow_mut() = Some(thermogram);
@@ -218,7 +219,10 @@ impl AppState {
                     self.action_render.set_enabled(true);
                     self.info_button.set_sensitive(has_info);
                     self.mode_optical.set_sensitive(has_optical);
-                    if !has_optical && !self.mode_thermal.is_active() {
+                    self.mode_pip.set_sensitive(has_pip);
+                    if (!has_optical && self.mode_optical.is_active())
+                        || (!has_pip && self.mode_pip.is_active())
+                    {
                         self.mode_thermal.set_active(true);
                     }
                     let files = scan_dir_files(path);
@@ -285,12 +289,17 @@ impl AppState {
         let max = self.max_temp.get();
         let palette: Vec<[f32; 3]> = self.palette.borrow().clone();
         let thermal_mode = self.is_thermal_mode();
+        let pip_mode = self.mode_pip.is_active();
         let img_ref = SendWeakRef::from(self.image.downgrade());
         let surface_arc = self.image_bgra.clone();
 
         if let Some(thermogram) = self.thermogram.borrow().clone() {
             std::thread::spawn(move || {
-                let image = if !thermal_mode {
+                let image = if pip_mode {
+                    thermogram
+                        .picture_in_picture(min, max, &palette)
+                        .unwrap_or_else(|| thermogram.render(min, max, &palette))
+                } else if !thermal_mode {
                     thermogram.optical().unwrap_or_else(|| thermogram.render(min, max, &palette))
                 } else {
                     thermogram.render(min, max, &palette)
@@ -579,14 +588,15 @@ impl AppState {
         }
 
         let s = this.borrow();
-        let is_thermal = s.is_thermal_mode();
-        s.color_bar.set_sensitive(is_thermal);
-        s.range_bar.set_visible(is_thermal);
-        s.palette_button.set_sensitive(is_thermal);
+        // PIP renders thermal data too, so palette and range still apply there.
+        let uses_palette = s.is_thermal_mode() || s.mode_pip.is_active();
+        s.color_bar.set_sensitive(uses_palette);
+        s.range_bar.set_visible(uses_palette);
+        s.palette_button.set_sensitive(uses_palette);
 
         // Re-render with the appropriate image
         s.draw_render_threaded();
-        if is_thermal {
+        if uses_palette {
             s.color_bar.queue_draw();
         }
     }
@@ -889,6 +899,10 @@ impl AppState {
             });
             let that = this.clone();
             this.borrow().mode_optical.connect_toggled(move |btn| {
+                if btn.is_active() { Self::apply_mode(&that, btn); }
+            });
+            let that = this.clone();
+            this.borrow().mode_pip.connect_toggled(move |btn| {
                 if btn.is_active() { Self::apply_mode(&that, btn); }
             });
         }

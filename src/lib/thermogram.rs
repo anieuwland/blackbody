@@ -102,6 +102,26 @@ impl Thermogram {
             Thermogram::Tiff(_) | Thermogram::Png(_) => None,
         }
     }
+
+    pub fn has_pip(&self) -> bool {
+        match self {
+            Thermogram::Flir(t) => t.has_pip(),
+            Thermogram::Tiff(_) | Thermogram::Png(_) => false,
+        }
+    }
+
+    /// Thermal render composited onto the optical image, if the file has PIP geometry.
+    pub fn picture_in_picture(
+        &self,
+        min_temp: f32,
+        max_temp: f32,
+        palette: &[[f32; 3]],
+    ) -> Option<Array<u8, Ix3>> {
+        match self {
+            Thermogram::Flir(t) => t.picture_in_picture(min_temp, max_temp, palette),
+            Thermogram::Tiff(_) | Thermogram::Png(_) => None,
+        }
+    }
 }
 
 /// The `ThermogramTrait` implemented for the `Thermogram` enum. Method calls are forwarded to the

@@ -64,6 +64,41 @@ impl FlirThermogram {
     pub fn camera_metadata(&self) -> Option<&CameraMetadata> {
         self.thermogram.camera_metadata.as_ref()
     }
+
+    pub fn has_pip(&self) -> bool {
+        self.thermogram.pip_info.is_some() && self.thermogram.embedded_image.is_some()
+    }
+
+    /// Composite the thermal render onto the optical image using the embedded PIP geometry.
+    /// Temperatures in celsius, palette colors in 0.0–1.0 RGB, as elsewhere in this crate.
+    pub fn picture_in_picture(
+        &self,
+        min_temp: f32,
+        max_temp: f32,
+        palette: &[[f32; 3]],
+    ) -> Option<Array<u8, Ix3>> {
+        let to_u8 = |f: f32| (f * 255.0) as u8;
+        let colors = palette.iter().map(|c| [to_u8(c[0]), to_u8(c[1]), to_u8(c[2])]).collect();
+        let normalization = flyr::units::Normalization::Explicit {
+            min: min_temp + 273.15,
+            max: max_temp + 273.15,
+        };
+        let rgba = self
+            .thermogram
+            .picture_in_picture(&flyr::units::Palette::Custom(colors), &normalization)
+            .ok()?;
+
+        // The composite has the orientation-corrected optical dimensions.
+        let ei = self.thermogram.embedded_image.as_ref()?;
+        let orientation = self.thermogram.orientation.unwrap_or(1);
+        let (w, h) = if (5..=8).contains(&orientation) {
+            (ei.height as usize, ei.width as usize)
+        } else {
+            (ei.width as usize, ei.height as usize)
+        };
+        let rgb: Vec<u8> = rgba.chunks_exact(4).flat_map(|p| [p[0], p[1], p[2]]).collect();
+        Array::from_shape_vec((h, w, 3), rgb).ok()
+    }
 }
 
 impl ThermogramTrait for FlirThermogram {
@@ -96,6 +131,23 @@ impl ThermogramTrait for FlirThermogram {
 impl From<&FlirThermogram> for Array<f32, Ix2> {
     fn from(thermogram: &FlirThermogram) -> Array<f32, Ix2> {
         thermogram.thermal().clone()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pip_composite_has_optical_shape() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../flyr-rs/thermograms/flir_e5_2-pip.jpg");
+        let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
+        assert!(t.has_pip());
+        let img = t
+            .picture_in_picture(t.min_temp(), t.max_temp(), &crate::palettes::TURBO)
+            .expect("pip composite");
+        // Optical is 640x480 vs 120x90 thermal; RGB channels last.
+        assert_eq!(img.shape(), &[480, 640, 3]);
     }
 }
 
