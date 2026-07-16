@@ -143,6 +143,40 @@ impl From<&FlirThermogram> for Array<f32, Ix2> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::Measurement;
+
+    // The reference values in the two measurement tests below are the min/max/avg the
+    // camera itself rendered into the JPEG overlay. Tolerances absorb the difference
+    // between flyr's and FLIR's Planck evaluation, not geometry errors: a wrong region
+    // (e.g. reading width/height as a second corner) is off by whole degrees.
+
+    #[test]
+    fn area_stats_match_camera_overlay() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../flyr-rs/thermograms/flir_sc660_1.jpg");
+        let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
+        let area = t.measurements().iter()
+            .find(|m| matches!(m, Measurement::Area { .. }))
+            .expect("sc660_1 should contain an area measurement");
+        let s = t.measurement_stats(area).expect("area stats");
+        // Camera overlay: Max 34.8, Min 22.7, Avg 28.1
+        assert!((s.avg - 28.1).abs() < 0.1, "avg {} != 28.1", s.avg);
+        assert!((s.min - 22.7).abs() < 0.5, "min {} != 22.7", s.min);
+        assert!((s.max - 34.8).abs() < 0.7, "max {} != 34.8", s.max);
+    }
+
+    #[test]
+    fn ellipse_stats_match_camera_overlay() {
+        let path = concat!(
+            env!("CARGO_MANIFEST_DIR"), "/../flyr-rs/thermograms/flir_thermocam_b400_2.jpg"
+        );
+        let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
+        let ellipse = t.measurements().iter()
+            .find(|m| matches!(m, Measurement::Ellipse { .. }))
+            .expect("b400_2 should contain an ellipse measurement");
+        let s = t.measurement_stats(ellipse).expect("ellipse stats");
+        // Camera overlay: El1 Max -0.1
+        assert!((s.max - -0.1).abs() < 0.2, "max {} != -0.1", s.max);
+    }
 
     #[test]
     fn pip_composite_has_optical_shape() {
