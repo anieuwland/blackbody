@@ -58,6 +58,9 @@ pub struct AppState {
     zoom_fit: Cell<bool>,
     zoom_factor: Cell<f64>,
     image_bgra: SharedImage,
+    /// Cairo surface over the latest frame, built once per frame by
+    /// `current_surface` (main thread only — ImageSurface is not Send).
+    image_surface: RefCell<Option<cairo::ImageSurface>>,
     /// Bumped per render request; stale render threads compare and drop out.
     render_generation: Arc<AtomicU64>,
     mouse_pos: Cell<(f64, f64)>,
@@ -121,6 +124,7 @@ impl AppState {
             zoom_fit: Cell::new(true),
             zoom_factor: Cell::new(1.0),
             image_bgra: Arc::new(Mutex::new(None)),
+            image_surface: RefCell::new(None),
             render_generation: Arc::new(AtomicU64::new(0)),
             mouse_pos: Cell::new((0.0, 0.0)),
             action_export: SimpleAction::new("export", None),
@@ -266,6 +270,21 @@ impl AppState {
         }
     }
 
+    /// The latest rendered frame as a cairo surface. Drains the cross-thread
+    /// slot at most once per frame; the returned clone is a refcount bump,
+    /// not a pixel copy.
+    fn current_surface(&self) -> Option<cairo::ImageSurface> {
+        if let Some((bgra, w, h)) = self.image_bgra.lock().unwrap().take() {
+            let stride = w * 4;
+            if let Ok(surface) =
+                cairo::ImageSurface::create_for_data(bgra, cairo::Format::Rgb24, w, h, stride)
+            {
+                *self.image_surface.borrow_mut() = Some(surface);
+            }
+        }
+        self.image_surface.borrow().clone()
+    }
+
     fn apply_zoom(&self) {
         if self.zoom_fit.get() {
             self.image.set_halign(gtk4::Align::Fill);
@@ -274,10 +293,9 @@ impl AppState {
             self.zoom_label.set_text("Fit");
         } else {
             let factor = self.zoom_factor.get();
-            let data = self.image_bgra.lock().unwrap();
-            if let Some((_, img_w, img_h)) = data.as_ref() {
-                let w = (*img_w as f64 * factor) as i32;
-                let h = (*img_h as f64 * factor) as i32;
+            if let Some(surface) = self.current_surface() {
+                let w = (surface.width() as f64 * factor) as i32;
+                let h = (surface.height() as f64 * factor) as i32;
                 // Center within the viewport so the image doesn't stretch to fill it.
                 // The viewport always allocates max(natural, viewport_size); halign=center
                 // keeps the DrawingArea at its natural (= size_request) size within that.
@@ -575,7 +593,7 @@ impl AppState {
     }
 
     fn show_osd(&self) {
-        if self.image_bgra.lock().unwrap().is_none() { return; }
+        if self.current_surface().is_none() { return; }
         if let Some(id) = self.osd_hide_source.replace(None) {
             id.remove();
         }
@@ -1084,18 +1102,11 @@ impl AppState {
             // In fit mode the area fills the viewport (hexpand/vexpand=true), so the
             // image is scaled to fit. In zoom mode size_request sets the area to exactly
             // the desired pixel size, so the image fills it 1:1.
-            let surface_arc = this.borrow().image_bgra.clone();
             let that = this.clone();
             this.borrow().image.set_draw_func(move |_, ctx, width, height| {
-                let data = surface_arc.lock().unwrap();
-                let Some((bytes, img_w, img_h)) = data.as_ref() else { return };
-                let bytes_clone = bytes.clone();
-                let (img_w, img_h) = (*img_w, *img_h);
-                drop(data);
-                let stride = img_w * 4;
-                let Ok(surface) = cairo::ImageSurface::create_for_data(
-                    bytes_clone, cairo::Format::Rgb24, img_w, img_h, stride,
-                ) else { return };
+                let s = that.borrow();
+                let Some(surface) = s.current_surface() else { return };
+                let (img_w, img_h) = (surface.width(), surface.height());
                 let (scale, off_x, off_y) =
                     fit_transform(img_w as f64, img_h as f64, width as f64, height as f64);
                 let _ = ctx.save();
@@ -1107,7 +1118,6 @@ impl AppState {
 
                 // ponytail: measurement coords are thermal pixels, which map 1:1 onto the
                 // thermal render only; add the PIP transform if overlays are wanted there.
-                let s = that.borrow();
                 if !s.draw_measurements.get() || !s.is_thermal_mode() {
                     return;
                 }
@@ -1201,11 +1211,10 @@ impl AppState {
 
                 // Effective zoom factor before this step; fit mode needs its ratio computed.
                 let old_factor = if s.zoom_fit.get() {
-                    let data = s.image_bgra.lock().unwrap();
-                    data.as_ref().map(|(_, img_w, img_h)| {
+                    s.current_surface().map(|surface| {
                         let vw = s.scrolled_window.width() as f64;
                         let vh = s.scrolled_window.height() as f64;
-                        (vw / *img_w as f64).min(vh / *img_h as f64)
+                        (vw / surface.width() as f64).min(vh / surface.height() as f64)
                     }).unwrap_or(1.0)
                 } else {
                     s.zoom_factor.get()
@@ -1225,12 +1234,9 @@ impl AppState {
                 // Pre-expand the adjustment bounds to the new image size so that
                 // set_value below is not clamped to the old (smaller) upper.
                 // The layout pass will confirm the same values from set_size_request.
-                {
-                    let data = s.image_bgra.lock().unwrap();
-                    if let Some((_, img_w, img_h)) = data.as_ref() {
-                        hadj.set_upper((*img_w as f64 * new_factor).ceil());
-                        vadj.set_upper((*img_h as f64 * new_factor).ceil());
-                    }
+                if let Some(surface) = s.current_surface() {
+                    hadj.set_upper((surface.width() as f64 * new_factor).ceil());
+                    vadj.set_upper((surface.height() as f64 * new_factor).ceil());
                 }
                 hadj.set_value(img_x * ratio - mx);
                 vadj.set_value(img_y * ratio - my);
