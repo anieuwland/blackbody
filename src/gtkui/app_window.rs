@@ -261,7 +261,7 @@ impl AppState {
                 }
                 None => {
                     let p = path.to_str().unwrap_or("<invalid path>");
-                    self.show_error_dialog(&format!(
+                    self.show_error_dialog("Could not open file", &format!(
                         "Failed to open file. The file may be corrupted or the camera \
                          unsupported.\n\nFile: {p}"
                     ));
@@ -691,7 +691,7 @@ impl AppState {
                         };
                         if ok.is_none() {
                             let p = path.to_str().unwrap_or("<invalid path>");
-                            that.borrow().show_error_dialog(&format!("Failed to export to {p}"));
+                            that.borrow().show_error_dialog("Export failed", &format!("Failed to export to {p}"));
                         }
                     }
                 }
@@ -733,7 +733,7 @@ impl AppState {
                         drop(s);
                         if thermogram.save_render(path.clone(), min, max, &palette).is_none() {
                             let p = path.to_str().unwrap_or("<invalid path>");
-                            that.borrow().show_error_dialog(&format!("Failed to save to {p}"));
+                            that.borrow().show_error_dialog("Save failed", &format!("Failed to save to {p}"));
                         }
                     }
                 }
@@ -994,8 +994,8 @@ impl AppState {
         });
     }
 
-    fn show_error_dialog(&self, msg: &str) {
-        let dialog = adw::AlertDialog::new(Some("Could not open file"), Some(msg));
+    fn show_error_dialog(&self, title: &str, msg: &str) {
+        let dialog = adw::AlertDialog::new(Some(title), Some(msg));
         dialog.add_response("close", "Close");
         dialog.present(Some(&self.window));
     }
