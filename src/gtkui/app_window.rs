@@ -671,17 +671,7 @@ impl AppState {
                     let ext = dlg.filter().and_then(|f| f.name())
                         .map(|n| if n.contains("PNG") { "png" } else { "tiff" })
                         .unwrap_or("tiff");
-                    let path = if path.extension()
-                        .and_then(|e| e.to_str())
-                        .map(|e| e.eq_ignore_ascii_case(ext))
-                        .unwrap_or(false)
-                    {
-                        path
-                    } else {
-                        let mut s = path.into_os_string();
-                        s.push(format!(".{ext}"));
-                        PathBuf::from(s)
-                    };
+                    let path = ensure_extension(path, ext);
                     let thermogram = that.borrow().thermogram.borrow().clone();
                     if let Some(thermogram) = thermogram {
                         let result = if ext == "png" {
@@ -944,6 +934,24 @@ fn widget_to_image(
     }
     let (ix, iy) = (ix as usize, iy as usize);
     (ix < img_w && iy < img_h).then_some((ix, iy))
+}
+
+/// Append `.{ext}` unless the path already carries a matching extension.
+/// "tif" counts as a match for "tiff", so "foo.tif" isn't turned into
+/// "foo.tif.tiff".
+fn ensure_extension(path: PathBuf, ext: &str) -> PathBuf {
+    let already_matches = path
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.eq_ignore_ascii_case(ext) || (ext == "tiff" && e.eq_ignore_ascii_case("tif")))
+        .unwrap_or(false);
+    if already_matches {
+        path
+    } else {
+        let mut s = path.into_os_string();
+        s.push(format!(".{ext}"));
+        PathBuf::from(s)
+    }
 }
 
 fn scan_dir_files(path: &Path) -> Vec<PathBuf> {
@@ -1318,7 +1326,20 @@ impl AppState {
 
 #[cfg(test)]
 mod tests {
-    use super::widget_to_image;
+    use super::{ensure_extension, widget_to_image};
+    use std::path::PathBuf;
+
+    #[test]
+    fn ensure_extension_accepts_tif_for_tiff() {
+        let p = |s: &str| PathBuf::from(s);
+        // "foo.tif" previously became "foo.tif.tiff"
+        assert_eq!(ensure_extension(p("foo.tif"), "tiff"), p("foo.tif"));
+        assert_eq!(ensure_extension(p("foo.TIFF"), "tiff"), p("foo.TIFF"));
+        assert_eq!(ensure_extension(p("foo"), "tiff"), p("foo.tiff"));
+        assert_eq!(ensure_extension(p("foo.png"), "tiff"), p("foo.png.tiff"));
+        assert_eq!(ensure_extension(p("foo.PNG"), "png"), p("foo.PNG"));
+        assert_eq!(ensure_extension(p("foo.tif"), "png"), p("foo.tif.png"));
+    }
 
     #[test]
     fn maps_painted_area_and_rejects_margins() {
