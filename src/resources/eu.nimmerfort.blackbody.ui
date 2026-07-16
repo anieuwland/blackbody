@@ -114,12 +114,14 @@
                 <child>
                   <object class="GtkToggleButton" id="mode_optical">
                     <property name="label" translatable="yes">O</property>
+                    <property name="group">mode_thermal</property>
                     <property name="tooltip-text" translatable="yes">Optical view</property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="mode_pip">
                     <property name="label" translatable="yes">P</property>
+                    <property name="group">mode_thermal</property>
                     <property name="sensitive">false</property>
                     <property name="tooltip-text" translatable="yes">Picture-in-picture</property>
                   </object>

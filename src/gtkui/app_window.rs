@@ -592,18 +592,9 @@ impl AppState {
         self.osd_hide_source.set(Some(id));
     }
 
-    fn apply_mode(this: &Rc<RefCell<Self>>, button: &ToggleButton) {
-        // GTK already set `button` active before emitting toggled; just deactivate the others.
-        // Touching `button` here would re-emit toggled → infinite recursion → stack overflow.
-        {
-            let s = this.borrow();
-            for tb in [&s.mode_thermal, &s.mode_optical, &s.mode_pip] {
-                if *tb != *button {
-                    tb.set_active(false);
-                }
-            }
-        }
-
+    /// Called when a mode button becomes active. The T/O/P buttons are grouped
+    /// in the .ui, so GTK enforces exactly one active (and prevents untoggling).
+    fn apply_mode(this: &Rc<RefCell<Self>>) {
         let s = this.borrow();
         // PIP renders thermal data too, so palette and range still apply there.
         let uses_palette = s.is_thermal_mode() || s.mode_pip.is_active();
@@ -991,19 +982,14 @@ impl AppState {
             });
         }
         {
-            // Mode toggles: T / O / P
-            let that = this.clone();
-            this.borrow().mode_thermal.connect_toggled(move |btn| {
-                if btn.is_active() { Self::apply_mode(&that, btn); }
-            });
-            let that = this.clone();
-            this.borrow().mode_optical.connect_toggled(move |btn| {
-                if btn.is_active() { Self::apply_mode(&that, btn); }
-            });
-            let that = this.clone();
-            this.borrow().mode_pip.connect_toggled(move |btn| {
-                if btn.is_active() { Self::apply_mode(&that, btn); }
-            });
+            // Mode toggles: T / O / P (grouped in the .ui — radio semantics)
+            let s = this.borrow();
+            for tb in [&s.mode_thermal, &s.mode_optical, &s.mode_pip] {
+                let that = this.clone();
+                tb.connect_toggled(move |btn| {
+                    if btn.is_active() { Self::apply_mode(&that); }
+                });
+            }
         }
         {
             // Sidebar toggles: measurements / info share one panel
