@@ -1326,17 +1326,23 @@ impl AppState {
             let that = this.clone();
             let key_ctrl = EventControllerKey::new();
             key_ctrl.connect_key_pressed(move |_, key, _, _| {
-                let delta: i32 = match key {
-                    gtk4::gdk::Key::Left => -1,
-                    gtk4::gdk::Key::Right => 1,
-                    _ => return glib::Propagation::Proceed,
-                };
+                use gtk4::gdk::Key;
                 let path = {
                     let s = that.borrow();
                     let files = s.dir_files.borrow();
-                    if files.is_empty() { return glib::Propagation::Stop; }
-                    let new_idx = (s.dir_idx.get() as i32 + delta)
-                        .clamp(0, files.len() as i32 - 1) as usize;
+                    let cur = s.dir_idx.get() as i32;
+                    let last = files.len() as i32 - 1;
+                    let new_idx = match key {
+                        Key::Left => (cur - 1).max(0),
+                        Key::Right => (cur + 1).min(last),
+                        Key::Home => 0,
+                        Key::End => last,
+                        _ => return glib::Propagation::Proceed,
+                    };
+                    if files.is_empty() || new_idx == cur {
+                        return glib::Propagation::Stop;
+                    }
+                    let new_idx = new_idx as usize;
                     s.dir_idx.set(new_idx);
                     files[new_idx].clone()
                 };
