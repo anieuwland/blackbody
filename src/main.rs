@@ -24,7 +24,7 @@ pub fn main() -> ExitCode {
         match cmdline.arguments().get(1) {
             Some(arg) => {
                 let state = AppState::new(app);
-                state.borrow().set_thermogram_from_path(Some(std::path::Path::new(arg)));
+                state.set_thermogram_from_path(Some(std::path::Path::new(arg)));
             }
             None => app.activate(),
         }
