@@ -339,14 +339,13 @@ impl AppState {
         let has_info = thermogram.capture_params().is_some();
         let has_optical = thermogram.has_optical();
         let has_pip = thermogram.has_pip();
-        let has_measurements = !thermogram.measurements().is_empty();
         let embedded_palette = thermogram.palette();
         *self.thermogram.borrow_mut() = Some(Arc::new(thermogram));
 
         *self.active_palette.borrow_mut() = PALETTES[self.palette_idx.get()].to_vec();
         Self::update_embedded_palette(self, embedded_palette);
         self.configure_range_scales(min, max);
-        self.update_controls(has_info, has_optical, has_pip, has_measurements);
+        self.update_controls(has_info, has_optical, has_pip);
         self.remember_directory(path);
         self.show_osd();
         self.draw_render_threaded();
@@ -370,7 +369,7 @@ impl AppState {
     /// Enable the controls the loaded file supports and fall back to thermal
     /// mode if the active mode lost its data. Call after the thermogram is
     /// stored: switching the mode triggers a re-render.
-    fn update_controls(&self, has_info: bool, has_optical: bool, has_pip: bool, has_measurements: bool) {
+    fn update_controls(&self, has_info: bool, has_optical: bool, has_pip: bool) {
         self.ui.canvas.placeholder.set_visible(false);
         self.ui.osd.zoom_button.set_sensitive(true);
         self.action_export.set_enabled(true);
@@ -378,10 +377,10 @@ impl AppState {
 
         let header = &self.ui.header;
         header.info_button.set_sensitive(has_info);
-        header.measurements_button.set_sensitive(has_measurements);
-        if !has_measurements && header.measurements_button.is_active() {
-            header.measurements_button.set_active(false);
-        }
+        // Always available once a file is open: without measurements the
+        // sidebar shows an empty state instead.
+        header.measurements_button.set_sensitive(true);
+        header.mode_thermal.set_sensitive(true);
         header.mode_optical.set_sensitive(has_optical);
         header.mode_pip.set_sensitive(has_pip);
         if (!has_optical && header.mode_optical.is_active())

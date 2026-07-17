@@ -108,6 +108,7 @@
                   <object class="GtkToggleButton" id="mode_thermal">
                     <property name="label" translatable="yes">T</property>
                     <property name="active">true</property>
+                    <property name="sensitive">false</property>
                     <property name="tooltip-text" translatable="yes">Thermal view</property>
                   </object>
                 </child>
@@ -115,6 +116,7 @@
                   <object class="GtkToggleButton" id="mode_optical">
                     <property name="label" translatable="yes">O</property>
                     <property name="group">mode_thermal</property>
+                    <property name="sensitive">false</property>
                     <property name="tooltip-text" translatable="yes">Optical view</property>
                   </object>
                 </child>
@@ -188,6 +190,7 @@
         <property name="content">
           <object class="AdwOverlaySplitView" id="info_split_view">
             <property name="sidebar-position">end</property>
+            <property name="show-sidebar">false</property>
             <property name="sidebar">
               <object class="GtkScrolledWindow">
                 <property name="hscrollbar-policy">never</property>

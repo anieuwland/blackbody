@@ -75,6 +75,7 @@ impl AppState {
 
         let measurements = thermogram.measurements();
         if measurements.is_empty() {
+            sidebar.append(&no_measurements_page());
             return;
         }
         sidebar.append(&self.overlay_switch_group());
@@ -102,6 +103,17 @@ impl AppState {
         group.add(&switch);
         group
     }
+}
+
+/// Dimmed placeholder shown when the file contains no measurement tools.
+fn no_measurements_page() -> adw::StatusPage {
+    adw::StatusPage::builder()
+        .icon_name("find-location-symbolic")
+        .title(gettext("No Measurements"))
+        .description(gettext("This thermogram contains no measurement tools"))
+        .vexpand(true)
+        .css_classes(["compact"])
+        .build()
 }
 
 // value is title (bold), label is subtitle (dim)
