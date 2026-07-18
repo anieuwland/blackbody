@@ -10,40 +10,51 @@
   <url type="homepage">https://bitbucket.org/nimmerwoner/blackbody/</url>
   <content_rating type="oars-1.1" />
   <translation type="gettext">blackbody</translation>
-  <developer_name>Arthur Nieuwland</developer_name>
+  <developer id="eu.nimmerfort">
+    <name>Arthur Nieuwland</name>
+  </developer>
   <update_contact>anieuwland@nimmerfort.eu</update_contact>
 
   <description>
-    <p>Blackbody is a thermogram viewer. It allows viewing FLIR JPEG, TIFF, and 16-bit centikelvin PNG thermograms, giving control over the render settings.</p>
+    <p>Blackbody is a viewer for FLIR thermograms and other thermal images. Explore temperatures under the cursor, render to different palettes and ranges, overlay the visible-light photo, and inspect embedded measurements and camera metadata.</p>
     <p>Features:</p>
     <ul>
-      <li>Loading FLIR thermograms from many cameras, both thermal and optical data</li>
+      <li>Loading FLIR thermograms from many cameras, both thermal and photo data</li>
       <li>Loading single-band TIFFs and 16-bit centikelvin PNGs</li>
       <li>Investigating temperatures with the mouse</li>
+      <li>Viewing embedded measurements: spots, lines, and areas</li>
+      <li>Overlay view, also known as Picture-in-Picture or MSX, combining thermal and visible images</li>
+      <li>Temperatures in celsius, fahrenheit, or kelvin</li>
+      <li>Metadata panel with camera info and GPS location, openable in a map</li>
       <li>Exporting renders to PNG and thermal data to TIFF or 16-bit centikelvin PNG</li>
       <li>Rendering to embedded color palettes, if present</li>
       <li>Rendering to many different colors palettes, including inferno and turbo</li>
       <li>Specifying the thermal range to render</li>
       <li>Zooming in and out</li>
       <li>Translated to multiple languages</li>
-    </ul>
-    <p>Cameras known to work:</p>
-    <ul>
-      <li>FLIR C2</li>
-      <li>FLIR E4</li>
-      <li>FLIR E5</li>
-      <li>FLIR E6</li>
-      <li>FLIR E8</li>
-      <li>FLIR E8XT</li>
-      <li>FLIR E53</li>
-      <li>FLIR E75</li>
-      <li>FLIR P60 (PAL)</li>
-      <li>FLIR T630SC</li>
-      <li>FLIR T660</li>
+      <li>Most FLIR cameras known to work</li>
     </ul>
   </description>
 
   <releases>
+    <release version="2.0.0" date="2026-07-18" urgency="low" type="stable">
+      <description>
+        <p>A major release porting Blackbody to GTK4 and libadwaita, with a redesigned interface and many new features:</p>
+        <ul>
+          <li>Completely redesigned user interface, dark by default, with on-screen temperature range sliders</li>
+          <li>Overlay view (Picture-in-Picture or MSX) next to the thermal and visible spectrum views</li>
+          <li>Embedded measurements (spots, lines, and areas) are now drawn on the render</li>
+          <li>Temperatures can be shown in celsius, fahrenheit, or kelvin</li>
+          <li>Information panel showing camera metadata and GPS location, with the option to open the location in a map</li>
+          <li>Support for loading 16-bit centikelvin PNGs</li>
+          <li>Scroll to zoom and keyboard navigation through all thermograms in a directory</li>
+          <li>Palette choice is remembered when opening the next thermogram</li>
+          <li>Improved export options and clearer error messages</li>
+          <li>More supported FLIR cameras due to upgrading to flyr==0.7.0</li>
+        </ul>
+      </description>
+    </release>
+
     <release version="1.3.0" date="2022-07-08" urgency="low" type="stable">
       <description>
         <p>This release overhauls the UI and adds important new features:</p>
@@ -98,21 +109,25 @@
   </releases>
 
   <screenshots>
-    <screenshot>
-      <caption>A cat with a heater in the background (19°C - 40°C, inferno palette)</caption>
-      <image type="source" width="682" height="569">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-01.png</image>
+    <screenshot type="default">
+        <caption>A thermogram of a bird in °Celsius, in Blackbody's default view using the embedded palette.</caption>
+        <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-01.png</image>
     </screenshot>
     <screenshot>
-      <caption>A cat with a heater in the background, halved in size (19°C - 67°C, cividis palette)</caption>
-      <image type="source" width="682" height="569">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-02.png</image>
+        <caption>Blackbody's info pane of a high quality FLIR SC660 camera, in °Fahrenheit.</caption>
+        <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-02.png</image>
     </screenshot>
     <screenshot>
-      <caption>A house in winter (6°C - 12°C, turbo palette)</caption>
-      <image type="source" width="682" height="569">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-03.png</image>
+        <caption>Spot measurements on a thermogram in °Fahrenheit with a custom palette.</caption>
+        <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-03.png</image>
     </screenshot>
     <screenshot>
-      <caption>A running jet engine (15°C - 95°C, palette emphasizing warmth)</caption>
-      <image type="source" width="682" height="569">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-04.png</image>
+        <caption>A thermogram in Kelvin laid over the visible spectrum photo, using a custom palette.</caption>
+        <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-04.png</image>
+    </screenshot>
+    <screenshot>
+        <caption>Zoomed in on a cat's head with a custom palette and temperature range.</caption>
+        <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-05.png</image>
     </screenshot>
   </screenshots>
 </component>

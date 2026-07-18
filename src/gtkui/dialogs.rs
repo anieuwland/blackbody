@@ -133,6 +133,12 @@ impl AppState {
             .application_name("Blackbody")
             .version(crate::config::VERSION)
             .developer_name("Arthur Nieuwland")
+            .comments(gettext(
+                "A viewer for FLIR thermograms and other thermal images. \
+                 Explore temperatures under the cursor, render to different \
+                 palettes and ranges, overlay the visible-light photo, and \
+                 inspect embedded measurements and camera metadata.",
+            ))
             .website("https://bitbucket.org/nimmerwoner/blackbody/")
             .license("EUPL-1.2")
             .build()
