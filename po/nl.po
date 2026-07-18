@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-18 12:04+0200\n"
+"POT-Creation-Date: 2026-07-18 19:08+0200\n"
 "PO-Revision-Date: 2021-01-02 13:11+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -29,227 +29,306 @@ msgstr "Blackbody"
 msgid "A thermogram viewer"
 msgstr "Een thermogramvertoner"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:13
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:14
 msgid "Arthur Nieuwland"
 msgstr "Arthur Nieuwland"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:17
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:19
 msgid ""
-"Blackbody is a thermogram viewer. It allows viewing FLIR JPEG, TIFF, and 16-"
-"bit centikelvin PNG thermograms, giving control over the render settings."
+"Blackbody is a viewer for FLIR thermograms and other thermal images. Explore "
+"temperatures under the cursor, render to different palettes and ranges, "
+"overlay the visible-light photo, and inspect embedded measurements and "
+"camera metadata."
 msgstr ""
-"Blackbody is een thermogramvertoner. Hiermee kunnen FLIR JPEG-, TIFF- en 16-"
-"bits centikelvine PNG-thermogrammen worden bekeken, met controle over de "
-"renderinstellingen."
+"Blackbody is een vertoner voor FLIR-thermogrammen en andere warmtebeelden. "
+"Onderzoek temperaturen onder de cursor, render naar verschillende paletten "
+"en temperatuurbereiken, leg het warmtebeeld over de foto in zichtbaar licht "
+"en bekijk ingebedde metingen en camerametadata."
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:18
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:20
 msgid "Features:"
 msgstr "Functionaliteit:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:20
-msgid ""
-"Loading FLIR thermograms from many cameras, both thermal and optical data"
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:22
+msgid "Loading FLIR thermograms from many cameras, both thermal and photo data"
 msgstr ""
 "FLIR-thermogrammen van vele camera's inladen, zowel thermische als optische "
 "gegevens"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:21
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:23
 msgid "Loading single-band TIFFs and 16-bit centikelvin PNGs"
 msgstr "Enkelbands TIFF- en 16-bits centikelvine PNG-bestanden inladen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:22
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:24
 msgid "Investigating temperatures with the mouse"
 msgstr "Temperaturen onderzoeken met de muis"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:23
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:25
+msgid "Viewing embedded measurements: spots, lines, and areas"
+msgstr "Ingebedde metingen bekijken: punten, lijnen en gebieden"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:26
+msgid ""
+"Overlay view, also known as Picture-in-Picture or MSX, combining thermal and "
+"visible images"
+msgstr ""
+"Overlayweergave, ook bekend als beeld-in-beeld of MSX, die het warmtebeeld "
+"en het zichtbare beeld combineert"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:27
+msgid "Temperatures in celsius, fahrenheit, or kelvin"
+msgstr "Temperaturen in Celsius, Fahrenheit of Kelvin"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:28
+msgid "Metadata panel with camera info and GPS location, openable in a map"
+msgstr ""
+"Metadatapaneel met camera-informatie en GPS-locatie, te openen op een kaart"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:29
 msgid ""
 "Exporting renders to PNG and thermal data to TIFF or 16-bit centikelvin PNG"
 msgstr ""
 "Renders exporteren naar PNG en thermische gegevens naar TIFF of 16-bits "
 "centikelvine PNG"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:24
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:30
 msgid "Rendering to embedded color palettes, if present"
 msgstr "Renderen naar ingebedde kleurpaletten, indien aanwezig"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:25
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:90
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:31
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:101
 msgid ""
 "Rendering to many different colors palettes, including inferno and turbo"
 msgstr ""
 "Naar uiteenlopende kleurpaletten renderen, onder andere inferno en turbo"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:26
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:91
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:32
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:102
 msgid "Specifying the thermal range to render"
 msgstr "Het warmtebereik instellen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:27
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:92
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:33
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:103
 msgid "Zooming in and out"
 msgstr "In- en uitzoomen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:28
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:93
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:34
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:104
 msgid "Translated to multiple languages"
 msgstr "Vertaald in meerdere talen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:30
-msgid "Cameras known to work:"
-msgstr "Camera's waarmee Blackbody overweg kan:"
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:32
-msgid "FLIR C2"
-msgstr ""
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:33
-msgid "FLIR E4"
-msgstr ""
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:34
-msgid "FLIR E5"
-msgstr ""
-
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:35
-msgid "FLIR E6"
-msgstr ""
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:36
-msgid "FLIR E8"
-msgstr ""
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:37
-msgid "FLIR E8XT"
-msgstr ""
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:38
-msgid "FLIR E53"
-msgstr ""
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:39
-msgid "FLIR E75"
-msgstr ""
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:40
-msgid "FLIR P60 (PAL)"
-msgstr ""
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:41
-msgid "FLIR T630SC"
-msgstr ""
+msgid "Most FLIR cameras known to work"
+msgstr "Werkt met de meeste FLIR-camera's"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:42
-msgid "FLIR T660"
+msgid ""
+"A major release porting Blackbody to GTK4 and libadwaita, with a redesigned "
+"interface and many new features:"
 msgstr ""
+"Een grote uitgave die Blackbody overzet naar GTK4 en libadwaita, met een "
+"opnieuw ontworpen interface en veel nieuwe functionaliteit:"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:44
+msgid ""
+"Completely redesigned user interface, dark by default, with on-screen "
+"temperature range sliders"
+msgstr ""
+"Volledig opnieuw ontworpen gebruikersinterface, standaard donker, met "
+"schuifregelaars voor het temperatuurbereik in beeld"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:45
+msgid ""
+"Overlay view (Picture-in-Picture or MSX) next to the thermal and visible "
+"spectrum views"
+msgstr ""
+"Overlayweergave (beeld-in-beeld of MSX) naast de weergaven voor het "
+"thermische en het zichtbare spectrum"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:46
+msgid ""
+"Embedded measurements (spots, lines, and areas) are now drawn on the render"
+msgstr ""
+"Ingebedde metingen (punten, lijnen en gebieden) worden nu op de render "
+"getekend"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:47
+msgid "Temperatures can be shown in celsius, fahrenheit, or kelvin"
+msgstr ""
+"Temperaturen kunnen worden weergegeven in Celsius, Fahrenheit of Kelvin"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:48
+msgid ""
+"Information panel showing camera metadata and GPS location, with the option "
+"to open the location in a map"
+msgstr ""
+"Informatiepaneel met camerametadata en GPS-locatie, met de optie om de "
+"locatie op een kaart te openen"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:49
-msgid "This release overhauls the UI and adds important new features:"
+msgid "Support for loading 16-bit centikelvin PNGs"
+msgstr "Ondersteuning voor het inladen van 16-bits centikelvine PNG-bestanden"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:50
+msgid ""
+"Scroll to zoom and keyboard navigation through all thermograms in a directory"
 msgstr ""
+"Scrollen om te zoomen en met het toetsenbord door alle thermogrammen in een "
+"map navigeren"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:51
-msgid "Ability to view optical images (photos) in FLIR images"
-msgstr ""
+msgid "Palette choice is remembered when opening the next thermogram"
+msgstr "De paletkeuze wordt onthouden bij het openen van het volgende thermogram"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:52
-msgid "Support for rendering thermal data to FLIR's embedded palettes"
-msgstr ""
+msgid "Improved export options and clearer error messages"
+msgstr "Verbeterde exportopties en duidelijkere foutmeldingen"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:53
+msgid "More supported FLIR cameras due to upgrading to flyr==0.7.0"
+msgstr "Meer ondersteunde FLIR-camera's dankzij de upgrade naar flyr==0.7.0"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:60
+msgid "This release overhauls the UI and adds important new features:"
+msgstr ""
+"Deze uitgave vernieuwt de interface en voegt belangrijke nieuwe "
+"functionaliteit toe:"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:62
+msgid "Ability to view optical images (photos) in FLIR images"
+msgstr "Mogelijkheid om optische beelden (foto's) in FLIR-bestanden te bekijken"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:63
+msgid "Support for rendering thermal data to FLIR's embedded palettes"
+msgstr ""
+"Ondersteuning voor het renderen van thermische gegevens naar de ingebedde "
+"paletten van FLIR"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:64
 msgid ""
 "Correcting for the rotation of a thermogram to show the image right side up"
 msgstr ""
+"Correctie voor de rotatie van een thermogram zodat het beeld rechtop wordt "
+"getoond"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:60
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:71
 msgid "This release adds major interactivity improvements:"
-msgstr ""
+msgstr "Deze uitgave voegt grote verbeteringen in interactiviteit toe:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:62
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:73
 msgid "Temperature in the render can be investigated by hovering over pixels"
 msgstr ""
+"De temperatuur in de render kan worden onderzocht door met de muis over "
+"pixels te bewegen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:63
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:74
 msgid "Added a thermometer showing the colors and associated temperatures"
 msgstr ""
+"Een thermometer toegevoegd die de kleuren en bijbehorende temperaturen toont"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:64
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:75
 msgid "Thermogram renders can be saved to PNGs"
-msgstr ""
+msgstr "Renders van thermogrammen kunnen worden opgeslagen als PNG"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:65
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:76
 msgid "Thermograms' celsius data can be exported to tiff"
 msgstr ""
+"Celsiusgegevens van thermogrammen kunnen worden geëxporteerd naar TIFF"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:66
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:77
 msgid ""
 "Allowed temperature range is now -273,15 to 1.000.000 instead of -99 to 99 "
 "(all °C)"
 msgstr ""
+"Het toegestane temperatuurbereik is nu -273,15 tot 1.000.000 in plaats van "
+"-99 tot 99 (alles in °C)"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:73
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:84
 msgid "A small, incremental update to Blackbody. Improvements:"
-msgstr ""
+msgstr "Een kleine, stapsgewijze update van Blackbody. Verbeteringen:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:75
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:86
 msgid "An error message is shown if opening a thermogram fails"
 msgstr ""
+"Er wordt een foutmelding getoond als het openen van een thermogram mislukt"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:76
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:87
 msgid ""
 "When opening fails, Blackbody doesn't unload any loaded thermograms anymore"
 msgstr ""
+"Wanneer het openen mislukt, verwijdert Blackbody reeds ingeladen "
+"thermogrammen niet meer"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:77
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:88
 msgid ""
 "Added logo's heat waves as a nicer placeholder when no thermogram is opened "
 "yet"
 msgstr ""
+"De warmtegolven uit het logo toegevoegd als mooiere plaatshouder wanneer er "
+"nog geen thermogram is geopend"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:78
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:89
 msgid ""
 "Refined headerbar controls to only be sensitive when a thermogram is opened"
 msgstr ""
+"Bedieningselementen in de kopbalk verfijnd zodat ze alleen actief zijn "
+"wanneer een thermogram is geopend"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:79
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:90
 msgid ""
 "Three more known-to-be-compatible cameras (FLIR C2, FLIR E5 and FLIR P60)"
 msgstr ""
+"Drie extra camera's waarvan bekend is dat ze werken (FLIR C2, FLIR E5 en "
+"FLIR P60)"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:86
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:97
 msgid "First release of Blackbody. The most important features are:"
-msgstr ""
+msgstr "Eerste uitgave van Blackbody. De belangrijkste functionaliteit:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:88
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:99
 msgid "Loading FLIR thermograms from many cameras"
 msgstr "FLIR-thermogrammen van verschillende camera's inladen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:89
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:100
 msgid "Loading single-band TIFFs assumed to be in °C"
 msgstr "Enkelbands TIFF-beelden inladen (aangenomen in °C)"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:94
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:105
 msgid "Available for Linux and Windows"
 msgstr "Werkt op Linux en Windows"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:102
-msgid "A cat with a heater in the background (19°C - 40°C, inferno palette)"
-msgstr ""
-"Een kat met een radiator in the achtergrond (19°C - 40°C, inferno palet)"
-
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:106
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:113
 msgid ""
-"A cat with a heater in the background, halved in size (19°C - 67°C, cividis "
-"palette)"
+"A thermogram of a bird in °Celsius, in Blackbody's default view using the "
+"embedded palette."
 msgstr ""
-"Een kat met een radiator in de achtergrond, in grootte gehalveerd (19°C - "
-"67°C, cividis palet)"
+"Een thermogram van een vogel in °Celsius, in de standaardweergave van "
+"Blackbody met het ingebedde palet."
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:110
-msgid "A house in winter (6°C - 12°C, turbo palette)"
-msgstr "Een huis in de winter (6°C - 12°C, turbo palet)"
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:117
+msgid ""
+"Blackbody's info pane of a high quality FLIR SC660 camera, in °Fahrenheit."
+msgstr ""
+"Het informatiepaneel van Blackbody voor een hoogwaardige FLIR SC660-camera, "
+"in °Fahrenheit."
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:114
-msgid "A running jet engine (15°C - 95°C, palette emphasizing warmth)"
-msgstr "Een lopende jetturbine (15°C - 95°C, warmte-benadrukkende palet)"
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:121
+msgid "Spot measurements on a thermogram in °Fahrenheit with a custom palette."
+msgstr ""
+"Puntmetingen op een thermogram in °Fahrenheit met een aangepast palet."
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:125
+msgid ""
+"A thermogram in Kelvin laid over the visible spectrum photo, using a custom "
+"palette."
+msgstr ""
+"Een thermogram in Kelvin over de foto in zichtbaar licht gelegd, met een "
+"aangepast palet."
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:129
+msgid "Zoomed in on a cat's head with a custom palette and temperature range."
+msgstr ""
+"Ingezoomd op de kop van een kat met een aangepast palet en temperatuurbereik."
 
 #: data/eu.nimmerfort.blackbody.gschema.xml:11
 msgid "Temperature unit"
@@ -266,23 +345,23 @@ msgstr "Passend"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:12
 msgid "50%"
-msgstr ""
+msgstr "50%"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:17
 msgid "67%"
-msgstr ""
+msgstr "67%"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:22
 msgid "100%"
-msgstr ""
+msgstr "100%"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:27
 msgid "200%"
-msgstr ""
+msgstr "200%"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:32
 msgid "400%"
-msgstr ""
+msgstr "400%"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:41
 msgid "New window"
@@ -350,7 +429,7 @@ msgstr "Camera-informatie"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:168
 msgid "Measurements"
-msgstr ""
+msgstr "Metingen"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:176
 msgid "Choose colour palette"
@@ -358,11 +437,11 @@ msgstr "Kleurenpalet kiezen"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:318
 msgid "Zoom"
-msgstr ""
+msgstr "Zoomen"
 
 #: src/gtkui/app_window.rs:348
 msgid "Could not open file"
-msgstr ""
+msgstr "Kon bestand niet openen"
 
 #: src/gtkui/app_window.rs:350
 #, rust-format
@@ -372,6 +451,11 @@ msgid ""
 "File: {}\n"
 "Cause: {}"
 msgstr ""
+"Openen van het bestand is mislukt. Het bestand is mogelijk beschadigd of de "
+"camera wordt niet ondersteund.\n"
+"\n"
+"Bestand: {}\n"
+"Oorzaak: {}"
 
 #: src/gtkui/dialogs.rs:22
 msgid "Open thermogram"
@@ -379,23 +463,23 @@ msgstr "Thermogram openen"
 
 #: src/gtkui/dialogs.rs:41
 msgid "Export"
-msgstr ""
+msgstr "Exporteren"
 
 #: src/gtkui/dialogs.rs:42
 msgid "Cancel"
-msgstr ""
+msgstr "Annuleren"
 
 #: src/gtkui/dialogs.rs:44
 msgid "TIFF (32-bit float)"
-msgstr ""
+msgstr "TIFF (32-bits float)"
 
 #: src/gtkui/dialogs.rs:45
 msgid "PNG (16-bit)"
-msgstr ""
+msgstr "PNG (16-bits)"
 
 #: src/gtkui/dialogs.rs:79
 msgid "Export failed"
-msgstr ""
+msgstr "Exporteren mislukt"
 
 #: src/gtkui/dialogs.rs:80
 #, rust-format
@@ -403,6 +487,8 @@ msgid ""
 "Failed to export to {}\n"
 "Cause: {}"
 msgstr ""
+"Exporteren naar {} is mislukt\n"
+"Oorzaak: {}"
 
 #: src/gtkui/dialogs.rs:89
 msgid "Save render"
@@ -410,7 +496,7 @@ msgstr "Render opslaan"
 
 #: src/gtkui/dialogs.rs:125
 msgid "Save failed"
-msgstr ""
+msgstr "Opslaan mislukt"
 
 #: src/gtkui/dialogs.rs:126
 #, rust-format
@@ -418,10 +504,23 @@ msgid ""
 "Failed to save to {}\n"
 "Cause: {}"
 msgstr ""
+"Opslaan naar {} is mislukt\n"
+"Oorzaak: {}"
 
-#: src/gtkui/dialogs.rs:144
-msgid "Close"
+#: src/gtkui/dialogs.rs:137
+msgid ""
+"A viewer for FLIR thermograms and other thermal images. Explore temperatures "
+"under the cursor, render to different palettes and ranges, overlay the "
+"visible-light photo, and inspect embedded measurements and camera metadata."
 msgstr ""
+"Een vertoner voor FLIR-thermogrammen en andere warmtebeelden. Onderzoek "
+"temperaturen onder de cursor, render naar verschillende paletten en "
+"temperatuurbereiken, leg het warmtebeeld over de foto in zichtbaar licht en "
+"bekijk ingebedde metingen en camerametadata."
+
+#: src/gtkui/dialogs.rs:150
+msgid "Close"
+msgstr "Sluiten"
 
 #: src/gtkui/palette_ui.rs:80
 msgid "Camera palette"
@@ -429,11 +528,11 @@ msgstr "Camerapalet"
 
 #: src/gtkui/palette_ui.rs:95
 msgid "Embedded"
-msgstr ""
+msgstr "Ingebed"
 
 #: src/gtkui/palette_ui.rs:170
 msgid "Perceptually uniform"
-msgstr ""
+msgstr "Perceptueel uniform"
 
 #: src/gtkui/palette_ui.rs:171
 msgid "Turbo"
@@ -457,7 +556,7 @@ msgstr "Viridis"
 
 #: src/gtkui/palette_ui.rs:177
 msgid "Classic"
-msgstr ""
+msgstr "Klassiek"
 
 #: src/gtkui/palette_ui.rs:178
 msgid "Grayscale"
@@ -469,7 +568,7 @@ msgstr "Heet"
 
 #: src/gtkui/palette_ui.rs:180
 msgid "Rainbow"
-msgstr ""
+msgstr "Regenboog"
 
 #: src/gtkui/palette_ui.rs:181
 msgid "Copper"
@@ -477,7 +576,7 @@ msgstr "Koper"
 
 #: src/gtkui/palette_ui.rs:183
 msgid "Diverging"
-msgstr ""
+msgstr "Divergerend"
 
 #: src/gtkui/palette_ui.rs:183
 msgid "Coolwarm"
@@ -485,79 +584,79 @@ msgstr "Koelwarm"
 
 #: src/gtkui/sidebar.rs:95
 msgid "Show in image"
-msgstr ""
+msgstr "In beeld tonen"
 
 #: src/gtkui/sidebar.rs:114
 msgid "No Measurements"
-msgstr ""
+msgstr "Geen metingen"
 
 #: src/gtkui/sidebar.rs:115
 msgid "This thermogram contains no measurement tools"
-msgstr ""
+msgstr "Dit thermogram bevat geen meetinstrumenten"
 
 #: src/gtkui/sidebar.rs:142
 msgid "Directory"
-msgstr ""
+msgstr "Map"
 
 #: src/gtkui/sidebar.rs:152
 msgid "Dimensions"
-msgstr ""
+msgstr "Afmetingen"
 
 #: src/gtkui/sidebar.rs:158
 msgid "Format"
-msgstr ""
+msgstr "Formaat"
 
 #: src/gtkui/sidebar.rs:161
 msgid "File size"
-msgstr ""
+msgstr "Bestandsgrootte"
 
 #: src/gtkui/sidebar.rs:163
 msgid "Created"
-msgstr ""
+msgstr "Aangemaakt"
 
 #: src/gtkui/sidebar.rs:166
 msgid "Modified"
-msgstr ""
+msgstr "Gewijzigd"
 
 #: src/gtkui/sidebar.rs:176
 msgid "Make"
-msgstr ""
+msgstr "Merk"
 
 #: src/gtkui/sidebar.rs:177
 msgid "Model"
-msgstr ""
+msgstr "Model"
 
 #: src/gtkui/sidebar.rs:178
 msgid "Focal length"
-msgstr ""
+msgstr "Brandpuntsafstand"
 
 #: src/gtkui/sidebar.rs:179
 msgid "Photographed"
-msgstr ""
+msgstr "Gefotografeerd"
 
 #: src/gtkui/sidebar.rs:195
 msgid "Show on map"
-msgstr ""
+msgstr "Op kaart tonen"
 
 #: src/gtkui/sidebar.rs:209
 msgid "Location"
-msgstr ""
+msgstr "Locatie"
 
 #: src/gtkui/sidebar.rs:219
 msgid "Emissivity"
-msgstr ""
+msgstr "Emissiviteit"
 
 #: src/gtkui/sidebar.rs:220
 msgid "Object distance"
-msgstr ""
+msgstr "Objectafstand"
 
 #: src/gtkui/sidebar.rs:221
 msgid "Reflected temperature"
-msgstr ""
+msgstr "Gereflecteerde temperatuur"
 
 #: src/gtkui/sidebar.rs:222
 msgid "Relative humidity"
-msgstr ""
+msgstr "Relatieve luchtvochtigheid"
 
 #: src/gtkui/sidebar.rs:236
 #, rust-format
@@ -566,31 +665,57 @@ msgstr "gem. {} · {} – {}"
 
 #: src/gtkui/sidebar.rs:248
 msgid "Spot"
-msgstr ""
+msgstr "Punt"
 
 #: src/gtkui/sidebar.rs:250
 msgid "Endpoint"
-msgstr ""
+msgstr "Eindpunt"
 
 #: src/gtkui/sidebar.rs:254
 msgid "Area"
-msgstr ""
+msgstr "Gebied"
 
 #: src/gtkui/sidebar.rs:257
 msgid "Line"
-msgstr ""
+msgstr "Lijn"
 
 #: src/gtkui/sidebar.rs:263 src/gtkui/sidebar.rs:265
 msgid "Ellipse"
-msgstr ""
+msgstr "Ellips"
 
 #: src/gtkui/sidebar.rs:266
 msgid "Alarm"
-msgstr ""
+msgstr "Alarm"
 
 #: src/gtkui/sidebar.rs:267
 msgid "Difference"
-msgstr ""
+msgstr "Verschil"
+
+#~ msgid ""
+#~ "Blackbody is a thermogram viewer. It allows viewing FLIR JPEG, TIFF, and "
+#~ "16-bit centikelvin PNG thermograms, giving control over the render "
+#~ "settings."
+#~ msgstr ""
+#~ "Blackbody is een thermogramvertoner. Hiermee kunnen FLIR JPEG-, TIFF- en "
+#~ "16-bits centikelvine PNG-thermogrammen worden bekeken, met controle over "
+#~ "de renderinstellingen."
+
+#~ msgid "A cat with a heater in the background (19°C - 40°C, inferno palette)"
+#~ msgstr ""
+#~ "Een kat met een radiator in the achtergrond (19°C - 40°C, inferno palet)"
+
+#~ msgid ""
+#~ "A cat with a heater in the background, halved in size (19°C - 67°C, "
+#~ "cividis palette)"
+#~ msgstr ""
+#~ "Een kat met een radiator in de achtergrond, in grootte gehalveerd (19°C - "
+#~ "67°C, cividis palet)"
+
+#~ msgid "A house in winter (6°C - 12°C, turbo palette)"
+#~ msgstr "Een huis in de winter (6°C - 12°C, turbo palet)"
+
+#~ msgid "A running jet engine (15°C - 95°C, palette emphasizing warmth)"
+#~ msgstr "Een lopende jetturbine (15°C - 95°C, warmte-benadrukkende palet)"
 
 #~ msgid "Optical view"
 #~ msgstr "Optische weergave"
