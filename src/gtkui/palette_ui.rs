@@ -18,47 +18,31 @@ impl AppState {
     }
 
     fn setup_palette_popover(this: &Rc<Self>) {
-        const GROUPS: &[(&str, &[(&str, usize)])] = &[
-            ("Perceptually uniform", &[
-                ("Turbo", 0),
-                ("Cividis", 1),
-                ("Inferno", 5),
-                ("Magma", 8),
-                ("Viridis", 9),
-            ]),
-            ("Classic", &[
-                ("Grayscale", 3),
-                ("Hot", 4),
-                ("Rainbow", 6),
-                ("Copper", 2),
-            ]),
-            ("Diverging", &[("Coolwarm", 7)]),
-        ];
-
         let palette = &this.ui.palette;
         palette.embedded_section.set_visible(false);
         palette.palette_box.prepend(&palette.embedded_section);
-        for (group_name, palettes) in GROUPS.iter().copied() {
-            Self::add_palette_group(this, group_name, palettes);
+        for (group_name, palettes) in palette_groups() {
+            Self::add_palette_group(this, &group_name, &palettes);
         }
     }
 
-    fn add_palette_group(this: &Rc<Self>, name: &str, palettes: &[(&str, usize)]) {
-        let heading = Label::builder().label(gettext(name)).xalign(0.0).build();
+    fn add_palette_group(this: &Rc<Self>, name: &str, palettes: &[(String, usize)]) {
+        let heading = Label::builder().label(name).xalign(0.0).build();
         heading.add_css_class("heading");
         let flow = swatch_flow_box();
 
         let palette_box = &this.ui.palette.palette_box;
         palette_box.append(&heading);
         palette_box.append(&flow);
-        for (name, idx) in palettes.iter().copied() {
-            flow.insert(&Self::standard_swatch(this, name, idx), -1);
+        for (name, idx) in palettes {
+            flow.insert(&Self::standard_swatch(this, name, *idx), -1);
         }
     }
 
     /// A swatch button for `PALETTES[idx]` that applies that palette on click.
+    /// `name` is already translated.
     fn standard_swatch(this: &Rc<Self>, name: &str, idx: usize) -> Button {
-        let btn = make_swatch_button(PALETTES[idx].to_vec(), &gettext(name));
+        let btn = make_swatch_button(PALETTES[idx].to_vec(), name);
         // Mark first palette (Turbo, idx=0) as initially selected
         if idx == 0 {
             btn.add_css_class("suggested-action");
@@ -177,6 +161,27 @@ impl AppState {
             true
         });
     }
+}
+
+/// Popover groups: (translated heading, [(translated name, `PALETTES` index)]).
+/// Built at runtime so xgettext sees each name as a literal.
+fn palette_groups() -> [(String, Vec<(String, usize)>); 3] {
+    [
+        (gettext("Perceptually uniform"), vec![
+            (gettext("Turbo"), 0),
+            (gettext("Cividis"), 1),
+            (gettext("Inferno"), 5),
+            (gettext("Magma"), 8),
+            (gettext("Viridis"), 9),
+        ]),
+        (gettext("Classic"), vec![
+            (gettext("Grayscale"), 3),
+            (gettext("Hot"), 4),
+            (gettext("Rainbow"), 6),
+            (gettext("Copper"), 2),
+        ]),
+        (gettext("Diverging"), vec![(gettext("Coolwarm"), 7)]),
+    ]
 }
 
 fn draw_color_bar(context: &cairo::Context, width: f64, height: f64, palette: &[[f32; 3]]) {

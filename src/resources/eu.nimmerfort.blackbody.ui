@@ -314,7 +314,7 @@
                             </child>
                             <child>
                               <object class="GtkLabel" id="zoom_label">
-                                <property name="label">Fit</property>
+                                <property name="label" translatable="yes">Fit</property>
                               </object>
                             </child>
                           </object>

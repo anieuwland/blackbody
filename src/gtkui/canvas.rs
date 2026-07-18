@@ -45,6 +45,16 @@ impl AppState {
         self.ui.header.mode_thermal.is_active()
     }
 
+    /// Drop the displayed frame. Bumping the generation orphans any in-flight
+    /// render thread, so a slow render of the previous file can't republish
+    /// its frame afterwards.
+    pub(super) fn clear_canvas(&self) {
+        self.render_generation.fetch_add(1, Ordering::Relaxed);
+        *self.image_bgra.lock().unwrap() = None;
+        *self.image_surface.borrow_mut() = None;
+        self.ui.canvas.image.queue_draw();
+    }
+
     /// Render the current mode's image on a worker thread and publish the
     /// result to `image_bgra`. Render threads finish in arbitrary order (a
     /// slider drag spawns many); only the thread matching the latest

@@ -28,18 +28,13 @@ run_command(
   check: true
 )
 
-sources = files(
-  'gtkui/app_window.rs',
-  'gtkui/mod.rs',
-  'config.rs',
-  'main.rs',
-)
-
 cargo_script = find_program(join_paths(meson.source_root(), 'build-aux/cargo.sh'))
 cargo_release = custom_target(
   'cargo-build',
   build_by_default: true,
-  input: sources,
+  # Always invoke cargo; it does its own (correct) change tracking, so a
+  # meson-side source list can only ever be stale.
+  build_always_stale: true,
   output: meson.project_name(),
   console: true,
   install: true,

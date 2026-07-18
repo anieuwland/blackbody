@@ -21,7 +21,7 @@ use libadwaita as adw;
 
 use super::dialogs::tr;
 use super::palettes::PALETTES;
-use libblackbody::{Thermogram, ThermogramTrait};
+use libblackbody::{Error, Thermogram, ThermogramTrait};
 
 const UI: &str = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui";
 
@@ -44,6 +44,9 @@ pub(super) struct CanvasUi {
     pub(super) scrolled_window: ScrolledWindow,
     pub(super) overlay: Overlay,
     pub(super) placeholder: gtk4::Box,
+    /// Shown instead of the image when directory navigation hits an
+    /// unloadable file.
+    pub(super) error_page: adw::StatusPage,
 }
 
 /// The on-screen display floating over the canvas: temperature range scales
@@ -111,6 +114,10 @@ impl CanvasUi {
             scrolled_window: builder.object("scrolled_window").unwrap(),
             overlay: builder.object("canvas_overlay").unwrap(),
             placeholder: gtk4::Box::new(Orientation::Vertical, 24),
+            error_page: adw::StatusPage::builder()
+                .icon_name("image-missing-symbolic")
+                .visible(false)
+                .build(),
         }
     }
 }
@@ -274,6 +281,7 @@ impl AppState {
         canvas.placeholder.set_halign(gtk4::Align::Center);
         canvas.placeholder.set_valign(gtk4::Align::Center);
         canvas.overlay.add_overlay(&canvas.placeholder);
+        canvas.overlay.add_overlay(&canvas.error_page);
     }
 
     /// Clicking the controls must not move keyboard focus onto them: a focused
@@ -371,6 +379,7 @@ impl AppState {
     /// stored: switching the mode triggers a re-render.
     fn update_controls(&self, has_info: bool, has_optical: bool, has_pip: bool) {
         self.ui.canvas.placeholder.set_visible(false);
+        self.ui.canvas.error_page.set_visible(false);
         self.ui.osd.zoom_button.set_sensitive(true);
         self.action_export.set_enabled(true);
         self.action_render.set_enabled(true);
@@ -387,6 +396,51 @@ impl AppState {
             || (!has_pip && header.mode_pip.is_active())
         {
             header.mode_thermal.set_active(true);
+        }
+    }
+
+    /// Directory navigation: a failed load shows an error state on the canvas
+    /// instead of a dialog, so browsing continues past unloadable files.
+    fn navigate_to(self: &Rc<Self>, path: &Path) {
+        match Thermogram::from_file(path) {
+            Ok(thermogram) => self.load_thermogram(thermogram, path),
+            Err(e) => self.show_load_error(path, &e),
+        }
+    }
+
+    fn show_load_error(&self, path: &Path, error: &Error) {
+        let name = path.file_name().unwrap_or_default().to_string_lossy();
+        self.ui.window.set_title(Some(&name));
+        *self.thermogram.borrow_mut() = None;
+        self.clear_canvas();
+        self.disable_controls();
+
+        let page = &self.ui.canvas.error_page;
+        page.set_title(&name);
+        page.set_description(Some(&error.to_string()));
+        page.set_visible(true);
+    }
+
+    /// Grey out everything that needs a loaded thermogram; `update_controls`
+    /// re-enables on the next successful load. Untoggling the sidebar buttons
+    /// also closes the sidebar, whose content belongs to the previous file.
+    fn disable_controls(&self) {
+        self.ui.osd.zoom_button.set_sensitive(false);
+        self.action_export.set_enabled(false);
+        self.action_render.set_enabled(false);
+
+        let header = &self.ui.header;
+        header.info_button.set_active(false);
+        header.measurements_button.set_active(false);
+        let buttons = [
+            &header.info_button,
+            &header.measurements_button,
+            &header.mode_thermal,
+            &header.mode_optical,
+            &header.mode_pip,
+        ];
+        for b in buttons {
+            b.set_sensitive(false);
         }
     }
 
@@ -447,7 +501,7 @@ impl AppState {
                 return glib::Propagation::Proceed;
             }
             if let Some(path) = that.step_directory(key) {
-                that.set_thermogram_from_path(Some(&path));
+                that.navigate_to(&path);
             }
             glib::Propagation::Stop
         });

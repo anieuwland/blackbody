@@ -11,6 +11,7 @@ use libadwaita::prelude::*;
 use libadwaita::{ActionRow, PreferencesGroup};
 
 use super::app_window::AppState;
+use super::dialogs::tr;
 use libblackbody::{Measurement, Thermogram, ThermogramTrait};
 
 impl AppState {
@@ -175,8 +176,40 @@ fn camera_group(thermogram: &Thermogram) -> PreferencesGroup {
         if let Some(v) = &meta.model { add_row(&group, &gettext("Model"), v); }
         if let Some(v) = meta.focal_length { add_row(&group, &gettext("Focal length"), &format!("{v:.1} mm")); }
         if let Some(v) = &meta.date_time { add_row(&group, &gettext("Photographed"), &format_exif_datetime(v)); }
+        if let (Some(lat), Some(lon)) = (meta.gps_latitude, meta.gps_longitude) {
+            group.add(&location_row(lat, lon));
+        }
     }
     group
+}
+
+/// GPS location row — the pin button opens the position in the user's maps
+/// app (RFC 5870 `geo:` URI), falling back to OpenStreetMap in the browser
+/// when no handler is installed.
+fn location_row(lat: f64, lon: f64) -> ActionRow {
+    let pin_btn = gtk4::Button::builder()
+        .icon_name("mark-location-symbolic")
+        .valign(gtk4::Align::Center)
+        .css_classes(["flat"])
+        .tooltip_text(gettext("Show on map"))
+        .build();
+    pin_btn.connect_clicked(move |_| {
+        let geo = format!("geo:{lat},{lon}");
+        let osm = format!("https://www.openstreetmap.org/?mlat={lat}&mlon={lon}#map=16/{lat}/{lon}");
+        gtk4::UriLauncher::new(&geo).launch(None::<&gtk4::Window>, gio::Cancellable::NONE, move |result| {
+            if result.is_err() {
+                gtk4::UriLauncher::new(&osm).launch(None::<&gtk4::Window>, gio::Cancellable::NONE, |_| {});
+            }
+        });
+    });
+
+    let row = ActionRow::builder()
+        .title(format!("{lat:.5}°, {lon:.5}°"))
+        .subtitle(gettext("Location"))
+        .build();
+    row.add_suffix(&pin_btn);
+    row.set_activatable_widget(Some(&pin_btn));
+    row
 }
 
 fn capture_group(thermogram: &Thermogram) -> PreferencesGroup {
@@ -192,40 +225,45 @@ fn capture_group(thermogram: &Thermogram) -> PreferencesGroup {
 
 fn measurement_row(thermogram: &Thermogram, m: &Measurement) -> ActionRow {
     let (kind, label, coords) = describe_measurement(m);
-    let kind = gettext(kind);
     let subtitle = match label {
         "" => format!("{kind} {coords}"),
         l => format!("{kind} ‘{l}’ {coords}"),
     };
     let value = match thermogram.measurement_stats(m) {
         Some(s) if s.min == s.max => format!("{:.1} °C", s.avg),
-        Some(s) => format!("avg {:.1} °C · {:.1} – {:.1} °C", s.avg, s.min, s.max),
+        Some(s) => tr(
+            "avg {} °C · {} – {} °C",
+            &[&format!("{:.1}", s.avg), &format!("{:.1}", s.min), &format!("{:.1}", s.max)],
+        ),
         None => "—".into(),
     };
     ActionRow::builder().title(&value).subtitle(subtitle.trim_end()).build()
 }
 
-/// (kind, user-assigned label, coordinate string) for a measurement's sidebar row.
-fn describe_measurement(m: &Measurement) -> (&'static str, &str, String) {
+/// (translated kind, user-assigned label, coordinate string) for a
+/// measurement's sidebar row.
+fn describe_measurement(m: &Measurement) -> (String, &str, String) {
     match m {
-        Measurement::Spot { label, x, y } => ("Spot", label, format!("({x}, {y})")),
-        Measurement::Endpoint { label, x, y } => ("Endpoint", label, format!("({x}, {y})")),
+        Measurement::Spot { label, x, y } => (gettext("Spot"), label, format!("({x}, {y})")),
+        Measurement::Endpoint { label, x, y } => {
+            (gettext("Endpoint"), label, format!("({x}, {y})"))
+        }
         // Area params are x, y, width, height (flyr 0.7 misnames w/h as x2/y2)
         Measurement::Area { label, x1, y1, x2: w, y2: h } => {
-            ("Area", label, format!("({x1}, {y1}) {w} × {h} px"))
+            (gettext("Area"), label, format!("({x1}, {y1}) {w} × {h} px"))
         }
         Measurement::Line { label, x1, y1, x2, y2 } => {
-            ("Line", label, format!("({x1}, {y1}) – ({x2}, {y2})"))
+            (gettext("Line"), label, format!("({x1}, {y1}) – ({x2}, {y2})"))
         }
         Measurement::Ellipse { label, params } if params.len() >= 6 => {
             let (xc, yc) = (params[0] as f64, params[1] as f64);
             let ru = (params[2] as f64 - xc).hypot(params[3] as f64 - yc);
             let rv = (params[4] as f64 - xc).hypot(params[5] as f64 - yc);
-            ("Ellipse", label, format!("({}, {}) r {ru:.0} × {rv:.0} px", params[0], params[1]))
+            (gettext("Ellipse"), label, format!("({}, {}) r {ru:.0} × {rv:.0} px", params[0], params[1]))
         }
-        Measurement::Ellipse { label, .. } => ("Ellipse", label, String::new()),
-        Measurement::Alarm { label, .. } => ("Alarm", label, String::new()),
-        Measurement::Difference { label, .. } => ("Difference", label, String::new()),
+        Measurement::Ellipse { label, .. } => (gettext("Ellipse"), label, String::new()),
+        Measurement::Alarm { label, .. } => (gettext("Alarm"), label, String::new()),
+        Measurement::Difference { label, .. } => (gettext("Difference"), label, String::new()),
     }
 }
 
