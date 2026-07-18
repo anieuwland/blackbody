@@ -29,7 +29,7 @@ features = [ "v4_12",]
 
 [dependencies.libadwaita]
 version = "0.9"
-features = [ "v1_6",]
+features = [ "v1_7",]
 
 [dependencies.image]
 version = "0.23.14"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: blackbody\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-18 11:16+0200\n"
+"POT-Creation-Date: 2026-07-18 12:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -248,7 +248,7 @@ msgid "The unit temperatures are displayed in."
 msgstr ""
 
 #: src/resources/eu.nimmerfort.blackbody.ui:8
-#: src/resources/eu.nimmerfort.blackbody.ui:334 src/gtkui/canvas.rs:289
+#: src/resources/eu.nimmerfort.blackbody.ui:331 src/gtkui/canvas.rs:287
 msgid "Fit"
 msgstr ""
 
@@ -276,7 +276,7 @@ msgstr ""
 msgid "New window"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:45 src/gtkui/app_window.rs:289
+#: src/resources/eu.nimmerfort.blackbody.ui:45 src/gtkui/app_window.rs:286
 msgid "Open thermogram…"
 msgstr ""
 
@@ -304,55 +304,55 @@ msgstr ""
 msgid "About Blackbody"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:126
-msgid "T"
+#: src/resources/eu.nimmerfort.blackbody.ui:127
+msgid "Thermal"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:129
-msgid "Thermal view"
+#: src/resources/eu.nimmerfort.blackbody.ui:128
+msgid "Thermal image"
 msgstr ""
 
 #: src/resources/eu.nimmerfort.blackbody.ui:134
-msgid "O"
+msgid "Visible"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:137
-msgid "Optical view"
+#: src/resources/eu.nimmerfort.blackbody.ui:135
+msgid "Visible-light photo"
+msgstr ""
+
+#: src/resources/eu.nimmerfort.blackbody.ui:141
+msgid "Overlay"
 msgstr ""
 
 #: src/resources/eu.nimmerfort.blackbody.ui:142
-msgid "P"
+msgid "Thermal picture-in-picture over the photo"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:145
-msgid "Picture-in-picture"
-msgstr ""
-
-#: src/resources/eu.nimmerfort.blackbody.ui:155
+#: src/resources/eu.nimmerfort.blackbody.ui:152
 msgid "Main menu"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:163
+#: src/resources/eu.nimmerfort.blackbody.ui:160
 msgid "Camera info"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:171
+#: src/resources/eu.nimmerfort.blackbody.ui:168
 msgid "Measurements"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:179
+#: src/resources/eu.nimmerfort.blackbody.ui:176
 msgid "Choose colour palette"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:321
+#: src/resources/eu.nimmerfort.blackbody.ui:318
 msgid "Zoom"
 msgstr ""
 
-#: src/gtkui/app_window.rs:342
+#: src/gtkui/app_window.rs:348
 msgid "Could not open file"
 msgstr ""
 
-#: src/gtkui/app_window.rs:344
+#: src/gtkui/app_window.rs:350
 #, rust-format
 msgid ""
 "Failed to open file. The file may be corrupted or the camera unsupported.\n"

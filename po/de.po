@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-18 11:16+0200\n"
+"POT-Creation-Date: 2026-07-18 12:04+0200\n"
 "PO-Revision-Date: 2020-10-16 13:52+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -257,7 +257,7 @@ msgid "The unit temperatures are displayed in."
 msgstr "Die Einheit, in der Temperaturen angezeigt werden."
 
 #: src/resources/eu.nimmerfort.blackbody.ui:8
-#: src/resources/eu.nimmerfort.blackbody.ui:334 src/gtkui/canvas.rs:289
+#: src/resources/eu.nimmerfort.blackbody.ui:331 src/gtkui/canvas.rs:287
 msgid "Fit"
 msgstr "Einpassen"
 
@@ -285,7 +285,7 @@ msgstr ""
 msgid "New window"
 msgstr "Neues Fenster"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:45 src/gtkui/app_window.rs:289
+#: src/resources/eu.nimmerfort.blackbody.ui:45 src/gtkui/app_window.rs:286
 msgid "Open thermogram…"
 msgstr "Thermogramm öffnen…"
 
@@ -313,55 +313,55 @@ msgstr "Kelvin"
 msgid "About Blackbody"
 msgstr "Über Blackbody"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:126
-msgid "T"
-msgstr ""
+#: src/resources/eu.nimmerfort.blackbody.ui:127
+msgid "Thermal"
+msgstr "Thermisch"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:129
-msgid "Thermal view"
-msgstr "Wärmeansicht"
+#: src/resources/eu.nimmerfort.blackbody.ui:128
+msgid "Thermal image"
+msgstr "Wärmebild"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:134
-msgid "O"
-msgstr ""
+msgid "Visible"
+msgstr "Sichtbar"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:137
-msgid "Optical view"
-msgstr "Optische Ansicht"
+#: src/resources/eu.nimmerfort.blackbody.ui:135
+msgid "Visible-light photo"
+msgstr "Foto im sichtbaren Licht"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:141
+msgid "Overlay"
+msgstr "Überlagerung"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:142
-msgid "P"
-msgstr ""
+msgid "Thermal picture-in-picture over the photo"
+msgstr "Thermisches Bild-in-Bild über dem Foto"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:145
-msgid "Picture-in-picture"
-msgstr "Bild-in-Bild"
-
-#: src/resources/eu.nimmerfort.blackbody.ui:155
+#: src/resources/eu.nimmerfort.blackbody.ui:152
 msgid "Main menu"
 msgstr "Hauptmenü"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:163
+#: src/resources/eu.nimmerfort.blackbody.ui:160
 msgid "Camera info"
 msgstr "Kamera-Informationen"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:171
+#: src/resources/eu.nimmerfort.blackbody.ui:168
 msgid "Measurements"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:179
+#: src/resources/eu.nimmerfort.blackbody.ui:176
 msgid "Choose colour palette"
 msgstr "Farbpalette auswählen"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:321
+#: src/resources/eu.nimmerfort.blackbody.ui:318
 msgid "Zoom"
 msgstr ""
 
-#: src/gtkui/app_window.rs:342
+#: src/gtkui/app_window.rs:348
 msgid "Could not open file"
 msgstr ""
 
-#: src/gtkui/app_window.rs:344
+#: src/gtkui/app_window.rs:350
 #, rust-format
 msgid ""
 "Failed to open file. The file may be corrupted or the camera unsupported.\n"
@@ -371,9 +371,8 @@ msgid ""
 msgstr ""
 
 #: src/gtkui/dialogs.rs:22
-#, fuzzy
 msgid "Open thermogram"
-msgstr "Thermogramm öffnen…"
+msgstr "Thermogramm öffnen"
 
 #: src/gtkui/dialogs.rs:41
 msgid "Export"
@@ -403,9 +402,8 @@ msgid ""
 msgstr ""
 
 #: src/gtkui/dialogs.rs:89
-#, fuzzy
 msgid "Save render"
-msgstr "Render speichern…"
+msgstr "Render speichern"
 
 #: src/gtkui/dialogs.rs:125
 msgid "Save failed"
@@ -423,9 +421,8 @@ msgid "Close"
 msgstr ""
 
 #: src/gtkui/palette_ui.rs:80
-#, fuzzy
 msgid "Camera palette"
-msgstr "Farbpalette auswählen"
+msgstr "Kamerapalette"
 
 #: src/gtkui/palette_ui.rs:95
 msgid "Embedded"
@@ -591,6 +588,12 @@ msgstr ""
 #: src/gtkui/sidebar.rs:267
 msgid "Difference"
 msgstr ""
+
+#~ msgid "Optical view"
+#~ msgstr "Optische Ansicht"
+
+#~ msgid "Picture-in-picture"
+#~ msgstr "Bild-in-Bild"
 
 #~ msgid "Exporting thermal data or renders to files"
 #~ msgstr "Thermische Daten oder Renderings in Dateien exportieren"

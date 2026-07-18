@@ -1,6 +1,7 @@
 //! The thermogram canvas: threaded rendering, the image draw function
-//! (including measurement overlays), zoom, display modes (T/O/P), the
-//! temperature range scales, and the per-pixel temperature tooltip.
+//! (including measurement overlays), zoom, display modes (thermal, visible,
+//! overlay), the temperature range scales, and the per-pixel temperature
+//! tooltip.
 
 use std::rc::Rc;
 use std::sync::atomic::Ordering;
@@ -42,7 +43,11 @@ impl AppState {
     }
 
     pub(super) fn is_thermal_mode(&self) -> bool {
-        self.ui.header.mode_thermal.is_active()
+        self.ui.header.mode_group.active_name().as_deref() == Some("thermal")
+    }
+
+    pub(super) fn is_overlay_mode(&self) -> bool {
+        self.ui.header.mode_group.active_name().as_deref() == Some("overlay")
     }
 
     /// Drop the displayed frame. Bumping the generation orphans any in-flight
@@ -66,7 +71,7 @@ impl AppState {
         let max = self.max_temp.get();
         let palette: Vec<[f32; 3]> = self.active_palette.borrow().clone();
         let thermal_mode = self.is_thermal_mode();
-        let pip_mode = self.ui.header.mode_pip.is_active();
+        let pip_mode = self.is_overlay_mode();
         let img_ref = SendWeakRef::from(self.ui.canvas.image.downgrade());
         let surface_arc = self.image_bgra.clone();
         let generation = self.render_generation.clone();
@@ -127,22 +132,15 @@ impl AppState {
         true
     }
 
-    /// Mode toggles: T / O / P (grouped in the .ui — radio semantics)
     fn connect_mode_toggles(this: &Rc<Self>) {
-        let header = &this.ui.header;
-        for tb in [&header.mode_thermal, &header.mode_optical, &header.mode_pip] {
-            let that = this.clone();
-            tb.connect_toggled(move |btn| {
-                if btn.is_active() { that.apply_mode(); }
-            });
-        }
+        let that = this.clone();
+        this.ui.header.mode_group.connect_active_notify(move |_| that.apply_mode());
     }
 
-    /// Called when a mode button becomes active. The T/O/P buttons are grouped
-    /// in the .ui, so GTK enforces exactly one active (and prevents untoggling).
+    /// Called when the active display mode changes.
     fn apply_mode(&self) {
-        // PIP renders thermal data too, so palette and range still apply there.
-        let uses_palette = self.is_thermal_mode() || self.ui.header.mode_pip.is_active();
+        // The overlay renders thermal data too, so palette and range still apply.
+        let uses_palette = self.is_thermal_mode() || self.is_overlay_mode();
         self.ui.palette.color_bar.set_sensitive(uses_palette);
         self.ui.osd.range_bar.set_visible(uses_palette);
         self.ui.header.palette_button.set_sensitive(uses_palette);

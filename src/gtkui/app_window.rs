@@ -39,11 +39,10 @@ fn app_settings() -> Option<gio::Settings> {
 /// BGRA pixels plus width and height, shared with the render thread.
 type SharedImage = Arc<Mutex<Option<(Vec<u8>, i32, i32)>>>;
 
-/// The header bar: display mode toggles and the popover/sidebar buttons.
+/// The header bar: the display mode toggle group and the popover/sidebar buttons.
 pub(super) struct HeaderUi {
-    pub(super) mode_thermal: ToggleButton,
-    pub(super) mode_optical: ToggleButton,
-    pub(super) mode_pip: ToggleButton,
+    /// Toggles named "thermal", "visible" and "overlay".
+    pub(super) mode_group: adw::ToggleGroup,
     pub(super) palette_button: MenuButton,
     pub(super) info_button: ToggleButton,
     pub(super) measurements_button: ToggleButton,
@@ -108,9 +107,7 @@ pub(super) struct Ui {
 impl HeaderUi {
     fn from_builder(builder: &Builder) -> HeaderUi {
         HeaderUi {
-            mode_thermal: builder.object("mode_thermal").unwrap(),
-            mode_optical: builder.object("mode_optical").unwrap(),
-            mode_pip: builder.object("mode_pip").unwrap(),
+            mode_group: builder.object("mode_group").unwrap(),
             palette_button: builder.object("palette_button").unwrap(),
             info_button: builder.object("info_button").unwrap(),
             measurements_button: builder.object("measurements_button").unwrap(),
@@ -305,20 +302,29 @@ impl AppState {
     /// Tab to the sliders.
     fn prevent_focus_stealing(&self) {
         let (header, osd) = (&self.ui.header, &self.ui.osd);
-        let controls: [&gtk4::Widget; 9] = [
+        let controls: [&gtk4::Widget; 7] = [
             osd.min_scale.upcast_ref(),
             osd.max_scale.upcast_ref(),
             osd.zoom_button.upcast_ref(),
             header.palette_button.upcast_ref(),
-            header.mode_thermal.upcast_ref(),
-            header.mode_optical.upcast_ref(),
-            header.mode_pip.upcast_ref(),
+            header.mode_group.upcast_ref(),
             header.info_button.upcast_ref(),
             header.measurements_button.upcast_ref(),
         ];
         for w in controls {
             w.set_focus_on_click(false);
         }
+        // AdwToggleGroup doesn't forward focus-on-click to its internal
+        // buttons, so switch it off on every descendant too.
+        fn no_focus_on_click(widget: &gtk4::Widget) {
+            widget.set_focus_on_click(false);
+            let mut child = widget.first_child();
+            while let Some(c) = child {
+                no_focus_on_click(&c);
+                child = c.next_sibling();
+            }
+        }
+        no_focus_on_click(header.mode_group.upcast_ref());
 
         // And clicking the thermogram itself focuses it, so navigation keys
         // always come back when the user clicks the image.
@@ -403,13 +409,15 @@ impl AppState {
         // Always available once a file is open: without measurements the
         // sidebar shows an empty state instead.
         header.measurements_button.set_sensitive(true);
-        header.mode_thermal.set_sensitive(true);
-        header.mode_optical.set_sensitive(has_optical);
-        header.mode_pip.set_sensitive(has_pip);
-        if (!has_optical && header.mode_optical.is_active())
-            || (!has_pip && header.mode_pip.is_active())
+        let modes = &header.mode_group;
+        modes.set_sensitive(true);
+        modes.toggle_by_name("visible").unwrap().set_enabled(has_optical);
+        modes.toggle_by_name("overlay").unwrap().set_enabled(has_pip);
+        let active = modes.active_name();
+        if (!has_optical && active.as_deref() == Some("visible"))
+            || (!has_pip && active.as_deref() == Some("overlay"))
         {
-            header.mode_thermal.set_active(true);
+            modes.set_active_name(Some("thermal"));
         }
     }
 
@@ -446,16 +454,9 @@ impl AppState {
         let header = &self.ui.header;
         header.info_button.set_active(false);
         header.measurements_button.set_active(false);
-        let buttons = [
-            &header.info_button,
-            &header.measurements_button,
-            &header.mode_thermal,
-            &header.mode_optical,
-            &header.mode_pip,
-        ];
-        for b in buttons {
-            b.set_sensitive(false);
-        }
+        header.info_button.set_sensitive(false);
+        header.measurements_button.set_sensitive(false);
+        header.mode_group.set_sensitive(false);
     }
 
     fn remember_directory(&self, path: &Path) {

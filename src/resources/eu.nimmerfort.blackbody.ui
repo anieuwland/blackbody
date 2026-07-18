@@ -117,32 +117,29 @@
         <child type="top">
           <object class="AdwHeaderBar" id="headerbar">
 
-            <!-- Start: Mode switcher [T][O][P] -->
+            <!-- Start: Mode switcher (thermal/visible/overlay) -->
             <child>
-              <object class="GtkBox" id="mode_box">
-                <style><class name="linked"/></style>
+              <object class="AdwToggleGroup" id="mode_group">
+                <property name="sensitive">false</property>
                 <child>
-                  <object class="GtkToggleButton" id="mode_thermal">
-                    <property name="label" translatable="yes">T</property>
-                    <property name="active">true</property>
-                    <property name="sensitive">false</property>
-                    <property name="tooltip-text" translatable="yes">Thermal view</property>
+                  <object class="AdwToggle">
+                    <property name="name">thermal</property>
+                    <property name="label" translatable="yes">Thermal</property>
+                    <property name="tooltip" translatable="yes">Thermal image</property>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="mode_optical">
-                    <property name="label" translatable="yes">O</property>
-                    <property name="group">mode_thermal</property>
-                    <property name="sensitive">false</property>
-                    <property name="tooltip-text" translatable="yes">Optical view</property>
+                  <object class="AdwToggle">
+                    <property name="name">visible</property>
+                    <property name="label" translatable="yes">Visible</property>
+                    <property name="tooltip" translatable="yes">Visible-light photo</property>
                   </object>
                 </child>
                 <child>
-                  <object class="GtkToggleButton" id="mode_pip">
-                    <property name="label" translatable="yes">P</property>
-                    <property name="group">mode_thermal</property>
-                    <property name="sensitive">false</property>
-                    <property name="tooltip-text" translatable="yes">Picture-in-picture</property>
+                  <object class="AdwToggle">
+                    <property name="name">overlay</property>
+                    <property name="label" translatable="yes">Overlay</property>
+                    <property name="tooltip" translatable="yes">Thermal picture-in-picture over the photo</property>
                   </object>
                 </child>
               </object>
