@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-12 21:46+0200\n"
+"POT-Creation-Date: 2026-07-17 15:58+0200\n"
 "PO-Revision-Date: 2020-10-16 13:52+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -65,7 +65,8 @@ msgstr "Temperaturen mit der Maus untersuchen"
 msgid ""
 "Exporting renders to PNG and thermal data to TIFF or 16-bit centikelvin PNG"
 msgstr ""
-"Renderings als PNG und thermische Daten als TIFF oder 16-Bit-Centikelvin-PNG exportieren"
+"Renderings als PNG und thermische Daten als TIFF oder 16-Bit-Centikelvin-PNG "
+"exportieren"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:24
 msgid "Rendering to embedded color palettes, if present"
@@ -248,6 +249,7 @@ msgid "A running jet engine (15°C - 95°C, palette emphasizing warmth)"
 msgstr ""
 
 #: src/resources/eu.nimmerfort.blackbody.ui:8
+#: src/resources/eu.nimmerfort.blackbody.ui:317 src/gtkui/canvas.rs:289
 msgid "Fit"
 msgstr "Einpassen"
 
@@ -275,11 +277,11 @@ msgstr ""
 msgid "New window"
 msgstr "Neues Fenster"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:45
+#: src/resources/eu.nimmerfort.blackbody.ui:45 src/gtkui/app_window.rs:275
 msgid "Open thermogram…"
 msgstr "Thermogramm öffnen…"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:51
+#: src/resources/eu.nimmerfort.blackbody.ui:51 src/gtkui/dialogs.rs:38
 msgid "Export thermogram…"
 msgstr "Thermogramm exportieren…"
 
@@ -295,40 +297,271 @@ msgstr "Über Blackbody"
 msgid "T"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:111
+#: src/resources/eu.nimmerfort.blackbody.ui:112
 msgid "Thermal view"
 msgstr "Wärmeansicht"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:116
+#: src/resources/eu.nimmerfort.blackbody.ui:117
 msgid "O"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:117
+#: src/resources/eu.nimmerfort.blackbody.ui:120
 msgid "Optical view"
 msgstr "Optische Ansicht"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:122
+#: src/resources/eu.nimmerfort.blackbody.ui:125
 msgid "P"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:124
+#: src/resources/eu.nimmerfort.blackbody.ui:128
 msgid "Picture-in-picture"
 msgstr "Bild-in-Bild"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:134
+#: src/resources/eu.nimmerfort.blackbody.ui:138
 msgid "Main menu"
 msgstr "Hauptmenü"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:142
+#: src/resources/eu.nimmerfort.blackbody.ui:146
 msgid "Camera info"
 msgstr "Kamera-Informationen"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:150
+#: src/resources/eu.nimmerfort.blackbody.ui:154
+msgid "Measurements"
+msgstr ""
+
+#: src/resources/eu.nimmerfort.blackbody.ui:162
 msgid "Choose colour palette"
 msgstr "Farbpalette auswählen"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:276
+#: src/resources/eu.nimmerfort.blackbody.ui:304
 msgid "Zoom"
+msgstr ""
+
+#: src/gtkui/app_window.rs:328
+msgid "Could not open file"
+msgstr ""
+
+#: src/gtkui/app_window.rs:330
+#, rust-format
+msgid ""
+"Failed to open file. The file may be corrupted or the camera unsupported.\n"
+"\n"
+"File: {}\n"
+"Cause: {}"
+msgstr ""
+
+#: src/gtkui/dialogs.rs:22
+#, fuzzy
+msgid "Open thermogram"
+msgstr "Thermogramm öffnen…"
+
+#: src/gtkui/dialogs.rs:41
+msgid "Export"
+msgstr ""
+
+#: src/gtkui/dialogs.rs:42
+msgid "Cancel"
+msgstr ""
+
+#: src/gtkui/dialogs.rs:44
+msgid "TIFF (32-bit float)"
+msgstr ""
+
+#: src/gtkui/dialogs.rs:45
+msgid "PNG (16-bit)"
+msgstr ""
+
+#: src/gtkui/dialogs.rs:79
+msgid "Export failed"
+msgstr ""
+
+#: src/gtkui/dialogs.rs:80
+#, rust-format
+msgid ""
+"Failed to export to {}\n"
+"Cause: {}"
+msgstr ""
+
+#: src/gtkui/dialogs.rs:89
+#, fuzzy
+msgid "Save render"
+msgstr "Render speichern…"
+
+#: src/gtkui/dialogs.rs:125
+msgid "Save failed"
+msgstr ""
+
+#: src/gtkui/dialogs.rs:126
+#, rust-format
+msgid ""
+"Failed to save to {}\n"
+"Cause: {}"
+msgstr ""
+
+#: src/gtkui/dialogs.rs:144
+msgid "Close"
+msgstr ""
+
+#: src/gtkui/palette_ui.rs:80
+#, fuzzy
+msgid "Camera palette"
+msgstr "Farbpalette auswählen"
+
+#: src/gtkui/palette_ui.rs:95
+msgid "Embedded"
+msgstr ""
+
+#: src/gtkui/palette_ui.rs:170
+msgid "Perceptually uniform"
+msgstr ""
+
+#: src/gtkui/palette_ui.rs:171
+msgid "Turbo"
+msgstr "Turbo"
+
+#: src/gtkui/palette_ui.rs:172
+msgid "Cividis"
+msgstr "Cividis"
+
+#: src/gtkui/palette_ui.rs:173
+msgid "Inferno"
+msgstr "Inferno"
+
+#: src/gtkui/palette_ui.rs:174
+msgid "Magma"
+msgstr "Magma"
+
+#: src/gtkui/palette_ui.rs:175
+msgid "Viridis"
+msgstr "Viridis"
+
+#: src/gtkui/palette_ui.rs:177
+msgid "Classic"
+msgstr ""
+
+#: src/gtkui/palette_ui.rs:178
+msgid "Grayscale"
+msgstr "Grau"
+
+#: src/gtkui/palette_ui.rs:179
+msgid "Hot"
+msgstr "Heiß"
+
+#: src/gtkui/palette_ui.rs:180
+msgid "Rainbow"
+msgstr ""
+
+#: src/gtkui/palette_ui.rs:181
+msgid "Copper"
+msgstr "Kupfer"
+
+#: src/gtkui/palette_ui.rs:183
+msgid "Diverging"
+msgstr ""
+
+#: src/gtkui/palette_ui.rs:183
+msgid "Coolwarm"
+msgstr "Kuhlwarm"
+
+#: src/gtkui/sidebar.rs:94
+msgid "Show in image"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:113
+msgid "No Measurements"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:114
+msgid "This thermogram contains no measurement tools"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:141
+msgid "Directory"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:151
+msgid "Dimensions"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:157
+msgid "Format"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:160
+msgid "File size"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:162
+msgid "Created"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:165
+msgid "Modified"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:175
+msgid "Make"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:176
+msgid "Model"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:177
+msgid "Focal length"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:178
+msgid "Photographed"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:186
+msgid "Emissivity"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:187
+msgid "Object distance"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:188
+msgid "Reflected temperature"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:189
+msgid "Relative humidity"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:203
+#, rust-format
+msgid "avg {} °C · {} – {} °C"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:215
+msgid "Spot"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:217
+msgid "Endpoint"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:221
+msgid "Area"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:224
+msgid "Line"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:230 src/gtkui/sidebar.rs:232
+msgid "Ellipse"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:233
+msgid "Alarm"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:234
+msgid "Difference"
 msgstr ""
 
 #~ msgid "Exporting thermal data or renders to files"
@@ -339,15 +572,6 @@ msgstr ""
 
 #~ msgid "A thermogram viewer."
 #~ msgstr "Ein Thermogrammbetrachter."
-
-#~ msgid "Cividis"
-#~ msgstr "Cividis"
-
-#~ msgid "Coolwarm"
-#~ msgstr "Kuhlwarm"
-
-#~ msgid "Copper"
-#~ msgstr "Kupfer"
 
 #~ msgid ""
 #~ "EUROPEAN UNION PUBLIC LICENCE v. 1.2\n"
@@ -975,32 +1199,14 @@ msgstr ""
 #~ "Alle sonstigen Änderungen oder Ergänzungen dieses Anhangs bedürfen der "
 #~ "Ausarbeitung einer neuen Version der EUPL."
 
-#~ msgid "Grayscale"
-#~ msgstr "Grau"
-
-#~ msgid "Hot"
-#~ msgstr "Heiß"
-
-#~ msgid "Inferno"
-#~ msgstr "Inferno"
-
 #~ msgid "Jet"
 #~ msgstr "Jet"
-
-#~ msgid "Magma"
-#~ msgstr "Magma"
 
 #~ msgid "Open..."
 #~ msgstr "Öffnen..."
 
 #~ msgid "Palette"
 #~ msgstr "Palette"
-
-#~ msgid "Turbo"
-#~ msgstr "Turbo"
-
-#~ msgid "Viridis"
-#~ msgstr "Viridis"
 
 #~ msgid "°C"
 #~ msgstr "°C"
