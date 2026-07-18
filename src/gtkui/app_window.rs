@@ -21,9 +21,20 @@ use libadwaita as adw;
 
 use super::dialogs::tr;
 use super::palettes::PALETTES;
+use super::units::TempUnit;
 use libblackbody::{Error, Thermogram, ThermogramTrait};
 
 const UI: &str = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui";
+
+/// The app's GSettings, or None when the compiled schema isn't installed or
+/// predates the key (e.g. plain `cargo run` during development, where only
+/// the Meson build installs schemas).
+fn app_settings() -> Option<gio::Settings> {
+    let schema = gio::SettingsSchemaSource::default()?.lookup("eu.nimmerfort.blackbody", true)?;
+    schema
+        .has_key("temperature-unit")
+        .then(|| gio::Settings::new("eu.nimmerfort.blackbody"))
+}
 
 /// BGRA pixels plus width and height, shared with the render thread.
 type SharedImage = Arc<Mutex<Option<(Vec<u8>, i32, i32)>>>;
@@ -205,6 +216,8 @@ pub struct AppState {
     pub(super) dir_idx: Cell<usize>,
     pub(super) min_temp: Cell<f32>,
     pub(super) max_temp: Cell<f32>,
+    /// Display unit for temperatures; the data itself stays in Celsius.
+    pub(super) temp_unit: Cell<TempUnit>,
     pub(super) active_palette: RefCell<Vec<[f32; 3]>>,
 }
 
@@ -229,6 +242,7 @@ impl AppState {
             dir_idx: Cell::new(0),
             min_temp: Cell::new(0.0),
             max_temp: Cell::new(0.0),
+            temp_unit: Cell::new(TempUnit::default()),
             active_palette: RefCell::new(PALETTES[3].to_vec()), // grayscale until thermogram loaded
         });
 
@@ -370,8 +384,8 @@ impl AppState {
         osd.max_scale.adjustment().set_upper((max + 20.0) as f64);
         osd.min_scale.set_value(-(min as f64));
         osd.max_scale.set_value(max as f64);
-        osd.min_label.set_text(&format!("{:.1} °C", min));
-        osd.max_label.set_text(&format!("{:.1} °C", max));
+        osd.min_label.set_text(&self.temp_unit.get().format(min));
+        osd.max_label.set_text(&self.temp_unit.get().format(max));
     }
 
     /// Enable the controls the loaded file supports and fall back to thermal
@@ -489,6 +503,61 @@ impl AppState {
         let new_window = SimpleAction::new("new-window", None);
         new_window.connect_activate(move |_, _| { AppState::new(&app_clone); });
         app.add_action(&new_window);
+
+        Self::connect_temperature_unit(this, app);
+    }
+
+    /// The app-wide temperature unit: a stateful action driving the menu
+    /// radios, persisted to GSettings. The action is shared by all windows;
+    /// each window watches its state to refresh the visible temperatures.
+    fn connect_temperature_unit(this: &Rc<Self>, app: &adw::Application) {
+        let action = match app.lookup_action("temperature-unit") {
+            Some(a) => a.downcast::<SimpleAction>().unwrap(),
+            None => {
+                let settings = app_settings();
+                let initial = settings
+                    .as_ref()
+                    .map(|s| s.string("temperature-unit").to_string())
+                    .unwrap_or_else(|| "celsius".into());
+                let action = SimpleAction::new_stateful(
+                    "temperature-unit",
+                    Some(glib::VariantTy::STRING),
+                    &initial.to_variant(),
+                );
+                action.connect_activate(move |action, param| {
+                    let Some(param) = param else { return };
+                    action.set_state(param);
+                    if let Some(s) = &settings {
+                        s.set_string("temperature-unit", param.str().unwrap_or("celsius")).ok();
+                    }
+                });
+                app.add_action(&action);
+                action
+            }
+        };
+
+        let unit_of = |a: &SimpleAction| {
+            TempUnit::from_key(a.state().as_ref().and_then(|v| v.str()).unwrap_or("celsius"))
+        };
+        this.temp_unit.set(unit_of(&action));
+        let that = this.clone();
+        action.connect_notify_local(Some("state"), move |action, _| {
+            that.temp_unit.set(unit_of(action));
+            that.refresh_temperature_displays();
+        });
+    }
+
+    /// Re-render every temperature shown as text after a unit change.
+    /// Tooltips and the thermal render need nothing: they compute on demand.
+    fn refresh_temperature_displays(&self) {
+        let unit = self.temp_unit.get();
+        self.ui.osd.min_label.set_text(&unit.format(self.min_temp.get()));
+        self.ui.osd.max_label.set_text(&unit.format(self.max_temp.get()));
+        let thermogram = self.thermogram.borrow().as_ref().map(Arc::clone);
+        if let Some(t) = thermogram {
+            self.populate_info_sidebar(&t);
+            self.populate_measurements_sidebar(&t);
+        }
     }
 
     /// Left/Right/Home/End browse the directory of the open file.

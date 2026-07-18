@@ -123,7 +123,7 @@ impl AppState {
         };
 
         let temp = thermogram.thermal()[[iy, ix]];
-        tooltip.set_text(Some(&format!("{:.1} °C", temp)));
+        tooltip.set_text(Some(&self.temp_unit.get().format(temp)));
         true
     }
 
@@ -201,7 +201,7 @@ impl AppState {
 
     fn set_range_min(&self, min: f32) {
         self.min_temp.set(min);
-        self.ui.osd.min_label.set_text(&format!("{:.1} °C", min));
+        self.ui.osd.min_label.set_text(&self.temp_unit.get().format(min));
         self.ui.osd.max_scale.adjustment().set_lower(min as f64);
         self.draw_render_threaded();
         self.ui.palette.color_bar.queue_draw();
@@ -209,7 +209,7 @@ impl AppState {
 
     fn set_range_max(&self, max: f32) {
         self.max_temp.set(max);
-        self.ui.osd.max_label.set_text(&format!("{:.1} °C", max));
+        self.ui.osd.max_label.set_text(&self.temp_unit.get().format(max));
         // min_scale is inverted, so its lower bound is -actual_max.
         self.ui.osd.min_scale.adjustment().set_lower(-(max as f64));
         self.draw_render_threaded();

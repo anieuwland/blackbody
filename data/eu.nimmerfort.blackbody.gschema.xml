@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="blackbody">
 	<schema id="eu.nimmerfort.blackbody" path="/eu/nimmerfort/blackbody/">
+		<key name="temperature-unit" type="s">
+			<choices>
+				<choice value="celsius"/>
+				<choice value="fahrenheit"/>
+				<choice value="kelvin"/>
+			</choices>
+			<default>"celsius"</default>
+			<summary>Temperature unit</summary>
+			<description>The unit temperatures are displayed in.</description>
+		</key>
 	</schema>
 </schemalist>

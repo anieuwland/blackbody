@@ -12,6 +12,7 @@ use libadwaita::{ActionRow, PreferencesGroup};
 
 use super::app_window::AppState;
 use super::dialogs::tr;
+use super::units::TempUnit;
 use libblackbody::{Measurement, Thermogram, ThermogramTrait};
 
 impl AppState {
@@ -65,7 +66,7 @@ impl AppState {
         }
         sidebar.append(&image_group(thermogram));
         sidebar.append(&camera_group(thermogram));
-        sidebar.append(&capture_group(thermogram));
+        sidebar.append(&capture_group(thermogram, self.temp_unit.get()));
     }
 
     pub(super) fn populate_measurements_sidebar(&self, thermogram: &Thermogram) {
@@ -83,7 +84,7 @@ impl AppState {
 
         let group = PreferencesGroup::new();
         for m in measurements {
-            group.add(&measurement_row(thermogram, m));
+            group.add(&measurement_row(thermogram, m, self.temp_unit.get()));
         }
         sidebar.append(&group);
     }
@@ -212,28 +213,28 @@ fn location_row(lat: f64, lon: f64) -> ActionRow {
     row
 }
 
-fn capture_group(thermogram: &Thermogram) -> PreferencesGroup {
+fn capture_group(thermogram: &Thermogram, unit: TempUnit) -> PreferencesGroup {
     let group = PreferencesGroup::new();
     if let Some(cp) = thermogram.capture_params() {
         add_row(&group, &gettext("Emissivity"), &format!("{:.2}", cp.emissivity));
         add_row(&group, &gettext("Object distance"), &format!("{:.2} m", cp.object_distance_m));
-        add_row(&group, &gettext("Reflected temperature"), &format!("{:.1} °C", cp.reflected_temp_k - 273.15));
+        add_row(&group, &gettext("Reflected temperature"), &unit.format(cp.reflected_temp_k - 273.15));
         add_row(&group, &gettext("Relative humidity"), &format!("{:.0}%", cp.relative_humidity * 100.0));
     }
     group
 }
 
-fn measurement_row(thermogram: &Thermogram, m: &Measurement) -> ActionRow {
+fn measurement_row(thermogram: &Thermogram, m: &Measurement, unit: TempUnit) -> ActionRow {
     let (kind, label, coords) = describe_measurement(m);
     let subtitle = match label {
         "" => format!("{kind} {coords}"),
         l => format!("{kind} ‘{l}’ {coords}"),
     };
     let value = match thermogram.measurement_stats(m) {
-        Some(s) if s.min == s.max => format!("{:.1} °C", s.avg),
+        Some(s) if s.min == s.max => unit.format(s.avg),
         Some(s) => tr(
-            "avg {} °C · {} – {} °C",
-            &[&format!("{:.1}", s.avg), &format!("{:.1}", s.min), &format!("{:.1}", s.max)],
+            "avg {} · {} – {}",
+            &[&unit.format(s.avg), &format!("{:.1}", unit.convert(s.min)), &unit.format(s.max)],
         ),
         None => "—".into(),
     };

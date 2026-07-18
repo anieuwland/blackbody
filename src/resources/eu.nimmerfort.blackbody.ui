@@ -58,6 +58,23 @@
     </section>
     <section>
       <item>
+        <attribute name="label" translatable="yes">Celsius</attribute>
+        <attribute name="action">app.temperature-unit</attribute>
+        <attribute name="target">celsius</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Fahrenheit</attribute>
+        <attribute name="action">app.temperature-unit</attribute>
+        <attribute name="target">fahrenheit</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Kelvin</attribute>
+        <attribute name="action">app.temperature-unit</attribute>
+        <attribute name="target">kelvin</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
         <attribute name="label" translatable="yes">About Blackbody</attribute>
         <attribute name="action">app.about</attribute>
       </item>

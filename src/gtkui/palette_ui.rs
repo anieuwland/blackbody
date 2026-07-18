@@ -157,7 +157,7 @@ impl AppState {
             if h == 0 { return false; }
             let position = 1.0 - y as f32 / h as f32;
             let temp = that.min_temp.get() + position * (that.max_temp.get() - that.min_temp.get());
-            tooltip.set_text(Some(&format!("{:.1} °C", temp)));
+            tooltip.set_text(Some(&that.temp_unit.get().format(temp)));
             true
         });
     }

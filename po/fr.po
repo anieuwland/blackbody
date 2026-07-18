@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 15:58+0200\n"
+"POT-Creation-Date: 2026-07-18 11:16+0200\n"
 "PO-Revision-Date: 2021-01-02 13:13+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -20,7 +20,7 @@ msgstr ""
 
 #: data/eu.nimmerfort.blackbody.desktop.in:2
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:4
-#: src/resources/eu.nimmerfort.blackbody.ui:94
+#: src/resources/eu.nimmerfort.blackbody.ui:111
 msgid "Blackbody"
 msgstr "Blackbody"
 
@@ -249,8 +249,16 @@ msgstr ""
 msgid "A running jet engine (15°C - 95°C, palette emphasizing warmth)"
 msgstr ""
 
+#: data/eu.nimmerfort.blackbody.gschema.xml:11
+msgid "Temperature unit"
+msgstr "Unité de température"
+
+#: data/eu.nimmerfort.blackbody.gschema.xml:12
+msgid "The unit temperatures are displayed in."
+msgstr "L’unité dans laquelle les températures sont affichées."
+
 #: src/resources/eu.nimmerfort.blackbody.ui:8
-#: src/resources/eu.nimmerfort.blackbody.ui:317 src/gtkui/canvas.rs:289
+#: src/resources/eu.nimmerfort.blackbody.ui:334 src/gtkui/canvas.rs:289
 msgid "Fit"
 msgstr "Ajuster"
 
@@ -278,7 +286,7 @@ msgstr ""
 msgid "New window"
 msgstr "Nouvelle fenêtre"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:45 src/gtkui/app_window.rs:275
+#: src/resources/eu.nimmerfort.blackbody.ui:45 src/gtkui/app_window.rs:289
 msgid "Open thermogram…"
 msgstr "Ouvrir le thermogramme…"
 
@@ -291,58 +299,70 @@ msgid "Save render…"
 msgstr "Enregistrer le rendu…"
 
 #: src/resources/eu.nimmerfort.blackbody.ui:61
+msgid "Celsius"
+msgstr "Celsius"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:66
+msgid "Fahrenheit"
+msgstr "Fahrenheit"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:71
+msgid "Kelvin"
+msgstr "Kelvin"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:78
 msgid "About Blackbody"
 msgstr "À propos de Blackbody"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:109
+#: src/resources/eu.nimmerfort.blackbody.ui:126
 msgid "T"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:112
+#: src/resources/eu.nimmerfort.blackbody.ui:129
 msgid "Thermal view"
 msgstr "Vue thermique"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:117
+#: src/resources/eu.nimmerfort.blackbody.ui:134
 msgid "O"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:120
+#: src/resources/eu.nimmerfort.blackbody.ui:137
 msgid "Optical view"
 msgstr "Vue optique"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:125
+#: src/resources/eu.nimmerfort.blackbody.ui:142
 msgid "P"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:128
+#: src/resources/eu.nimmerfort.blackbody.ui:145
 msgid "Picture-in-picture"
 msgstr "Image dans l'image"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:138
+#: src/resources/eu.nimmerfort.blackbody.ui:155
 msgid "Main menu"
 msgstr "Menu principal"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:146
+#: src/resources/eu.nimmerfort.blackbody.ui:163
 msgid "Camera info"
 msgstr "Infos caméra"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:154
+#: src/resources/eu.nimmerfort.blackbody.ui:171
 msgid "Measurements"
 msgstr ""
 
-#: src/resources/eu.nimmerfort.blackbody.ui:162
+#: src/resources/eu.nimmerfort.blackbody.ui:179
 msgid "Choose colour palette"
 msgstr "Choisir la palette de couleurs"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:304
+#: src/resources/eu.nimmerfort.blackbody.ui:321
 msgid "Zoom"
 msgstr ""
 
-#: src/gtkui/app_window.rs:328
+#: src/gtkui/app_window.rs:342
 msgid "Could not open file"
 msgstr ""
 
-#: src/gtkui/app_window.rs:330
+#: src/gtkui/app_window.rs:344
 #, rust-format
 msgid ""
 "Failed to open file. The file may be corrupted or the camera unsupported.\n"
@@ -464,104 +484,112 @@ msgstr ""
 msgid "Coolwarm"
 msgstr "Coolchaud"
 
-#: src/gtkui/sidebar.rs:94
+#: src/gtkui/sidebar.rs:95
 msgid "Show in image"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:113
+#: src/gtkui/sidebar.rs:114
 msgid "No Measurements"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:114
+#: src/gtkui/sidebar.rs:115
 msgid "This thermogram contains no measurement tools"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:141
+#: src/gtkui/sidebar.rs:142
 msgid "Directory"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:151
+#: src/gtkui/sidebar.rs:152
 msgid "Dimensions"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:157
+#: src/gtkui/sidebar.rs:158
 msgid "Format"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:160
+#: src/gtkui/sidebar.rs:161
 msgid "File size"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:162
+#: src/gtkui/sidebar.rs:163
 msgid "Created"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:165
+#: src/gtkui/sidebar.rs:166
 msgid "Modified"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:175
+#: src/gtkui/sidebar.rs:176
 msgid "Make"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:176
+#: src/gtkui/sidebar.rs:177
 msgid "Model"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:177
+#: src/gtkui/sidebar.rs:178
 msgid "Focal length"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:178
+#: src/gtkui/sidebar.rs:179
 msgid "Photographed"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:186
+#: src/gtkui/sidebar.rs:195
+msgid "Show on map"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:209
+msgid "Location"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:219
 msgid "Emissivity"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:187
+#: src/gtkui/sidebar.rs:220
 msgid "Object distance"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:188
+#: src/gtkui/sidebar.rs:221
 msgid "Reflected temperature"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:189
+#: src/gtkui/sidebar.rs:222
 msgid "Relative humidity"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:203
+#: src/gtkui/sidebar.rs:236
 #, rust-format
-msgid "avg {} °C · {} – {} °C"
-msgstr ""
+msgid "avg {} · {} – {}"
+msgstr "moy. {} · {} – {}"
 
-#: src/gtkui/sidebar.rs:215
+#: src/gtkui/sidebar.rs:248
 msgid "Spot"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:217
+#: src/gtkui/sidebar.rs:250
 msgid "Endpoint"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:221
+#: src/gtkui/sidebar.rs:254
 msgid "Area"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:224
+#: src/gtkui/sidebar.rs:257
 msgid "Line"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:230 src/gtkui/sidebar.rs:232
+#: src/gtkui/sidebar.rs:263 src/gtkui/sidebar.rs:265
 msgid "Ellipse"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:233
+#: src/gtkui/sidebar.rs:266
 msgid "Alarm"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:234
+#: src/gtkui/sidebar.rs:267
 msgid "Difference"
 msgstr ""
 
