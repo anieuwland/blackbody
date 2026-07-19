@@ -2,30 +2,34 @@ pipelines:
   tags:
     'release-*':
       - parallel:
-        # - step:
-        #     name: Building for Windows (x86_64)
-        #     image: registry.fedoraproject.org/fedora-minimal:32
-        #     script:
-        #       - microdnf install glib2-devel gtk3-devel cairo-devel pango-devel meson ninja-build libappstream-glib desktop-file-utils gcc mingw64-gcc mingw64-pango mingw64-poppler mingw64-gtk3 mingw64-winpthreads mingw64-winpthreads-static
-        #       - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rust-init.sh
-        #       - bash rust-init.sh -y --profile minimal -t x86_64-pc-windows-gnu,x86_64-unknown-linux-gnu
-        #       - rm rust-init.sh
-        #       - source $HOME/.cargo/env
-        #       - meson -Dbuildtype=release windows
-        #       - cd windows
-        #       - BLACKBODY_BUILDER=windows ninja
-        #       - cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll src/
-        #       - cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/gdbus.exe src/
-        #       - mkdir -p src/share/glib-2.0/schemas
-        #       - cp /usr/x86_64-w64-mingw32/sys-root/mingw/share/glib-2.0/schemas/gschemas.compiled src/share/glib-2.0/schemas/gschemas.compiled
-        #       - cp -r /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons src/share/icons
-        #       - mkdir dist
-        #       - export VERSION=`echo $BITBUCKET_TAG | sed -e 's,release-,,'`
-        #       - mv src dist/blackbody-$VERSION-windows
-        #       - cd dist
-        #       - zip -r blackbody-$VERSION-windows.zip blackbody-$VERSION-windows
-        #     artifacts:
-        #       - windows/dist/*.zip
+        - step:
+            name: Building for Windows (x86_64)
+            image: registry.fedoraproject.org/fedora:43
+            script:
+              # GTK4/libadwaita come from MSYS2 (Fedora ships no mingw
+              # libadwaita); Rust and the mingw linker come from Fedora.
+              - dnf install -y gcc meson ninja-build glib2-devel gettext pkgconf zip pacman cargo rust-std-static-x86_64-pc-windows-gnu mingw64-gcc mingw64-winpthreads-static
+              - bash build-aux/windows/build-msys2-sysroot.sh /opt/msys2
+              - meson setup windows -Dbuildtype=release
+              - BLACKBODY_BUILDER=windows ninja -C windows
+              - cd windows
+              # Bundle runtime: DLLs, glib helpers, pixbuf loaders, compiled
+              # schemas (incl. the app's own), icons. main.rs loads the
+              # gresource from next to the exe, which ninja left in src/.
+              - cp /opt/msys2/mingw64/bin/*.dll src/
+              - cp /opt/msys2/mingw64/bin/gdbus.exe /opt/msys2/mingw64/bin/gspawn-win64-helper*.exe src/
+              - mkdir -p src/lib src/share/glib-2.0/schemas
+              - cp -r /opt/msys2/mingw64/lib/gdk-pixbuf-2.0 src/lib/
+              - cp ../data/eu.nimmerfort.blackbody.gschema.xml /opt/msys2/mingw64/share/glib-2.0/schemas/
+              - glib-compile-schemas --targetdir=src/share/glib-2.0/schemas /opt/msys2/mingw64/share/glib-2.0/schemas
+              - cp -r /opt/msys2/mingw64/share/icons src/share/icons
+              - mkdir dist
+              - export VERSION=`echo $BITBUCKET_TAG | sed -e 's,release-,,'`
+              - mv src dist/blackbody-$VERSION-windows
+              - cd dist
+              - zip -r blackbody-$VERSION-windows.zip blackbody-$VERSION-windows
+            artifacts:
+              - windows/dist/*.zip
         - step:
             name: Packaging for Linux (src)
             image: atlassian/default-image:3
@@ -46,10 +50,10 @@ pipelines:
               enabled: false
             script:
               - export VERSION=`echo $BITBUCKET_TAG | sed -e 's,release-,,'`
-              # - export WIN_PACKAGE=windows/dist/blackbody-$VERSION-windows.zip
+              - export WIN_PACKAGE=windows/dist/blackbody-$VERSION-windows.zip
               - export SRC_PACKAGE=source/dist/blackbody-$VERSION-source.tar.bz2
-              # - ls $WIN_PACKAGE $SRC_PACKAGE
-              # - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$WIN_PACKAGE"
+              - ls $WIN_PACKAGE $SRC_PACKAGE
+              - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$WIN_PACKAGE"
               - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$SRC_PACKAGE"
         - step:
             name: Publishing to Flathub
@@ -57,13 +61,15 @@ pipelines:
             script:
               # Set up environment
               - apt-get update && apt-get install -y python3-pip
-              - pip3 install toml
+              - pip3 install aiohttp tomlkit PyYAML
               - git clone git@github.com:anieuwland/eu.nimmerfort.blackbody.git
               - cd eu.nimmerfort.blackbody
               - git config --global user.name "Arthur Nieuwland"
               - git config --global user.email "anieuwland@nimmerfort.eu"
               # Generate updates
-              - python3 ../build-aux/flathub/flatpak-cargo-generator.py -o Cargo-sources.json ../Cargo.lock
+              # Pinned to flatpak-builder-tools commit f03a673 (2026); bump when upstream changes
+              - curl -sSfL https://raw.githubusercontent.com/flatpak/flatpak-builder-tools/f03a673abe6ce189cea1c2857e2b44af2dd79d1f/cargo/flatpak-cargo-generator.py -o /tmp/flatpak-cargo-generator.py
+              - python3 /tmp/flatpak-cargo-generator.py -o Cargo-sources.json ../Cargo.lock
               - jq ".modules[0].sources[1].tag = \"$BITBUCKET_TAG\" | .modules[0].sources[1].commit = \"$BITBUCKET_COMMIT\"" ../eu.nimmerfort.blackbody-flathub.json > eu.nimmerfort.blackbody.json
               # Commit and push
               - git add Cargo-sources.json eu.nimmerfort.blackbody.json

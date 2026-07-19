@@ -31,9 +31,17 @@ then
             && cp "$CARGO_TARGET_DIR"/release/"$APP_BIN" "$OUTPUT"
     elif [[ $BLACKBODY_BUILDER = "windows" ]]
     then
-        export MINGW_PREFIX="/usr/x86_64-w64-mingw32/sys-root/mingw/"
+        # MSYS2 sysroot from build-aux/windows/build-msys2-sysroot.sh. Its .pc
+        # files use prefix=/mingw64; PKG_CONFIG_SYSROOT_DIR resolves that to
+        # the extracted location.
+        export MSYS2_ROOT="${MSYS2_ROOT:-/opt/msys2}"
+        # gettext-sys finds libintl through MINGW_PREFIX
+        export MINGW_PREFIX="$MSYS2_ROOT/mingw64"
         export PKG_CONFIG_ALLOW_CROSS=1
-        export PKG_CONFIG_PATH=$MINGW_PREFIX/lib/pkgconfig
+        export PKG_CONFIG_SYSROOT_DIR="$MSYS2_ROOT"
+        export PKG_CONFIG_LIBDIR="$MSYS2_ROOT/mingw64/lib/pkgconfig"
+        export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER=x86_64-w64-mingw32-gcc
+        export CARGO_TARGET_X86_64_PC_WINDOWS_GNU_RUSTFLAGS="-L $MSYS2_ROOT/mingw64/lib"
         cargo build --manifest-path "$MESON_SOURCE_ROOT"/Cargo.toml --target=x86_64-pc-windows-gnu --release \
             && cp "$CARGO_TARGET_DIR"/x86_64-pc-windows-gnu/release/"$APP_BIN".exe "$OUTPUT".exe
     else
