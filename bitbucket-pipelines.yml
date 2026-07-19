@@ -2,30 +2,30 @@ pipelines:
   tags:
     'release-*':
       - parallel:
-        - step:
-            name: Building for Windows (x86_64)
-            image: registry.fedoraproject.org/fedora-minimal:32
-            script:
-              - microdnf install glib2-devel gtk3-devel cairo-devel pango-devel meson ninja-build libappstream-glib desktop-file-utils gcc mingw64-gcc mingw64-pango mingw64-poppler mingw64-gtk3 mingw64-winpthreads mingw64-winpthreads-static
-              - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rust-init.sh
-              - bash rust-init.sh -y --profile minimal -t x86_64-pc-windows-gnu,x86_64-unknown-linux-gnu
-              - rm rust-init.sh
-              - source $HOME/.cargo/env
-              - meson -Dbuildtype=release windows
-              - cd windows
-              - BLACKBODY_BUILDER=windows ninja
-              - cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll src/
-              - cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/gdbus.exe src/
-              - mkdir -p src/share/glib-2.0/schemas
-              - cp /usr/x86_64-w64-mingw32/sys-root/mingw/share/glib-2.0/schemas/gschemas.compiled src/share/glib-2.0/schemas/gschemas.compiled
-              - cp -r /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons src/share/icons
-              - mkdir dist
-              - export VERSION=`echo $BITBUCKET_TAG | sed -e 's,release-,,'`
-              - mv src dist/blackbody-$VERSION-windows
-              - cd dist
-              - zip -r blackbody-$VERSION-windows.zip blackbody-$VERSION-windows
-            artifacts:
-              - windows/dist/*.zip
+        # - step:
+        #     name: Building for Windows (x86_64)
+        #     image: registry.fedoraproject.org/fedora-minimal:32
+        #     script:
+        #       - microdnf install glib2-devel gtk3-devel cairo-devel pango-devel meson ninja-build libappstream-glib desktop-file-utils gcc mingw64-gcc mingw64-pango mingw64-poppler mingw64-gtk3 mingw64-winpthreads mingw64-winpthreads-static
+        #       - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rust-init.sh
+        #       - bash rust-init.sh -y --profile minimal -t x86_64-pc-windows-gnu,x86_64-unknown-linux-gnu
+        #       - rm rust-init.sh
+        #       - source $HOME/.cargo/env
+        #       - meson -Dbuildtype=release windows
+        #       - cd windows
+        #       - BLACKBODY_BUILDER=windows ninja
+        #       - cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll src/
+        #       - cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/gdbus.exe src/
+        #       - mkdir -p src/share/glib-2.0/schemas
+        #       - cp /usr/x86_64-w64-mingw32/sys-root/mingw/share/glib-2.0/schemas/gschemas.compiled src/share/glib-2.0/schemas/gschemas.compiled
+        #       - cp -r /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons src/share/icons
+        #       - mkdir dist
+        #       - export VERSION=`echo $BITBUCKET_TAG | sed -e 's,release-,,'`
+        #       - mv src dist/blackbody-$VERSION-windows
+        #       - cd dist
+        #       - zip -r blackbody-$VERSION-windows.zip blackbody-$VERSION-windows
+        #     artifacts:
+        #       - windows/dist/*.zip
         - step:
             name: Packaging for Linux (src)
             image: atlassian/default-image:3
@@ -46,10 +46,10 @@ pipelines:
               enabled: false
             script:
               - export VERSION=`echo $BITBUCKET_TAG | sed -e 's,release-,,'`
-              - export WIN_PACKAGE=windows/dist/blackbody-$VERSION-windows.zip
+              # - export WIN_PACKAGE=windows/dist/blackbody-$VERSION-windows.zip
               - export SRC_PACKAGE=source/dist/blackbody-$VERSION-source.tar.bz2
-              - ls $WIN_PACKAGE $SRC_PACKAGE
-              - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$WIN_PACKAGE"
+              # - ls $WIN_PACKAGE $SRC_PACKAGE
+              # - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$WIN_PACKAGE"
               - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$SRC_PACKAGE"
         - step:
             name: Publishing to Flathub
@@ -58,7 +58,7 @@ pipelines:
               # Set up environment
               - apt-get update && apt-get install -y python3-pip
               - pip3 install toml
-              - git clone git@github.com:flathub/eu.nimmerfort.blackbody.git
+              - git clone git@github.com:anieuwland/eu.nimmerfort.blackbody.git
               - cd eu.nimmerfort.blackbody
               - git config --global user.name "Arthur Nieuwland"
               - git config --global user.email "anieuwland@nimmerfort.eu"
