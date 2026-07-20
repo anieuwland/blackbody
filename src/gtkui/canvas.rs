@@ -3,6 +3,7 @@
 //! overlay), the temperature range scales, and the per-pixel temperature
 //! tooltip.
 
+use std::cell::Cell;
 use std::rc::Rc;
 use std::sync::atomic::Ordering;
 
@@ -25,6 +26,7 @@ impl AppState {
         Self::connect_range_scales(this);
         Self::connect_zoom(this);
         Self::connect_zoom_actions(this);
+        Self::connect_pan(this);
     }
 
     /// The latest rendered frame as a cairo surface. Drains the cross-thread
@@ -233,6 +235,60 @@ impl AppState {
         this.ui.canvas.scrolled_window.add_controller(motion);
     }
 
+    /// Drag the image to pan, as an alternative to the scrollbars. The
+    /// adjustments clamp to their bounds, so in fit mode (or when the image
+    /// is smaller than the viewport) the drag is a harmless no-op.
+    fn connect_pan(this: &Rc<Self>) {
+        let drag = gtk4::GestureDrag::new();
+        let start = Rc::new(Cell::new((0.0, 0.0)));
+
+        let that = this.clone();
+        let start_pos = start.clone();
+        drag.connect_drag_begin(move |_, _, _| {
+            let sw = &that.ui.canvas.scrolled_window;
+            start_pos.set((sw.hadjustment().value(), sw.vadjustment().value()));
+        });
+
+        let that = this.clone();
+        drag.connect_drag_update(move |_, dx, dy| {
+            let sw = &that.ui.canvas.scrolled_window;
+            let (h0, v0) = start.get();
+            sw.hadjustment().set_value(h0 - dx);
+            sw.vadjustment().set_value(v0 - dy);
+        });
+
+        // Show the open hand whenever the image can be dragged. The bounds
+        // of the adjustments change on zoom, image load and window resize,
+        // all of which emit "changed" after the layout pass — unlike calling
+        // this directly from apply_zoom, which would read stale bounds.
+        let sw = &this.ui.canvas.scrolled_window;
+        for adj in [sw.hadjustment(), sw.vadjustment()] {
+            let that = this.clone();
+            adj.connect_changed(move |_| that.update_pan_cursor());
+        }
+
+        sw.add_controller(drag);
+    }
+
+    /// The open-hand cursor when panning is possible, the default otherwise.
+    /// Set on the drawing area as well as the viewport: during a drag the
+    /// implicit pointer grab resolves the cursor from the widget that took
+    /// the press (the drawing area), so the hand must live there too or it
+    /// reverts to the arrow mid-drag.
+    fn update_pan_cursor(&self) {
+        let cursor = if self.can_pan() { grab_cursor() } else { None };
+        self.ui.canvas.scrolled_window.set_cursor(cursor.as_ref());
+        self.ui.canvas.image.set_cursor(cursor.as_ref());
+    }
+
+    /// Whether the image overflows the viewport in either direction.
+    fn can_pan(&self) -> bool {
+        let sw = &self.ui.canvas.scrolled_window;
+        let overflows =
+            |adj: gtk4::Adjustment| adj.upper() - adj.lower() > adj.page_size() + 0.5;
+        overflows(sw.hadjustment()) || overflows(sw.vadjustment())
+    }
+
     /// One scroll notch: 5% zoom per unit, keeping the image point under the
     /// cursor stationary.
     fn zoom_step(&self, dy: f64) {
@@ -324,6 +380,15 @@ impl AppState {
 
 /// The pixels for the given display mode, falling back to the thermal render
 /// when the file lacks the optical/PIP data.
+/// The open-hand cursor, falling back to the legacy X11 name "openhand" for
+/// themes that don't ship the CSS name. `set_cursor_from_name` alone would
+/// fall back to the arrow, which reads as "dragging is not possible".
+fn grab_cursor() -> Option<gtk4::gdk::Cursor> {
+    use gtk4::gdk::Cursor;
+    let fallback = Cursor::from_name("openhand", None);
+    Cursor::from_name("grab", fallback.as_ref()).or(fallback)
+}
+
 fn render_for_mode(
     thermogram: &Thermogram,
     min: f32,
