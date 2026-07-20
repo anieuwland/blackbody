@@ -43,6 +43,19 @@
   </description>
 
   <releases>
+    <release version="2.1.0" date="2026-07-20" urgency="low" type="stable">
+      <description>
+        <p>An incremental release improving how you browse and navigate thermograms:</p>
+        <ul>
+          <li>Added "Open folder…" (Ctrl+Shift+O) to browse a whole directory with the keyboard, working within the Flatpak sandbox via the file chooser portal</li>
+          <li>Reduced Flatpak permissions: file access is now granted per file/folder via the portal instead of static filesystem access</li>
+          <li>On-screen previous/next arrows appear when the directory has more thermograms to browse through</li>
+          <li>Pressing a navigation key when only the open file is accessible shows a hint with a shortcut to open the folder instead</li>
+          <li>The image can be dragged to pan when it is larger than the window</li>
+        </ul>
+      </description>
+    </release>
+
     <release version="2.0.0" date="2026-07-18" urgency="low" type="stable">
       <description>
         <p>A major release porting Blackbody to GTK4 and libadwaita, with a redesigned interface and many new features:</p>

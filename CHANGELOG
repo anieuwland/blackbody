@@ -1,6 +1,6 @@
 CHANGELOG
 ---------
-# Unreleased
+# 2.1.0 (2026-07-20)
 * Added "Open folder…" (Ctrl+Shift+O) to browse a whole directory with the
   keyboard (Left/Right/Home/End). Selecting a folder goes through the file
   chooser portal, so directory navigation now works in the Flatpak sandbox
@@ -11,6 +11,7 @@ CHANGELOG
   thermograms to browse through
 * Pressing a navigation key when only the open file is accessible shows a
   hint with a shortcut to open the folder instead
+* The image can be dragged to pan when it is larger than the window
 
 # 2.0.0 (2026-07-18)
 A major release porting Blackbody to GTK4 and libadwaita, with a redesigned
