@@ -30,6 +30,25 @@ impl AppState {
         });
     }
 
+    /// Folder selection goes through the file chooser portal, which grants
+    /// the sandbox read access to the whole folder — unlike opening a single
+    /// file, which leaves sibling files unreadable. This is what makes the
+    /// keyboard directory navigation work in the Flatpak without static
+    /// `--filesystem` permissions.
+    pub(super) fn show_open_folder_dialog(this: &Rc<Self>) {
+        let dialog = gtk4::FileDialog::builder()
+            .title(gettext("Open folder"))
+            .build();
+        let that = this.clone();
+        dialog.select_folder(Some(&this.ui.window), gio::Cancellable::NONE, move |result| {
+            if let Ok(folder) = result {
+                if let Some(path) = folder.path() {
+                    that.open_directory(&path);
+                }
+            }
+        });
+    }
+
     #[allow(deprecated)]
     pub(super) fn show_export_dialog(this: &Rc<Self>) {
         #[allow(deprecated)]

@@ -20,8 +20,7 @@
         "--device=dri",
         "--share=ipc",
         "--socket=fallback-x11",
-        "--socket=wayland",
-        "--filesystem=host:ro"
+        "--socket=wayland"
     ],
     "modules" : [
         {

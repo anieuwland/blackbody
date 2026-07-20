@@ -18,13 +18,7 @@
         "--device=dri",
         "--share=ipc",
         "--socket=fallback-x11",
-        "--socket=wayland",
-        "--filesystem=xdg-pictures:ro",
-        "--filesystem=xdg-download:ro",
-        "--filesystem=/run/media:ro",
-        "--talk-name=org.gtk.vfs.*",
-        "--filesystem=xdg-run/gvfs",
-        "--filesystem=xdg-run/gvfsd"
+        "--socket=wayland"
     ],
     "modules" : [
         {

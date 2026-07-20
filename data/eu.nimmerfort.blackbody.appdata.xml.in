@@ -15,7 +15,8 @@
   <developer id="eu.nimmerfort">
     <name>Arthur Nieuwland</name>
   </developer>
-  <update_contact>anieuwland@nimmerfort.eu</update_contact><branding>
+  <update_contact>anieuwland@nimmerfort.eu</update_contact>\
+  <branding>
     <color type="primary" scheme_preference="light">#f3a507</color>
     <color type="primary" scheme_preference="dark">#af208f</color>
   </branding>

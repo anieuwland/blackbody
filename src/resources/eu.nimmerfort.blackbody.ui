@@ -45,6 +45,10 @@
         <attribute name="label" translatable="yes">Open thermogram…</attribute>
         <attribute name="action">win.open</attribute>
       </item>
+      <item>
+        <attribute name="label" translatable="yes">Open folder…</attribute>
+        <attribute name="action">win.open-folder</attribute>
+      </item>
     </section>
     <section>
       <item>

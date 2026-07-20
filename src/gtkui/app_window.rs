@@ -250,10 +250,11 @@ impl AppState {
 
         // We're inside connect_activate, so GTK is ready — present immediately
         let app = application.as_ref();
-        app.set_accels_for_action("app.new-window", &["<Control>n"]);
-        app.set_accels_for_action("win.open",       &["<Control>o"]);
-        app.set_accels_for_action("win.export",     &["<Control>e"]);
-        app.set_accels_for_action("win.render",     &["<Control>s"]);
+        app.set_accels_for_action("app.new-window",  &["<Control>n"]);
+        app.set_accels_for_action("win.open",        &["<Control>o"]);
+        app.set_accels_for_action("win.open-folder", &["<Control><Shift>o"]);
+        app.set_accels_for_action("win.export",      &["<Control>e"]);
+        app.set_accels_for_action("win.render",      &["<Control>s"]);
         app.add_window(&this.ui.window);
         this.ui.window.present();
         this
@@ -287,8 +288,12 @@ impl AppState {
         btn.set_action_name(Some("win.open"));
         btn.add_css_class("suggested-action");
         btn.set_halign(gtk4::Align::Center);
+        let folder_btn = Button::with_label(&gettext("Open folder…"));
+        folder_btn.set_action_name(Some("win.open-folder"));
+        folder_btn.set_halign(gtk4::Align::Center);
         canvas.placeholder.append(&pic);
         canvas.placeholder.append(&btn);
+        canvas.placeholder.append(&folder_btn);
         canvas.placeholder.set_halign(gtk4::Align::Center);
         canvas.placeholder.set_valign(gtk4::Align::Center);
         canvas.overlay.add_overlay(&canvas.placeholder);
@@ -421,6 +426,25 @@ impl AppState {
         }
     }
 
+    /// Open a folder for keyboard browsing: load its first supported file.
+    /// Selecting the folder through the portal file dialog grants the sandbox
+    /// read access to all its files, so Left/Right/Home/End navigation works
+    /// without static filesystem permissions in the Flatpak manifest.
+    pub(super) fn open_directory(self: &Rc<Self>, dir: &Path) {
+        let files = scan_dir_files(dir);
+        let Some(first) = files.first().cloned() else {
+            self.show_error_dialog(
+                &gettext("No thermograms found"),
+                &tr(
+                    "The folder contains no supported image files (JPEG, TIFF or PNG).\n\nFolder: {}",
+                    &[dir.to_str().unwrap_or("<invalid path>")],
+                ),
+            );
+            return;
+        };
+        self.navigate_to(&first);
+    }
+
     /// Directory navigation: a failed load shows an error state on the canvas
     /// instead of a dialog, so browsing continues past unloadable files.
     fn navigate_to(self: &Rc<Self>, path: &Path) {
@@ -460,7 +484,7 @@ impl AppState {
     }
 
     fn remember_directory(&self, path: &Path) {
-        let files = scan_dir_files(path);
+        let files = path.parent().map(scan_dir_files).unwrap_or_default();
         let idx = files.iter().position(|p| p == path).unwrap_or(0);
         *self.dir_files.borrow_mut() = files;
         self.dir_idx.set(idx);
@@ -482,6 +506,11 @@ impl AppState {
         let open = SimpleAction::new("open", None);
         open.connect_activate(move |_, _| Self::show_open_dialog(&that));
         window.add_action(&open);
+
+        let that = this.clone();
+        let open_folder = SimpleAction::new("open-folder", None);
+        open_folder.connect_activate(move |_, _| Self::show_open_folder_dialog(&that));
+        window.add_action(&open_folder);
 
         this.action_export.set_enabled(false);
         let that = this.clone();
@@ -600,8 +629,7 @@ impl AppState {
     }
 }
 
-fn scan_dir_files(path: &Path) -> Vec<PathBuf> {
-    let Some(dir) = path.parent() else { return vec![] };
+fn scan_dir_files(dir: &Path) -> Vec<PathBuf> {
     let Ok(entries) = std::fs::read_dir(dir) else { return vec![] };
     let mut files: Vec<PathBuf> = entries
         .filter_map(|e| e.ok())

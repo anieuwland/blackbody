@@ -1,5 +1,13 @@
 CHANGELOG
 ---------
+# Unreleased
+* Added "Open folder…" (Ctrl+Shift+O) to browse a whole directory with the
+  keyboard (Left/Right/Home/End). Selecting a folder goes through the file
+  chooser portal, so directory navigation now works in the Flatpak sandbox
+  without broad filesystem permissions
+* Reduced Flatpak permissions: dropped all static --filesystem access from
+  the manifests; file access is now granted per file/folder via the portal
+
 # 1.2.0
 * Temperature in the render can be investigated by hovering over pixels
 * Added a thermometer showing the colors and associated temperatures
