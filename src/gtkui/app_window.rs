@@ -62,7 +62,7 @@ pub(super) struct CanvasUi {
 /// The on-screen display floating over the canvas: temperature range scales
 /// and the zoom menu, plus the fade animations.
 pub(super) struct OsdUi {
-    pub(super) container: gtk4::CenterBox,
+    pub(super) container: gtk4::Box,
     pub(super) show_anim: adw::TimedAnimation,
     pub(super) hide_anim: adw::TimedAnimation,
     pub(super) hide_source: Rc<Cell<Option<glib::SourceId>>>,
@@ -138,7 +138,7 @@ impl CanvasUi {
 
 impl OsdUi {
     fn from_builder(builder: &Builder) -> OsdUi {
-        let container: gtk4::CenterBox = builder.object("osd_container").unwrap();
+        let container: gtk4::Box = builder.object("osd_container").unwrap();
         let show_target = adw::PropertyAnimationTarget::new(&container, "opacity");
         let hide_target = adw::PropertyAnimationTarget::new(&container, "opacity");
         OsdUi {
