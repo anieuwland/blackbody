@@ -206,6 +206,8 @@
         </child>
 
         <property name="content">
+          <object class="AdwToastOverlay" id="toast_overlay">
+            <property name="child">
           <object class="AdwOverlaySplitView" id="info_split_view">
             <property name="sidebar-position">end</property>
             <property name="show-sidebar">false</property>
@@ -316,6 +318,30 @@
                         </child>
                       </object>
                     </child>
+                    <child type="center">
+                      <!-- Directory navigation pill, only visible when the
+                           open file has browsable siblings -->
+                      <object class="GtkBox" id="nav_bar">
+                        <property name="orientation">horizontal</property>
+                        <property name="visible">false</property>
+                        <property name="margin-end">16</property>
+                        <style><class name="osd"/><class name="linked"/></style>
+                        <child>
+                          <object class="GtkButton" id="nav_prev_button">
+                            <property name="icon-name">go-previous-symbolic</property>
+                            <property name="tooltip-text" translatable="yes">Previous thermogram (Left)</property>
+                            <style><class name="flat"/></style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="nav_next_button">
+                            <property name="icon-name">go-next-symbolic</property>
+                            <property name="tooltip-text" translatable="yes">Next thermogram (Right)</property>
+                            <style><class name="flat"/></style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
                     <child type="end">
                       <object class="GtkMenuButton" id="zoom_button">
                         <property name="always-show-arrow">true</property>
@@ -357,6 +383,8 @@
               </object><!-- GtkBox canvas_box -->
             </property>
           </object><!-- AdwOverlaySplitView -->
+            </property>
+          </object><!-- AdwToastOverlay -->
         </property>
 
       </object><!-- outer AdwToolbarView -->

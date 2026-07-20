@@ -73,6 +73,11 @@ pub(super) struct OsdUi {
     pub(super) max_label: Label,
     pub(super) zoom_button: MenuButton,
     pub(super) zoom_label: Label,
+    /// Directory navigation pill, visible only when the open file has
+    /// browsable siblings.
+    pub(super) nav_bar: gtk4::Box,
+    pub(super) nav_prev_button: Button,
+    pub(super) nav_next_button: Button,
 }
 
 /// The split view holding the info and measurements sidebars.
@@ -95,6 +100,7 @@ pub(super) struct PaletteUi {
 /// All widget handles, grouped by screen area.
 pub(super) struct Ui {
     pub(super) window: adw::ApplicationWindow,
+    pub(super) toast_overlay: adw::ToastOverlay,
     pub(super) header: HeaderUi,
     pub(super) canvas: CanvasUi,
     pub(super) osd: OsdUi,
@@ -147,6 +153,9 @@ impl OsdUi {
             max_label: builder.object("max_label").unwrap(),
             zoom_button: builder.object("zoom_button").unwrap(),
             zoom_label: builder.object("zoom_label").unwrap(),
+            nav_bar: builder.object("nav_bar").unwrap(),
+            nav_prev_button: builder.object("nav_prev_button").unwrap(),
+            nav_next_button: builder.object("nav_next_button").unwrap(),
         }
     }
 }
@@ -177,6 +186,7 @@ impl Ui {
     fn from_builder(builder: &Builder) -> Ui {
         Ui {
             window: builder.object("blackbody_window").unwrap(),
+            toast_overlay: builder.object("toast_overlay").unwrap(),
             header: HeaderUi::from_builder(builder),
             canvas: CanvasUi::from_builder(builder),
             osd: OsdUi::from_builder(builder),
@@ -211,6 +221,10 @@ pub struct AppState {
     pub(super) thermogram: RefCell<Option<Arc<Thermogram>>>,
     pub(super) dir_files: RefCell<Vec<PathBuf>>,
     pub(super) dir_idx: Cell<usize>,
+    /// Whether the "only this file is accessible" toast was already shown
+    /// for the current single-file context, to avoid stacking toasts on
+    /// repeated key presses.
+    nav_hint_shown: Cell<bool>,
     pub(super) min_temp: Cell<f32>,
     pub(super) max_temp: Cell<f32>,
     /// Display unit for temperatures; the data itself stays in Celsius.
@@ -237,6 +251,7 @@ impl AppState {
             thermogram: RefCell::new(None),
             dir_files: RefCell::new(Vec::new()),
             dir_idx: Cell::new(0),
+            nav_hint_shown: Cell::new(false),
             min_temp: Cell::new(0.0),
             max_temp: Cell::new(0.0),
             temp_unit: Cell::new(TempUnit::default()),
@@ -307,10 +322,12 @@ impl AppState {
     /// Tab to the sliders.
     fn prevent_focus_stealing(&self) {
         let (header, osd) = (&self.ui.header, &self.ui.osd);
-        let controls: [&gtk4::Widget; 7] = [
+        let controls: [&gtk4::Widget; 9] = [
             osd.min_scale.upcast_ref(),
             osd.max_scale.upcast_ref(),
             osd.zoom_button.upcast_ref(),
+            osd.nav_prev_button.upcast_ref(),
+            osd.nav_next_button.upcast_ref(),
             header.palette_button.upcast_ref(),
             header.mode_group.upcast_ref(),
             header.info_button.upcast_ref(),
@@ -465,6 +482,9 @@ impl AppState {
         page.set_title(&name);
         page.set_description(Some(&error.to_string()));
         page.set_visible(true);
+        // dir_files stays valid so browsing continues past the bad file, but
+        // the arrow sensitivity must track the new position.
+        self.update_nav_bar();
     }
 
     /// Grey out everything that needs a loaded thermogram; `update_controls`
@@ -488,6 +508,19 @@ impl AppState {
         let idx = files.iter().position(|p| p == path).unwrap_or(0);
         *self.dir_files.borrow_mut() = files;
         self.dir_idx.set(idx);
+        self.nav_hint_shown.set(false);
+        self.update_nav_bar();
+    }
+
+    /// Show the OSD navigation arrows only when there are sibling files to
+    /// browse to, and grey out the arrow at each end of the directory.
+    fn update_nav_bar(&self) {
+        let osd = &self.ui.osd;
+        let count = self.dir_files.borrow().len();
+        let idx = self.dir_idx.get();
+        osd.nav_bar.set_visible(count > 1);
+        osd.nav_prev_button.set_sensitive(idx > 0);
+        osd.nav_next_button.set_sensitive(idx + 1 < count);
     }
 
     fn connect_signals(this: &Rc<Self>, application: &impl IsA<adw::Application>) {
@@ -601,10 +634,51 @@ impl AppState {
             }
             if let Some(path) = that.step_directory(key) {
                 that.navigate_to(&path);
+            } else {
+                that.maybe_show_nav_hint();
             }
             glib::Propagation::Stop
         });
         this.ui.window.add_controller(key_ctrl);
+
+        let that = this.clone();
+        this.ui.osd.nav_prev_button.connect_clicked(move |_| {
+            if let Some(path) = that.step_directory(gtk4::gdk::Key::Left) {
+                that.navigate_to(&path);
+            }
+        });
+        let that = this.clone();
+        this.ui.osd.nav_next_button.connect_clicked(move |_| {
+            if let Some(path) = that.step_directory(gtk4::gdk::Key::Right) {
+                that.navigate_to(&path);
+            }
+        });
+    }
+
+    /// Navigation was attempted but there are no siblings to browse to —
+    /// under the Flatpak sandbox opening a single file grants access to only
+    /// that file, so the user likely wonders why the arrow keys do nothing.
+    /// Explain once per opened file, with a shortcut to the fix. Outside the
+    /// sandbox an empty sibling list means the directory really holds no
+    /// other supported files, so opening the folder wouldn't help and no
+    /// hint is shown.
+    fn maybe_show_nav_hint(self: &Rc<Self>) {
+        if !running_in_flatpak()
+            || self.thermogram.borrow().is_none()
+            || self.dir_files.borrow().len() > 1
+            || self.nav_hint_shown.get()
+        {
+            return;
+        }
+        self.nav_hint_shown.set(true);
+
+        let toast = adw::Toast::builder()
+            .title(gettext("Only this file is accessible — open its folder to browse"))
+            .button_label(gettext("Open Folder…"))
+            .build();
+        let that = self.clone();
+        toast.connect_button_clicked(move |_| Self::show_open_folder_dialog(&that));
+        self.ui.toast_overlay.add_toast(toast);
     }
 
     /// Move the directory position by one navigation key and return the new
@@ -627,6 +701,12 @@ impl AppState {
         self.dir_idx.set(new_idx as usize);
         Some(files[new_idx as usize].clone())
     }
+}
+
+/// Flatpak mounts `/.flatpak-info` inside every sandbox; its presence is the
+/// standard way for an app to detect it is running confined.
+fn running_in_flatpak() -> bool {
+    Path::new("/.flatpak-info").exists()
 }
 
 fn scan_dir_files(dir: &Path) -> Vec<PathBuf> {

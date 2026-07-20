@@ -7,6 +7,25 @@ CHANGELOG
   without broad filesystem permissions
 * Reduced Flatpak permissions: dropped all static --filesystem access from
   the manifests; file access is now granted per file/folder via the portal
+* On-screen previous/next arrows appear when the directory has more
+  thermograms to browse through
+* Pressing a navigation key when only the open file is accessible shows a
+  hint with a shortcut to open the folder instead
+
+# 2.0.0 (2026-07-18)
+A major release porting Blackbody to GTK4 and libadwaita, with a redesigned
+interface and many new features:
+
+* Completely redesigned user interface, dark by default, with on-screen temperature range sliders
+* Overlay view (Picture-in-Picture or MSX) next to the thermal and visible spectrum views
+* Embedded measurements (spots, lines, and areas) are now drawn on the render
+* Temperatures can be shown in celsius, fahrenheit, or kelvin
+* Information panel showing camera metadata and GPS location, with the option to open the location in a map
+* Support for loading 16-bit centikelvin PNGs
+* Scroll to zoom and keyboard navigation through all thermograms in a directory
+* Palette choice is remembered when opening the next thermogram
+* Improved export options and clearer error messages
+* More supported FLIR cameras due to upgrading to flyr==0.7.0
 
 # 1.2.0
 * Temperature in the render can be investigated by hovering over pixels
