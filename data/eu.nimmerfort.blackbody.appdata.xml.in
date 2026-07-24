@@ -2,7 +2,7 @@
 <!-- Copyright 2022 Arthur Nieuwland -->
 <component type="desktop-application">
   <name>Blackbody</name>
-	<summary>A thermogram viewer</summary>
+	<summary>Inspect thermograms</summary>
 	<id>eu.nimmerfort.blackbody</id>
   <launchable type="desktop-id">eu.nimmerfort.blackbody.desktop</launchable>
 	<metadata_license>CC0-1.0</metadata_license>
