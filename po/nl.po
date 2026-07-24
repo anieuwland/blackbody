@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-18 19:08+0200\n"
+"POT-Creation-Date: 2026-07-24 22:13+0200\n"
 "PO-Revision-Date: 2021-01-02 13:11+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -20,20 +20,23 @@ msgstr ""
 
 #: data/eu.nimmerfort.blackbody.desktop.in:2
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:4
-#: src/resources/eu.nimmerfort.blackbody.ui:111
+#: src/resources/eu.nimmerfort.blackbody.ui:115
 msgid "Blackbody"
 msgstr "Blackbody"
 
 #: data/eu.nimmerfort.blackbody.desktop.in:3
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:5
 msgid "A thermogram viewer"
 msgstr "Een thermogramvertoner"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:14
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:5
+msgid "Inspect thermograms"
+msgstr "Thermogrammen inspecteren"
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:16
 msgid "Arthur Nieuwland"
 msgstr "Arthur Nieuwland"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:19
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:25
 msgid ""
 "Blackbody is a viewer for FLIR thermograms and other thermal images. Explore "
 "temperatures under the cursor, render to different palettes and ranges, "
@@ -45,29 +48,29 @@ msgstr ""
 "en temperatuurbereiken, leg het warmtebeeld over de foto in zichtbaar licht "
 "en bekijk ingebedde metingen en camerametadata."
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:20
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:26
 msgid "Features:"
 msgstr "Functionaliteit:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:22
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:28
 msgid "Loading FLIR thermograms from many cameras, both thermal and photo data"
 msgstr ""
 "FLIR-thermogrammen van vele camera's inladen, zowel thermische als optische "
 "gegevens"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:23
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:29
 msgid "Loading single-band TIFFs and 16-bit centikelvin PNGs"
 msgstr "Enkelbands TIFF- en 16-bits centikelvine PNG-bestanden inladen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:24
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:30
 msgid "Investigating temperatures with the mouse"
 msgstr "Temperaturen onderzoeken met de muis"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:25
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:31
 msgid "Viewing embedded measurements: spots, lines, and areas"
 msgstr "Ingebedde metingen bekijken: punten, lijnen en gebieden"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:26
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:32
 msgid ""
 "Overlay view, also known as Picture-in-Picture or MSX, combining thermal and "
 "visible images"
@@ -75,53 +78,86 @@ msgstr ""
 "Overlayweergave, ook bekend als beeld-in-beeld of MSX, die het warmtebeeld "
 "en het zichtbare beeld combineert"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:27
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:33
 msgid "Temperatures in celsius, fahrenheit, or kelvin"
 msgstr "Temperaturen in Celsius, Fahrenheit of Kelvin"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:28
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:34
 msgid "Metadata panel with camera info and GPS location, openable in a map"
 msgstr ""
 "Metadatapaneel met camera-informatie en GPS-locatie, te openen op een kaart"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:29
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:35
 msgid ""
 "Exporting renders to PNG and thermal data to TIFF or 16-bit centikelvin PNG"
 msgstr ""
 "Renders exporteren naar PNG en thermische gegevens naar TIFF of 16-bits "
 "centikelvine PNG"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:30
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:36
 msgid "Rendering to embedded color palettes, if present"
 msgstr "Renderen naar ingebedde kleurpaletten, indien aanwezig"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:31
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:101
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:37
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:120
 msgid ""
 "Rendering to many different colors palettes, including inferno and turbo"
 msgstr ""
 "Naar uiteenlopende kleurpaletten renderen, onder andere inferno en turbo"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:32
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:102
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:38
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:121
 msgid "Specifying the thermal range to render"
 msgstr "Het warmtebereik instellen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:33
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:103
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:39
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:122
 msgid "Zooming in and out"
 msgstr "In- en uitzoomen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:34
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:104
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:40
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:123
 msgid "Translated to multiple languages"
 msgstr "Vertaald in meerdere talen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:35
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:41
 msgid "Most FLIR cameras known to work"
 msgstr "Werkt met de meeste FLIR-camera's"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:42
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:48
+msgid ""
+"An incremental release improving how you browse and navigate thermograms:"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:50
+msgid ""
+"Added \"Open folder…\" (Ctrl+Shift+O) to browse a whole directory with the "
+"keyboard, working within the Flatpak sandbox via the file chooser portal"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:51
+msgid ""
+"Reduced Flatpak permissions: file access is now granted per file/folder via "
+"the portal instead of static filesystem access"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:52
+msgid ""
+"On-screen previous/next arrows appear when the directory has more "
+"thermograms to browse through"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:53
+msgid ""
+"Pressing a navigation key when only the open file is accessible shows a hint "
+"with a shortcut to open the folder instead"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:54
+msgid "The image can be dragged to pan when it is larger than the window"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:61
 msgid ""
 "A major release porting Blackbody to GTK4 and libadwaita, with a redesigned "
 "interface and many new features:"
@@ -129,7 +165,7 @@ msgstr ""
 "Een grote uitgave die Blackbody overzet naar GTK4 en libadwaita, met een "
 "opnieuw ontworpen interface en veel nieuwe functionaliteit:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:44
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:63
 msgid ""
 "Completely redesigned user interface, dark by default, with on-screen "
 "temperature range sliders"
@@ -137,7 +173,7 @@ msgstr ""
 "Volledig opnieuw ontworpen gebruikersinterface, standaard donker, met "
 "schuifregelaars voor het temperatuurbereik in beeld"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:45
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:64
 msgid ""
 "Overlay view (Picture-in-Picture or MSX) next to the thermal and visible "
 "spectrum views"
@@ -145,19 +181,19 @@ msgstr ""
 "Overlayweergave (beeld-in-beeld of MSX) naast de weergaven voor het "
 "thermische en het zichtbare spectrum"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:46
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:65
 msgid ""
 "Embedded measurements (spots, lines, and areas) are now drawn on the render"
 msgstr ""
 "Ingebedde metingen (punten, lijnen en gebieden) worden nu op de render "
 "getekend"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:47
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:66
 msgid "Temperatures can be shown in celsius, fahrenheit, or kelvin"
 msgstr ""
 "Temperaturen kunnen worden weergegeven in Celsius, Fahrenheit of Kelvin"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:48
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:67
 msgid ""
 "Information panel showing camera metadata and GPS location, with the option "
 "to open the location in a map"
@@ -165,77 +201,78 @@ msgstr ""
 "Informatiepaneel met camerametadata en GPS-locatie, met de optie om de "
 "locatie op een kaart te openen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:49
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:68
 msgid "Support for loading 16-bit centikelvin PNGs"
 msgstr "Ondersteuning voor het inladen van 16-bits centikelvine PNG-bestanden"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:50
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:69
 msgid ""
 "Scroll to zoom and keyboard navigation through all thermograms in a directory"
 msgstr ""
 "Scrollen om te zoomen en met het toetsenbord door alle thermogrammen in een "
 "map navigeren"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:51
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:70
 msgid "Palette choice is remembered when opening the next thermogram"
-msgstr "De paletkeuze wordt onthouden bij het openen van het volgende thermogram"
+msgstr ""
+"De paletkeuze wordt onthouden bij het openen van het volgende thermogram"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:52
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:71
 msgid "Improved export options and clearer error messages"
 msgstr "Verbeterde exportopties en duidelijkere foutmeldingen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:53
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:72
 msgid "More supported FLIR cameras due to upgrading to flyr==0.7.0"
 msgstr "Meer ondersteunde FLIR-camera's dankzij de upgrade naar flyr==0.7.0"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:60
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:79
 msgid "This release overhauls the UI and adds important new features:"
 msgstr ""
 "Deze uitgave vernieuwt de interface en voegt belangrijke nieuwe "
 "functionaliteit toe:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:62
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:81
 msgid "Ability to view optical images (photos) in FLIR images"
-msgstr "Mogelijkheid om optische beelden (foto's) in FLIR-bestanden te bekijken"
+msgstr ""
+"Mogelijkheid om optische beelden (foto's) in FLIR-bestanden te bekijken"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:63
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:82
 msgid "Support for rendering thermal data to FLIR's embedded palettes"
 msgstr ""
 "Ondersteuning voor het renderen van thermische gegevens naar de ingebedde "
 "paletten van FLIR"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:64
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:83
 msgid ""
 "Correcting for the rotation of a thermogram to show the image right side up"
 msgstr ""
 "Correctie voor de rotatie van een thermogram zodat het beeld rechtop wordt "
 "getoond"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:71
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:90
 msgid "This release adds major interactivity improvements:"
 msgstr "Deze uitgave voegt grote verbeteringen in interactiviteit toe:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:73
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:92
 msgid "Temperature in the render can be investigated by hovering over pixels"
 msgstr ""
 "De temperatuur in de render kan worden onderzocht door met de muis over "
 "pixels te bewegen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:74
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:93
 msgid "Added a thermometer showing the colors and associated temperatures"
 msgstr ""
 "Een thermometer toegevoegd die de kleuren en bijbehorende temperaturen toont"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:75
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:94
 msgid "Thermogram renders can be saved to PNGs"
 msgstr "Renders van thermogrammen kunnen worden opgeslagen als PNG"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:76
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:95
 msgid "Thermograms' celsius data can be exported to tiff"
-msgstr ""
-"Celsiusgegevens van thermogrammen kunnen worden geëxporteerd naar TIFF"
+msgstr "Celsiusgegevens van thermogrammen kunnen worden geëxporteerd naar TIFF"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:77
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:96
 msgid ""
 "Allowed temperature range is now -273,15 to 1.000.000 instead of -99 to 99 "
 "(all °C)"
@@ -243,23 +280,23 @@ msgstr ""
 "Het toegestane temperatuurbereik is nu -273,15 tot 1.000.000 in plaats van "
 "-99 tot 99 (alles in °C)"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:84
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:103
 msgid "A small, incremental update to Blackbody. Improvements:"
 msgstr "Een kleine, stapsgewijze update van Blackbody. Verbeteringen:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:86
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:105
 msgid "An error message is shown if opening a thermogram fails"
 msgstr ""
 "Er wordt een foutmelding getoond als het openen van een thermogram mislukt"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:87
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:106
 msgid ""
 "When opening fails, Blackbody doesn't unload any loaded thermograms anymore"
 msgstr ""
 "Wanneer het openen mislukt, verwijdert Blackbody reeds ingeladen "
 "thermogrammen niet meer"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:88
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:107
 msgid ""
 "Added logo's heat waves as a nicer placeholder when no thermogram is opened "
 "yet"
@@ -267,37 +304,37 @@ msgstr ""
 "De warmtegolven uit het logo toegevoegd als mooiere plaatshouder wanneer er "
 "nog geen thermogram is geopend"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:89
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:108
 msgid ""
 "Refined headerbar controls to only be sensitive when a thermogram is opened"
 msgstr ""
 "Bedieningselementen in de kopbalk verfijnd zodat ze alleen actief zijn "
 "wanneer een thermogram is geopend"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:90
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:109
 msgid ""
 "Three more known-to-be-compatible cameras (FLIR C2, FLIR E5 and FLIR P60)"
 msgstr ""
 "Drie extra camera's waarvan bekend is dat ze werken (FLIR C2, FLIR E5 en "
 "FLIR P60)"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:97
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:116
 msgid "First release of Blackbody. The most important features are:"
 msgstr "Eerste uitgave van Blackbody. De belangrijkste functionaliteit:"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:99
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:118
 msgid "Loading FLIR thermograms from many cameras"
 msgstr "FLIR-thermogrammen van verschillende camera's inladen"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:100
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:119
 msgid "Loading single-band TIFFs assumed to be in °C"
 msgstr "Enkelbands TIFF-beelden inladen (aangenomen in °C)"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:105
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:124
 msgid "Available for Linux and Windows"
 msgstr "Werkt op Linux en Windows"
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:113
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:132
 msgid ""
 "A thermogram of a bird in °Celsius, in Blackbody's default view using the "
 "embedded palette."
@@ -305,19 +342,18 @@ msgstr ""
 "Een thermogram van een vogel in °Celsius, in de standaardweergave van "
 "Blackbody met het ingebedde palet."
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:117
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:136
 msgid ""
 "Blackbody's info pane of a high quality FLIR SC660 camera, in °Fahrenheit."
 msgstr ""
 "Het informatiepaneel van Blackbody voor een hoogwaardige FLIR SC660-camera, "
 "in °Fahrenheit."
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:121
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:140
 msgid "Spot measurements on a thermogram in °Fahrenheit with a custom palette."
-msgstr ""
-"Puntmetingen op een thermogram in °Fahrenheit met een aangepast palet."
+msgstr "Puntmetingen op een thermogram in °Fahrenheit met een aangepast palet."
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:125
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:144
 msgid ""
 "A thermogram in Kelvin laid over the visible spectrum photo, using a custom "
 "palette."
@@ -325,7 +361,7 @@ msgstr ""
 "Een thermogram in Kelvin over de foto in zichtbaar licht gelegd, met een "
 "aangepast palet."
 
-#: data/eu.nimmerfort.blackbody.appdata.xml.in:129
+#: data/eu.nimmerfort.blackbody.appdata.xml.in:148
 msgid "Zoomed in on a cat's head with a custom palette and temperature range."
 msgstr ""
 "Ingezoomd op de kop van een kat met een aangepast palet en temperatuurbereik."
@@ -339,7 +375,7 @@ msgid "The unit temperatures are displayed in."
 msgstr "De eenheid waarin temperaturen worden weergegeven."
 
 #: src/resources/eu.nimmerfort.blackbody.ui:8
-#: src/resources/eu.nimmerfort.blackbody.ui:331 src/gtkui/canvas.rs:287
+#: src/resources/eu.nimmerfort.blackbody.ui:363 src/gtkui/canvas.rs:343
 msgid "Fit"
 msgstr "Passend"
 
@@ -367,83 +403,95 @@ msgstr "400%"
 msgid "New window"
 msgstr "Nieuw venster"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:45 src/gtkui/app_window.rs:286
+#: src/resources/eu.nimmerfort.blackbody.ui:45 src/gtkui/app_window.rs:141
 msgid "Open thermogram…"
 msgstr "Thermogram openen…"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:51 src/gtkui/dialogs.rs:38
+#: src/resources/eu.nimmerfort.blackbody.ui:49 src/gtkui/app_window.rs:145
+msgid "Open folder…"
+msgstr "Map openen…"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:55 src/gtkui/dialogs.rs:58
 msgid "Export thermogram…"
 msgstr "Thermogram exporteren…"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:55
+#: src/resources/eu.nimmerfort.blackbody.ui:59
 msgid "Save render…"
 msgstr "Render opslaan…"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:61
+#: src/resources/eu.nimmerfort.blackbody.ui:65
 msgid "Celsius"
 msgstr "Celsius"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:66
+#: src/resources/eu.nimmerfort.blackbody.ui:70
 msgid "Fahrenheit"
 msgstr "Fahrenheit"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:71
+#: src/resources/eu.nimmerfort.blackbody.ui:75
 msgid "Kelvin"
 msgstr "Kelvin"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:78
+#: src/resources/eu.nimmerfort.blackbody.ui:82
 msgid "About Blackbody"
 msgstr "Over Blackbody"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:127
+#: src/resources/eu.nimmerfort.blackbody.ui:131
 msgid "Thermal"
 msgstr "Thermisch"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:128
+#: src/resources/eu.nimmerfort.blackbody.ui:132
 msgid "Thermal image"
 msgstr "Warmtebeeld"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:134
+#: src/resources/eu.nimmerfort.blackbody.ui:138
 msgid "Visible"
 msgstr "Zichtbaar"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:135
+#: src/resources/eu.nimmerfort.blackbody.ui:139
 msgid "Visible-light photo"
 msgstr "Foto in zichtbaar licht"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:141
+#: src/resources/eu.nimmerfort.blackbody.ui:145
 msgid "Overlay"
 msgstr "Overlay"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:142
+#: src/resources/eu.nimmerfort.blackbody.ui:146
 msgid "Thermal picture-in-picture over the photo"
 msgstr "Thermisch beeld-in-beeld over de foto"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:152
+#: src/resources/eu.nimmerfort.blackbody.ui:156
 msgid "Main menu"
 msgstr "Hoofdmenu"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:160
+#: src/resources/eu.nimmerfort.blackbody.ui:164
 msgid "Camera info"
 msgstr "Camera-informatie"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:168
+#: src/resources/eu.nimmerfort.blackbody.ui:172
 msgid "Measurements"
 msgstr "Metingen"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:176
+#: src/resources/eu.nimmerfort.blackbody.ui:180
 msgid "Choose colour palette"
 msgstr "Kleurenpalet kiezen"
 
-#: src/resources/eu.nimmerfort.blackbody.ui:318
+#: src/resources/eu.nimmerfort.blackbody.ui:288
+msgid "Previous thermogram (Left)"
+msgstr "Vorig thermogram (Links)"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:295
+msgid "Next thermogram (Right)"
+msgstr "Volgend thermogram (Rechts)"
+
+#: src/resources/eu.nimmerfort.blackbody.ui:350
 msgid "Zoom"
 msgstr "Zoomen"
 
-#: src/gtkui/app_window.rs:348
+#: src/gtkui/app_window.rs:209
 msgid "Could not open file"
 msgstr "Kon bestand niet openen"
 
-#: src/gtkui/app_window.rs:350
+#: src/gtkui/app_window.rs:211
 #, rust-format
 msgid ""
 "Failed to open file. The file may be corrupted or the camera unsupported.\n"
@@ -457,31 +505,59 @@ msgstr ""
 "Bestand: {}\n"
 "Oorzaak: {}"
 
+#: src/gtkui/app_window.rs:293
+msgid "No thermograms found"
+msgstr "Geen thermogrammen gevonden"
+
+#: src/gtkui/app_window.rs:295
+#, rust-format
+msgid ""
+"The folder contains no supported image files (JPEG, TIFF or PNG).\n"
+"\n"
+"Folder: {}"
+msgstr ""
+
+#: src/gtkui/app_window.rs:515
+msgid "Only this file is accessible — open its folder to browse"
+msgstr "Alleen dit bestand is toegankelijk — open de map om te bladeren"
+
+#: src/gtkui/app_window.rs:516
+msgid "Open Folder…"
+msgstr "Map openen…"
+
 #: src/gtkui/dialogs.rs:22
 msgid "Open thermogram"
 msgstr "Thermogram openen"
 
+#: src/gtkui/dialogs.rs:40
+msgid "Open folder"
+msgstr "Map openen"
+
 #: src/gtkui/dialogs.rs:41
+msgid "Open _Folder"
+msgstr "_Map openen"
+
+#: src/gtkui/dialogs.rs:61
 msgid "Export"
 msgstr "Exporteren"
 
-#: src/gtkui/dialogs.rs:42
+#: src/gtkui/dialogs.rs:62
 msgid "Cancel"
 msgstr "Annuleren"
 
-#: src/gtkui/dialogs.rs:44
+#: src/gtkui/dialogs.rs:64
 msgid "TIFF (32-bit float)"
 msgstr "TIFF (32-bits float)"
 
-#: src/gtkui/dialogs.rs:45
+#: src/gtkui/dialogs.rs:65
 msgid "PNG (16-bit)"
 msgstr "PNG (16-bits)"
 
-#: src/gtkui/dialogs.rs:79
+#: src/gtkui/dialogs.rs:99
 msgid "Export failed"
 msgstr "Exporteren mislukt"
 
-#: src/gtkui/dialogs.rs:80
+#: src/gtkui/dialogs.rs:100
 #, rust-format
 msgid ""
 "Failed to export to {}\n"
@@ -490,15 +566,15 @@ msgstr ""
 "Exporteren naar {} is mislukt\n"
 "Oorzaak: {}"
 
-#: src/gtkui/dialogs.rs:89
+#: src/gtkui/dialogs.rs:109
 msgid "Save render"
 msgstr "Render opslaan"
 
-#: src/gtkui/dialogs.rs:125
+#: src/gtkui/dialogs.rs:145
 msgid "Save failed"
 msgstr "Opslaan mislukt"
 
-#: src/gtkui/dialogs.rs:126
+#: src/gtkui/dialogs.rs:146
 #, rust-format
 msgid ""
 "Failed to save to {}\n"
@@ -507,7 +583,7 @@ msgstr ""
 "Opslaan naar {} is mislukt\n"
 "Oorzaak: {}"
 
-#: src/gtkui/dialogs.rs:137
+#: src/gtkui/dialogs.rs:157
 msgid ""
 "A viewer for FLIR thermograms and other thermal images. Explore temperatures "
 "under the cursor, render to different palettes and ranges, overlay the "
@@ -518,7 +594,7 @@ msgstr ""
 "temperatuurbereiken, leg het warmtebeeld over de foto in zichtbaar licht en "
 "bekijk ingebedde metingen en camerametadata."
 
-#: src/gtkui/dialogs.rs:150
+#: src/gtkui/dialogs.rs:170
 msgid "Close"
 msgstr "Sluiten"
 
@@ -595,7 +671,7 @@ msgid "This thermogram contains no measurement tools"
 msgstr "Dit thermogram bevat geen meetinstrumenten"
 
 #: src/gtkui/sidebar.rs:142
-msgid "Directory"
+msgid "Folder"
 msgstr "Map"
 
 #: src/gtkui/sidebar.rs:152
@@ -690,721 +766,3 @@ msgstr "Alarm"
 #: src/gtkui/sidebar.rs:267
 msgid "Difference"
 msgstr "Verschil"
-
-#~ msgid ""
-#~ "Blackbody is a thermogram viewer. It allows viewing FLIR JPEG, TIFF, and "
-#~ "16-bit centikelvin PNG thermograms, giving control over the render "
-#~ "settings."
-#~ msgstr ""
-#~ "Blackbody is een thermogramvertoner. Hiermee kunnen FLIR JPEG-, TIFF- en "
-#~ "16-bits centikelvine PNG-thermogrammen worden bekeken, met controle over "
-#~ "de renderinstellingen."
-
-#~ msgid "A cat with a heater in the background (19°C - 40°C, inferno palette)"
-#~ msgstr ""
-#~ "Een kat met een radiator in the achtergrond (19°C - 40°C, inferno palet)"
-
-#~ msgid ""
-#~ "A cat with a heater in the background, halved in size (19°C - 67°C, "
-#~ "cividis palette)"
-#~ msgstr ""
-#~ "Een kat met een radiator in de achtergrond, in grootte gehalveerd (19°C - "
-#~ "67°C, cividis palet)"
-
-#~ msgid "A house in winter (6°C - 12°C, turbo palette)"
-#~ msgstr "Een huis in de winter (6°C - 12°C, turbo palet)"
-
-#~ msgid "A running jet engine (15°C - 95°C, palette emphasizing warmth)"
-#~ msgstr "Een lopende jetturbine (15°C - 95°C, warmte-benadrukkende palet)"
-
-#~ msgid "Optical view"
-#~ msgstr "Optische weergave"
-
-#~ msgid "Picture-in-picture"
-#~ msgstr "Beeld-in-beeld"
-
-#~ msgid "Exporting thermal data or renders to files"
-#~ msgstr "Thermische gegevens of renders naar bestanden exporteren"
-
-#~ msgid "A  thermogram viewer."
-#~ msgstr "Een thermogramvertoner."
-
-#~ msgid "A thermogram viewer."
-#~ msgstr "Een thermogramvertoner."
-
-#~ msgid ""
-#~ "Blackbody is a thermogram viewer. It renders temperature data to RGB "
-#~ "images."
-#~ msgstr ""
-#~ "Blackbody is een thermogramvertoner. Het rendert warmtebeelden naar RGB-"
-#~ "beelden."
-
-#~ msgid ""
-#~ "EUROPEAN UNION PUBLIC LICENCE v. 1.2\n"
-#~ "\n"
-#~ "EUPL © the European Union 2007, 2016\n"
-#~ "\n"
-#~ "This European Union Public Licence (the ‘EUPL’) applies to the Work (as "
-#~ "defined below) which is provided under the terms of this Licence. Any use "
-#~ "of the Work, other than as authorised under this Licence is prohibited "
-#~ "(to the extent such use is covered by a right of the copyright holder of "
-#~ "the Work).\n"
-#~ "\n"
-#~ "The Work is provided under the terms of this Licence when the Licensor "
-#~ "(as defined below) has placed the following notice immediately following "
-#~ "the copyright notice for the Work:\n"
-#~ "\n"
-#~ "Licensed under the EUPL\n"
-#~ "\n"
-#~ "or has expressed by any other means his willingness to license under the "
-#~ "EUPL.\n"
-#~ "1. Definitions\n"
-#~ "\n"
-#~ "In this Licence, the following terms have the following meaning:\n"
-#~ "\n"
-#~ "— ‘The Licence’: this Licence.\n"
-#~ "\n"
-#~ "— ‘The Original Work’: the work or software distributed or communicated "
-#~ "by the Licensor under this Licence, available as Source Code and also as "
-#~ "Executable Code as the case may be.\n"
-#~ "\n"
-#~ "— ‘Derivative Works’: the works or software that could be created by the "
-#~ "Licensee, based upon the Original Work or modifications thereof. This "
-#~ "Licence does not define the extent of modification or dependence on the "
-#~ "Original Work required in order to classify a work as a Derivative Work; "
-#~ "this extent is determined by copyright law applicable in the country "
-#~ "mentioned in Article 15.\n"
-#~ "\n"
-#~ "— ‘The Work’: the Original Work or its Derivative Works.\n"
-#~ "\n"
-#~ "— ‘The Source Code’: the human-readable form of the Work which is the "
-#~ "most convenient for people to study and modify.\n"
-#~ "\n"
-#~ "— ‘The Executable Code’: any code which has generally been compiled and "
-#~ "which is meant to be interpreted by a computer as a program.\n"
-#~ "\n"
-#~ "— ‘The Licensor’: the natural or legal person that distributes or "
-#~ "communicates the Work under the Licence.\n"
-#~ "\n"
-#~ "— ‘Contributor(s)’: any natural or legal person who modifies the Work "
-#~ "under the Licence, or otherwise contributes to the creation of a "
-#~ "Derivative Work.\n"
-#~ "\n"
-#~ "— ‘The Licensee’ or ‘You’: any natural or legal person who makes any "
-#~ "usage of the Work under the terms of the Licence.\n"
-#~ "\n"
-#~ "— ‘Distribution’ or ‘Communication’: any act of selling, giving, lending, "
-#~ "renting, distributing, communicating, transmitting, or otherwise making "
-#~ "available, online or offline, copies of the Work or providing access to "
-#~ "its essential functionalities at the disposal of any other natural or "
-#~ "legal person.\n"
-#~ "2. Scope of the rights granted by the Licence\n"
-#~ "\n"
-#~ "The Licensor hereby grants You a worldwide, royalty-free, non-exclusive, "
-#~ "sublicensable licence to do the following, for the duration of copyright "
-#~ "vested in the Original Work:\n"
-#~ "\n"
-#~ "— use the Work in any circumstance and for all usage,\n"
-#~ "\n"
-#~ "— reproduce the Work,\n"
-#~ "\n"
-#~ "— modify the Work, and make Derivative Works based upon the Work,\n"
-#~ "\n"
-#~ "— communicate to the public, including the right to make available or "
-#~ "display the Work or copies thereof to the public and perform publicly, as "
-#~ "the case may be, the Work,\n"
-#~ "\n"
-#~ "— distribute the Work or copies thereof,\n"
-#~ "\n"
-#~ "— lend and rent the Work or copies thereof,\n"
-#~ "\n"
-#~ "— sublicense rights in the Work or copies thereof.\n"
-#~ "\n"
-#~ "Those rights can be exercised on any media, supports and formats, whether "
-#~ "now known or later invented, as far as the applicable law permits so.\n"
-#~ "\n"
-#~ "In the countries where moral rights apply, the Licensor waives his right "
-#~ "to exercise his moral right to the extent allowed by law in order to make "
-#~ "effective the licence of the economic rights here above listed.\n"
-#~ "\n"
-#~ "The Licensor grants to the Licensee royalty-free, non-exclusive usage "
-#~ "rights to any patents held by the Licensor, to the extent necessary to "
-#~ "make use of the rights granted on the Work under this Licence.\n"
-#~ "3. Communication of the Source Code\n"
-#~ "\n"
-#~ "The Licensor may provide the Work either in its Source Code form, or as "
-#~ "Executable Code. If the Work is provided as Executable Code, the Licensor "
-#~ "provides in addition a machine-readable copy of the Source Code of the "
-#~ "Work along with each copy of the Work that the Licensor distributes or "
-#~ "indicates, in a notice following the copyright notice attached to the "
-#~ "Work, a repository where the Source Code is easily and freely accessible "
-#~ "for as long as the Licensor continues to distribute or communicate the "
-#~ "Work.\n"
-#~ "4. Limitations on copyright\n"
-#~ "\n"
-#~ "Nothing in this Licence is intended to deprive the Licensee of the "
-#~ "benefits from any exception or limitation to the exclusive rights of the "
-#~ "rights owners in the Work, of the exhaustion of those rights or of other "
-#~ "applicable limitations thereto.\n"
-#~ "5. Obligations of the Licensee\n"
-#~ "\n"
-#~ "The grant of the rights mentioned above is subject to some restrictions "
-#~ "and obligations imposed on the Licensee. Those obligations are the "
-#~ "following:\n"
-#~ "\n"
-#~ "    Attribution right: The Licensee shall keep intact all copyright, "
-#~ "patent or trademarks notices and all notices that refer to the Licence "
-#~ "and to the disclaimer of warranties. The Licensee must include a copy of "
-#~ "such notices and a copy of the Licence with every copy of the Work he/she "
-#~ "distributes or communicates. The Licensee must cause any Derivative Work "
-#~ "to carry prominent notices stating that the Work has been modified and "
-#~ "the date of modification.\n"
-#~ "    Copyleft clause: If the Licensee distributes or communicates copies "
-#~ "of the Original Works or Derivative Works, this Distribution or "
-#~ "Communication will be done under the terms of this Licence or of a later "
-#~ "version of this Licence unless the Original Work is expressly distributed "
-#~ "only under this version of the Licence — for example by communicating "
-#~ "‘EUPL v. 1.2 only’. The Licensee (becoming Licensor) cannot offer or "
-#~ "impose any additional terms or conditions on the Work or Derivative Work "
-#~ "that alter or restrict the terms of the Licence.\n"
-#~ "    Compatibility clause: If the Licensee Distributes or Communicates "
-#~ "Derivative Works or copies thereof based upon both the Work and another "
-#~ "work licensed under a Compatible Licence, this Distribution or "
-#~ "Communication can be done under the terms of this Compatible Licence. For "
-#~ "the sake of this clause, ‘Compatible Licence’ refers to the licences "
-#~ "listed in the appendix attached to this Licence. Should the Licensee's "
-#~ "obligations under the Compatible Licence conflict with his/her "
-#~ "obligations under this Licence, the obligations of the Compatible Licence "
-#~ "shall prevail.\n"
-#~ "    Provision of Source Code: When distributing or communicating copies "
-#~ "of the Work, the Licensee will provide a machine-readable copy of the "
-#~ "Source Code or indicate a repository where this Source will be easily and "
-#~ "freely available for as long as the Licensee continues to distribute or "
-#~ "communicate the Work.\n"
-#~ "    Legal Protection: This Licence does not grant permission to use the "
-#~ "trade names, trademarks, service marks, or names of the Licensor, except "
-#~ "as required for reasonable and customary use in describing the origin of "
-#~ "the Work and reproducing the content of the copyright notice.\n"
-#~ "\n"
-#~ "6. Chain of Authorship\n"
-#~ "\n"
-#~ "The original Licensor warrants that the copyright in the Original Work "
-#~ "granted hereunder is owned by him/her or licensed to him/her and that he/"
-#~ "she has the power and authority to grant the Licence.\n"
-#~ "\n"
-#~ "Each Contributor warrants that the copyright in the modifications he/she "
-#~ "brings to the Work are owned by him/her or licensed to him/her and that "
-#~ "he/she has the power and authority to grant the Licence.\n"
-#~ "\n"
-#~ "Each time You accept the Licence, the original Licensor and subsequent "
-#~ "Contributors grant You a licence to their contri­ butions to the Work, "
-#~ "under the terms of this Licence.\n"
-#~ "7. Disclaimer of Warranty\n"
-#~ "\n"
-#~ "The Work is a work in progress, which is continuously improved by "
-#~ "numerous Contributors. It is not a finished work and may therefore "
-#~ "contain defects or ‘bugs’ inherent to this type of development.\n"
-#~ "\n"
-#~ "For the above reason, the Work is provided under the Licence on an ‘as "
-#~ "is’ basis and without warranties of any kind concerning the Work, "
-#~ "including without limitation merchantability, fitness for a particular "
-#~ "purpose, absence of defects or errors, accuracy, non-infringement of "
-#~ "intellectual property rights other than copyright as stated in Article 6 "
-#~ "of this Licence.\n"
-#~ "\n"
-#~ "This disclaimer of warranty is an essential part of the Licence and a "
-#~ "condition for the grant of any rights to the Work.\n"
-#~ "8. Disclaimer of Liability\n"
-#~ "\n"
-#~ "Except in the cases of wilful misconduct or damages directly caused to "
-#~ "natural persons, the Licensor will in no event be liable for any direct "
-#~ "or indirect, material or moral, damages of any kind, arising out of the "
-#~ "Licence or of the use of the Work, including without limitation, damages "
-#~ "for loss of goodwill, work stoppage, computer failure or malfunction, "
-#~ "loss of data or any commercial damage, even if the Licensor has been "
-#~ "advised of the possibility of such damage. However, the Licensor will be "
-#~ "liable under statutory product liability laws as far such laws apply to "
-#~ "the Work.\n"
-#~ "9. Additional agreements\n"
-#~ "\n"
-#~ "While distributing the Work, You may choose to conclude an additional "
-#~ "agreement, defining obligations or services consistent with this Licence. "
-#~ "However, if accepting obligations, You may act only on your own behalf "
-#~ "and on your sole responsibility, not on behalf of the original Licensor "
-#~ "or any other Contributor, and only if You agree to indemnify, defend, and "
-#~ "hold each Contributor harmless for any liability incurred by, or claims "
-#~ "asserted against such Contributor by the fact You have accepted any "
-#~ "warranty or additional liability.\n"
-#~ "10. Acceptance of the Licence\n"
-#~ "\n"
-#~ "The provisions of this Licence can be accepted by clicking on an icon ‘I "
-#~ "agree’ placed under the bottom of a window displaying the text of this "
-#~ "Licence or by affirming consent in any other similar way, in accordance "
-#~ "with the rules of applicable law. Clicking on that icon indicates your "
-#~ "clear and irrevocable acceptance of this Licence and all of its terms and "
-#~ "conditions.\n"
-#~ "\n"
-#~ "Similarly, you irrevocably accept this Licence and all of its terms and "
-#~ "conditions by exercising any rights granted to You by Article 2 of this "
-#~ "Licence, such as the use of the Work, the creation by You of a Derivative "
-#~ "Work or the Distribution or Communication by You of the Work or copies "
-#~ "thereof.\n"
-#~ "11. Information to the public\n"
-#~ "\n"
-#~ "In case of any Distribution or Communication of the Work by means of "
-#~ "electronic communication by You (for example, by offering to download the "
-#~ "Work from a remote location) the distribution channel or media (for "
-#~ "example, a website) must at least provide to the public the information "
-#~ "requested by the applicable law regarding the Licensor, the Licence and "
-#~ "the way it may be accessible, concluded, stored and reproduced by the "
-#~ "Licensee.\n"
-#~ "12. Termination of the Licence\n"
-#~ "\n"
-#~ "The Licence and the rights granted hereunder will terminate automatically "
-#~ "upon any breach by the Licensee of the terms of the Licence.\n"
-#~ "\n"
-#~ "Such a termination will not terminate the licences of any person who has "
-#~ "received the Work from the Licensee under the Licence, provided such "
-#~ "persons remain in full compliance with the Licence.\n"
-#~ "13. Miscellaneous\n"
-#~ "\n"
-#~ "Without prejudice of Article 9 above, the Licence represents the complete "
-#~ "agreement between the Parties as to the Work.\n"
-#~ "\n"
-#~ "If any provision of the Licence is invalid or unenforceable under "
-#~ "applicable law, this will not affect the validity or enforceability of "
-#~ "the Licence as a whole. Such provision will be construed or reformed so "
-#~ "as necessary to make it valid and enforceable.\n"
-#~ "\n"
-#~ "The European Commission may publish other linguistic versions or new "
-#~ "versions of this Licence or updated versions of the Appendix, so far this "
-#~ "is required and reasonable, without reducing the scope of the rights "
-#~ "granted by the Licence. New versions of the Licence will be published "
-#~ "with a unique version number.\n"
-#~ "\n"
-#~ "All linguistic versions of this Licence, approved by the European "
-#~ "Commission, have identical value. Parties can take advantage of the "
-#~ "linguistic version of their choice.\n"
-#~ "14. Jurisdiction\n"
-#~ "\n"
-#~ "Without prejudice to specific agreement between parties,\n"
-#~ "\n"
-#~ "— any litigation resulting from the interpretation of this License, "
-#~ "arising between the European Union institutions, bodies, offices or "
-#~ "agencies, as a Licensor, and any Licensee, will be subject to the "
-#~ "jurisdiction of the Court of Justice of the European Union, as laid down "
-#~ "in article 272 of the Treaty on the Functioning of the European Union,\n"
-#~ "\n"
-#~ "— any litigation arising between other parties and resulting from the "
-#~ "interpretation of this License, will be subject to the exclusive "
-#~ "jurisdiction of the competent court where the Licensor resides or "
-#~ "conducts its primary business.\n"
-#~ "15. Applicable Law\n"
-#~ "\n"
-#~ "Without prejudice to specific agreement between parties,\n"
-#~ "\n"
-#~ "— this Licence shall be governed by the law of the European Union Member "
-#~ "State where the Licensor has his seat, resides or has his registered "
-#~ "office,\n"
-#~ "\n"
-#~ "— this licence shall be governed by Belgian law if the Licensor has no "
-#~ "seat, residence or registered office inside a European Union Member "
-#~ "State.\n"
-#~ "Appendix\n"
-#~ "\n"
-#~ "‘Compatible Licences’ according to Article 5 EUPL are:\n"
-#~ "\n"
-#~ "— GNU General Public License (GPL) v. 2, v. 3\n"
-#~ "\n"
-#~ "— GNU Affero General Public License (AGPL) v. 3\n"
-#~ "\n"
-#~ "— Open Software License (OSL) v. 2.1, v. 3.0\n"
-#~ "\n"
-#~ "— Eclipse Public License (EPL) v. 1.0\n"
-#~ "\n"
-#~ "— CeCILL v. 2.0, v. 2.1\n"
-#~ "\n"
-#~ "— Mozilla Public Licence (MPL) v. 2\n"
-#~ "\n"
-#~ "— GNU Lesser General Public Licence (LGPL) v. 2.1, v. 3\n"
-#~ "\n"
-#~ "— Creative Commons Attribution-ShareAlike v. 3.0 Unported (CC BY-SA 3.0) "
-#~ "for works other than software\n"
-#~ "\n"
-#~ "— European Union Public Licence (EUPL) v. 1.1, v. 1.2\n"
-#~ "\n"
-#~ "— Québec Free and Open-Source Licence — Reciprocity (LiLiQ-R) or Strong "
-#~ "Reciprocity (LiLiQ-R+)\n"
-#~ "\n"
-#~ "The European Commission may update this Appendix to later versions of the "
-#~ "above licences without producing a new version of the EUPL, as long as "
-#~ "they provide the rights granted in Article 2 of this Licence and protect "
-#~ "the covered Source Code from exclusive appropriation.\n"
-#~ "\n"
-#~ "All other changes or additions to this Appendix require the production of "
-#~ "a new EUPL version."
-#~ msgstr ""
-#~ "OPENBARE LICENTIE VAN DE EUROPESE UNIE v. 1.2.\n"
-#~ "\n"
-#~ "EUPL © Europese Unie 2007, 2016\n"
-#~ "\n"
-#~ "Deze openbare licentie van de Europese Unie („EUPL”) is van toepassing op "
-#~ "het werk (zoals hieronder gedefinieerd) dat onder de voorwaarden van deze "
-#~ "licentie wordt verstrekt. Elk gebruik van het werk dat niet door deze "
-#~ "licentie is toegestaan, is verboden (voor zover dit gebruik valt onder "
-#~ "een recht van de houder van het auteursrecht op het werk).\n"
-#~ "\n"
-#~ "Het werk wordt verstrekt onder de voorwaarden van deze licentie wanneer "
-#~ "de licentiegever (zoals hieronder gedefinieerd), direct volgend op de "
-#~ "kennisgeving inzake het auteursrecht op het werk, de volgende "
-#~ "kennisgeving opneemt:\n"
-#~ "\n"
-#~ "In licentie gegeven krachtens de EUPL\n"
-#~ "\n"
-#~ "of op een andere wijze zijn bereidheid te kennen heeft gegeven krachtens "
-#~ "de EUPL in licentie te geven.\n"
-#~ "1. Definities\n"
-#~ "\n"
-#~ "In deze licentie wordt verstaan onder:\n"
-#~ "\n"
-#~ "— „de licentie”: de onderhavige licentie;\n"
-#~ "\n"
-#~ "— „het oorspronkelijke werk”: het werk dat of de software die door de "
-#~ "licentiegever krachtens deze licentie wordt verspreid of medegedeeld, en "
-#~ "dat/die beschikbaar is als broncode en, in voorkomend geval, ook als "
-#~ "uitvoerbare code;\n"
-#~ "\n"
-#~ "— „bewerkingen”: de werken of software die de licentiehouder kan creëren "
-#~ "op grond van het oorspronkelijke werk of wijzigingen ervan. In deze "
-#~ "licentie wordt niet gedefinieerd welke mate van wijziging of "
-#~ "afhankelijkheid van het oorspronkelijke werk vereist is om een werk als "
-#~ "een bewerking te kunnen aanmerken; dat wordt bepaald conform het "
-#~ "auteursrecht dat van toepassing is in de in artikel 15 bedoelde staat;\n"
-#~ "\n"
-#~ "— „het werk”: het oorspronkelijke werk of de bewerkingen ervan;\n"
-#~ "\n"
-#~ "— „de broncode”: de voor mensen leesbare vorm van het werk, die het "
-#~ "gemakkelijkste door mensen kan worden bestudeerd en gewijzigd;\n"
-#~ "\n"
-#~ "— „de uitvoerbare code”: elke code die over het algemeen is gecompileerd "
-#~ "en is bedoeld om door een computer als een programma te worden "
-#~ "uitgevoerd;\n"
-#~ "\n"
-#~ "— „de licentiegever”: de natuurlijke of rechtspersoon die het werk "
-#~ "krachtens de licentie verspreidt of mededeelt;\n"
-#~ "\n"
-#~ "— „bewerker(s)”: elke natuurlijke of rechtspersoon die het werk krachtens "
-#~ "de licentie wijzigt of op een andere wijze bijdraagt tot de "
-#~ "totstandkoming van een bewerking;\n"
-#~ "\n"
-#~ "— „de licentiehouder” of „u”: elke natuurlijke of rechtspersoon die het "
-#~ "werk onder de voorwaarden van de licentie gebruikt;\n"
-#~ "\n"
-#~ "— „verspreiding” of „mededeling”: het verkopen, geven, uitlenen, "
-#~ "verhuren, verspreiden, mededelen, doorgeven, of op een andere wijze "
-#~ "online of offline beschikbaar stellen van kopieën van het werk of het "
-#~ "verlenen van toegang tot de essentiële functies ervan ten behoeve van "
-#~ "andere natuurlijke of rechtspersonen.\n"
-#~ "2. Draagwijdte van de uit hoofde van de licentie verleende rechten\n"
-#~ "\n"
-#~ "De licentiegever verleent u hierbij een wereldwijde, royaltyvrije, niet-"
-#~ "exclusieve, voor een sublicentie in aanmerking komende licentie, om voor "
-#~ "de duur van het aan het oorspronkelijke werk verbonden auteursrecht, het "
-#~ "volgende te doen:\n"
-#~ "\n"
-#~ "— het werk in alle omstandigheden en voor ongeacht welk doel te "
-#~ "gebruiken;\n"
-#~ "\n"
-#~ "— het werk te verveelvoudigen;\n"
-#~ "\n"
-#~ "— het werk te wijzigen en op grond van het werk bewerkingen te "
-#~ "ontwikkelen;\n"
-#~ "\n"
-#~ "— het werk aan het publiek mede te delen, waaronder het recht om het werk "
-#~ "of kopieën ervan aan het publiek ter beschikking te stellen of te "
-#~ "vertonen, en het werk, in voorkomend geval, in het openbaar uit te "
-#~ "voeren;\n"
-#~ "\n"
-#~ "— het werk of kopieën ervan te verspreiden;\n"
-#~ "\n"
-#~ "— het werk of kopieën ervan uit te lenen en te verhuren;\n"
-#~ "\n"
-#~ "— de rechten op het werk of op kopieën ervan in sublicentie te geven.\n"
-#~ "\n"
-#~ "Deze rechten kunnen worden uitgeoefend met gebruikmaking van alle thans "
-#~ "bekende of nog uit te vinden media, dragers en formaten, voor zover het "
-#~ "toepasselijke recht dit toestaat.\n"
-#~ "\n"
-#~ "In de landen waar immateriële rechten van toepassing zijn, doet de "
-#~ "licentiegever afstand van zijn recht op uitoefening van zijn immateriële "
-#~ "rechten in de mate die door het toepasselijke recht wordt toegestaan "
-#~ "teneinde een doeltreffende uitoefening van de bovenvermelde in licentie "
-#~ "gegeven economische rechten mogelijk te maken.\n"
-#~ "\n"
-#~ "De licentiegever verleent de licentiehouder een royaltyvrij, niet-"
-#~ "exclusief gebruiksrecht op alle octrooien van de licentiegever, voor "
-#~ "zover dit noodzakelijk is om de uit hoofde van deze licentie verleende "
-#~ "rechten op het werk te gebruiken.\n"
-#~ "3. Mededeling van de broncode\n"
-#~ "\n"
-#~ "De licentiegever kan het werk verstrekken in zijn broncode of als "
-#~ "uitvoerbare code. Indien het werk als uitvoerbare code wordt verstrekt, "
-#~ "verstrekt de licentiegever bij elke door hem verspreide kopie van het "
-#~ "werk tevens een machinaal leesbare kopie van de broncode van het werk of "
-#~ "geeft hij in een mededeling, volgende op de bij het werk gevoegde "
-#~ "auteursrech­ telijke kennisgeving, de plaats aan waar de broncode "
-#~ "gemakkelijk en vrij toegankelijk is, zolang de licentiegever het werk "
-#~ "blijft verspreiden of mededelen.\n"
-#~ "4. Beperkingen van het auteursrecht\n"
-#~ "\n"
-#~ "Geen enkele bepaling in deze licentie heeft ten doel de licentiehouder "
-#~ "het recht te ontnemen een beroep te doen op een uitzondering op of een "
-#~ "beperking van de exclusieve rechten van de rechthebbenden op het werk, of "
-#~ "op de uitputting van die rechten of andere toepasselijke beperkingen "
-#~ "daarvan.\n"
-#~ "5. Verplichtingen van de licentiehouder\n"
-#~ "\n"
-#~ "De verlening van de bovenvermelde rechten is onderworpen aan een aantal "
-#~ "aan de licentiehouder opgelegde beperkingen en verplichtingen. Het gaat "
-#~ "om de onderstaande verplichtingen.\n"
-#~ "\n"
-#~ "    Attributierecht: de licentiehouder moet alle auteurs-, octrooi- of "
-#~ "merkenrechtelijke kennisgevingen onverlet laten alsook alle "
-#~ "kennisgevingen die naar de licentie en de afwijzing van garanties "
-#~ "verwijzen. De licentiehouder moet een afschrift van deze kennisgevingen "
-#~ "en een afschrift van de licentie bij elke kopie van het werk voegen die "
-#~ "hij verspreidt of mededeelt. De licentiehouder moet in elke bewerking "
-#~ "duidelijk aangeven dat het werk is gewijzigd, en eveneens de datum van "
-#~ "wijziging vermelden.\n"
-#~ "    Copyleftclausule: wanneer de licentiehouder kopieën van het "
-#~ "oorspronkelijke werk of bewerkingen verspreidt of mededeelt, geschiedt "
-#~ "die verspreiding of mededeling onder de voorwaarden van deze licentie of "
-#~ "van een latere versie van deze licentie, tenzij het oorspronkelijke werk "
-#~ "uitdrukkelijk alleen onder deze versie van de licentie wordt verspreid — "
-#~ "bijvoorbeeld door de mededeling „alleen EUPL v. 1.2”. De licentiehouder "
-#~ "(die licentiegever wordt) kan met betrekking tot het werk of de "
-#~ "bewerkingen geen aanvullende bepalingen of voorwaarden opleggen of "
-#~ "stellen die de voorwaarden van de licentie wijzigen of beperken.\n"
-#~ "    Verenigbaarheidsclausule: wanneer de licentiehouder bewerkingen of "
-#~ "kopieën ervan verspreidt of mededeelt die zijn gebaseerd op het werk en "
-#~ "op een ander werk dat uit hoofde van een verenigbare licentie in licentie "
-#~ "is gegeven, kan die verspreiding of mededeling geschieden onder de "
-#~ "voorwaarden van deze verenigbare licentie. Voor de toepassing van deze "
-#~ "clausule wordt onder „verenigbare licentie” verstaan, de licenties die in "
-#~ "het aanhangsel bij deze licentie zijn opgesomd. Indien de verplichtingen "
-#~ "van de licentiehouder uit hoofde van de verenigbare licentie in strijd "
-#~ "zijn met diens verplich­ tingen uit hoofde van deze licentie, hebben de "
-#~ "verplichtingen van de verenigbare licentie voorrang.\n"
-#~ "    Verstrekking van de broncode: bij de verspreiding of mededeling van "
-#~ "kopieën van het werk verstrekt de licentiehouder een machinaal leesbare "
-#~ "kopie van de broncode of geeft hij aan waar deze broncode gemakkelijk en "
-#~ "vrij toegankelijk is, zolang de licentiehouder het werk blijft "
-#~ "verspreiden of mededelen.\n"
-#~ "    Juridische bescherming: deze licentie verleent geen toestemming om "
-#~ "handelsnamen, handelsmerken, dienstmerken of namen van de licentiegever "
-#~ "te gebruiken, behalve wanneer dit op grond van een redelijk en normaal "
-#~ "gebruik noodzakelijk is om de oorsprong van het werk te beschrijven en de "
-#~ "inhoud van de auteursrechtelijke kennisgeving te herhalen.\n"
-#~ "\n"
-#~ "6. Auteursketen\n"
-#~ "\n"
-#~ "De oorspronkelijke licentiegever garandeert dat hij houder is van het "
-#~ "hierbij verleende auteursrecht op het oorspron­ kelijke werk dan wel dat "
-#~ "dit hem in licentie is gegeven en dat hij de bevoegdheid heeft de "
-#~ "licentie te verlenen.\n"
-#~ "\n"
-#~ "Elke bewerker garandeert dat hij houder is van het auteursrecht op de "
-#~ "door hem aan het werk aangebrachte wijzigingen dan wel dat dit hem in "
-#~ "licentie is gegeven en dat hij de bevoegdheid heeft de licentie te "
-#~ "verlenen.\n"
-#~ "\n"
-#~ "Telkens wanneer u de licentie aanvaardt, verlenen de oorspronkelijke "
-#~ "licentiegever en de opeenvolgende bewerkers u een licentie op hun "
-#~ "bijdragen aan het werk onder de voorwaarden van deze licentie.\n"
-#~ "7. Uitsluiting van garantie\n"
-#~ "\n"
-#~ "Het werk is een werk in ontwikkeling, dat voortdurend door vele bewerkers "
-#~ "wordt verbeterd. Het is een onvoltooid werk, dat bijgevolg nog "
-#~ "tekortkomingen of programmeerfouten („bugs”) kan vertonen, die "
-#~ "onlosmakelijk verbonden zijn met dit soort ontwikkeling.\n"
-#~ "\n"
-#~ "Om die reden wordt het werk op grond van de licentie verstrekt „zoals het "
-#~ "is” en zonder enige garantie met betrekking tot het werk te geven, met "
-#~ "inbegrip van, maar niet beperkt tot garanties met betrekking tot de "
-#~ "verhandelbaarheid, de geschiktheid voor een specifiek doel, de "
-#~ "afwezigheid van tekortkomingen of fouten, de nauwkeurigheid, de "
-#~ "eerbiediging van andere intellectuele-eigendomsrechten dan het in artikel "
-#~ "6 van deze licentie bedoelde auteursrecht.\n"
-#~ "\n"
-#~ "Deze uitsluiting van garantie is een essentieel onderdeel van de licentie "
-#~ "en een voorwaarde voor de verlening van rechten op het werk.\n"
-#~ "8. Uitsluiting van aansprakelijkheid\n"
-#~ "\n"
-#~ "Behoudens in het geval van een opzettelijke fout of directe schade aan "
-#~ "natuurlijke personen, is de licentiegever in geen enkel geval "
-#~ "aansprakelijk voor ongeacht welke directe of indirecte, materiële of "
-#~ "immateriële schade die voortvloeit uit de licentie of het gebruik van het "
-#~ "werk, met inbegrip van, maar niet beperkt tot schade als gevolg van het "
-#~ "verlies van goodwill, verloren werkuren, een computerdefect of "
-#~ "computerfout, het verlies van gegevens, of enige andere commerciële "
-#~ "schade, zelfs indien de licentiegever werd gewezen op de mogelijkheid van "
-#~ "dergelijke schade. De licentiegever is echter aansprakelijk op grond van "
-#~ "de wetgeving inzake productaansprakelijkheid, voor zover deze wetgeving "
-#~ "op het werk van toepassing is.\n"
-#~ "9. Aanvullende overeenkomsten\n"
-#~ "\n"
-#~ "Bij de verspreiding van het werk kunt u ervoor kiezen een aanvullende "
-#~ "overeenkomst te sluiten, waarin de verplichtingen of diensten "
-#~ "overeenkomstig deze licentie worden omschreven. Indien deze "
-#~ "verplichtingen worden aanvaard, kunt u echter alleen in eigen naam en "
-#~ "onder eigen verantwoordelijkheid handelen, en dus niet in naam van de "
-#~ "oorspronkelijke licentiegever of een bewerker, en kunt u voorts alleen "
-#~ "handelen indien u ermee instemt alle bewerkers schadeloos te stellen, te "
-#~ "verdedigen of te vrijwaren met betrekking tot de aansprakelijkheid van of "
-#~ "vorderingen tegen deze bewerkers op grond van het feit dat u een garantie "
-#~ "of aanvullende aansprakelijkheid hebt aanvaard.\n"
-#~ "10. Aanvaarding van de licentie\n"
-#~ "\n"
-#~ "De bepalingen van deze licentie kunnen worden aanvaard door te klikken op "
-#~ "het pictogram „Ik ga akkoord”, dat zich bevindt onderaan het venster "
-#~ "waarin de tekst van deze licentie is weergegeven, of door overeenkomstig "
-#~ "de toepasselijke wetsbepalingen op een soortgelijke wijze met de licentie "
-#~ "in te stemmen. Door op dat pictogram te klikken geeft u aan dat u deze "
-#~ "licentie en alle voorwaarden ervan ondubbelzinnig en onherroepelijk "
-#~ "aanvaardt.\n"
-#~ "\n"
-#~ "Evenzo aanvaardt u onherroepelijk deze licentie en alle voorwaarden ervan "
-#~ "door uitoefening van de rechten die u in artikel 2 van deze licentie zijn "
-#~ "verleend, zoals het gebruik van het werk, het creëren door u van een "
-#~ "bewerking of de verspreiding of mededeling door u van het werk of kopieën "
-#~ "ervan.\n"
-#~ "11. Voorlichting van het publiek\n"
-#~ "\n"
-#~ "Indien u het werk verspreidt of mededeelt door middel van elektronische "
-#~ "communicatiemiddelen (bijvoorbeeld door voor te stellen het werk op "
-#~ "afstand te downloaden), moet het distributiekanaal of het medium "
-#~ "(bijvoorbeeld een website) het publiek ten minste de gegevens verschaffen "
-#~ "die door het toepasselijke recht zijn voorgeschreven met betrekking tot "
-#~ "de licentiegever, de licentie en de wijze waarop deze kan worden "
-#~ "geraadpleegd, gesloten, opgeslagen en gereproduceerd door de "
-#~ "licentiehouder.\n"
-#~ "12. Einde van de licentie\n"
-#~ "\n"
-#~ "De licentie en de uit hoofde daarvan verleende rechten eindigen "
-#~ "automatisch bij elke inbreuk door de licentiehouder op de voorwaarden van "
-#~ "de licentie.\n"
-#~ "\n"
-#~ "Dit einde beëindigt niet de licenties van personen die het werk van de "
-#~ "licentiehouder krachtens de licentie hebben ontvangen, mits deze personen "
-#~ "zich volledig aan de licentie houden.\n"
-#~ "13. Overige\n"
-#~ "\n"
-#~ "Onverminderd artikel 9 vormt de licentie de gehele overeenkomst tussen de "
-#~ "partijen met betrekking tot het werk.\n"
-#~ "\n"
-#~ "Indien een bepaling van de licentie volgens het toepasselijke recht "
-#~ "ongeldig is of niet uitvoerbaar is, doet dit geen afbreuk aan de "
-#~ "geldigheid of uitvoerbaarheid van de licentie in haar geheel. Deze "
-#~ "bepaling dient zodanig te worden uitgelegd of gewijzigd dat zij geldig en "
-#~ "uitvoerbaar wordt.\n"
-#~ "\n"
-#~ "De Europese Commissie kan, voor zover dit noodzakelijk en redelijk is, "
-#~ "versies in andere talen of nieuwe versies van deze licentie of "
-#~ "geactualiseerde versies van dit aanhangsel publiceren, zonder de "
-#~ "draagwijdte van de uit hoofde van de licentie verleende rechten te "
-#~ "beperken. Nieuwe versies van de licentie zullen worden gepubliceerd met "
-#~ "een uniek versienummer.\n"
-#~ "\n"
-#~ "Alle door de Europese Commissie goedgekeurde taalversies van deze "
-#~ "licentie hebben dezelfde waarde. De partijen kunnen zich beroepen op de "
-#~ "taalversie van hun keuze.\n"
-#~ "14. Bevoegd gerecht\n"
-#~ "\n"
-#~ "Onverminderd specifieke overeenkomsten tussen de partijen,\n"
-#~ "\n"
-#~ "— vallen alle geschillen tussen de instellingen, organen en instanties "
-#~ "van de Europese Unie, als licentiegeefster, en een licentiehouder in "
-#~ "verband met de uitlegging van deze licentie onder de bevoegdheid van het "
-#~ "Hof van Justitie van de Europese Unie, conform artikel 272 van het "
-#~ "Verdrag betreffende de werking van de Europese Unie,\n"
-#~ "\n"
-#~ "— vallen alle geschillen tussen andere partijen in verband met de "
-#~ "uitlegging van deze licentie onder de uitsluitende bevoegdheid van het "
-#~ "bevoegde gerecht van de plaats waar de licentiegever is gevestigd of zijn "
-#~ "voornaamste activiteit uitoefent.\n"
-#~ "15. Toepasselijk recht\n"
-#~ "\n"
-#~ "Onverminderd specifieke overeenkomsten tussen de partijen,\n"
-#~ "\n"
-#~ "— wordt deze licentie beheerst door het recht van de lidstaat van de "
-#~ "Europese Unie waar de licentiegever zijn statutaire zetel, verblijfplaats "
-#~ "of hoofdkantoor heeft,\n"
-#~ "\n"
-#~ "— wordt deze licentie beheerst door het Belgische recht indien de "
-#~ "licentiegever geen statutaire zetel, verblijfplaats of hoofdkantoor heeft "
-#~ "in een lidstaat van de Europese Unie.\n"
-#~ "Aanhangsel\n"
-#~ "\n"
-#~ "„Verenigbare licenties” in de zin van artikel 5 EUPL zijn:\n"
-#~ "\n"
-#~ "— GNU General Public License (GPL) v. 2, v. 3\n"
-#~ "\n"
-#~ "— GNU Affero General Public License (AGPL) v. 3\n"
-#~ "\n"
-#~ "— Open Software License (OSL) v. 2.1, v. 3.0\n"
-#~ "\n"
-#~ "— Eclipse Public License (EPL) v. 1.0\n"
-#~ "\n"
-#~ "— CeCILL v. 2.0, v. 2.1\n"
-#~ "\n"
-#~ "— Mozilla Public Licence (MPL) v. 2\n"
-#~ "\n"
-#~ "— GNU Lesser General Public Licence (LGPL) v. 2.1, v. 3\n"
-#~ "\n"
-#~ "— Creative Commons Attribution-ShareAlike v. 3.0 Unported (CC BY-SA 3.0) "
-#~ "voor andere werken dan software\n"
-#~ "\n"
-#~ "— European Union Public Licence (EUPL) v. 1.1, v. 1.2\n"
-#~ "\n"
-#~ "— Québec Free and Open-Source Licence — Reciprocity (LiLiQ-R) of Strong "
-#~ "Reciprocity (LiLiQ-R+)\n"
-#~ "\n"
-#~ "De Europese Commissie kan dit aanhangsel actualiseren in geval van latere "
-#~ "versies van de bovengenoemde licenties zonder dat er een nieuwe EUPL-"
-#~ "versie wordt ontwikkeld, zolang die versies de uit hoofde van artikel 2 "
-#~ "van deze licentie verleende rechten verlenen en ze de betrokken broncode "
-#~ "beschermen tegen exclusieve toe-eigening.\n"
-#~ "\n"
-#~ "Voor alle andere wijzigingen van of aanvullingen op dit aanhangsel is de "
-#~ "ontwikkeling van een nieuwe EUPL-versie vereist."
-
-#~ msgid "Jet"
-#~ msgstr "Jet"
-
-#~ msgid "Open..."
-#~ msgstr "Openen..."
-
-#~ msgid "Palette"
-#~ msgstr "Palet"
-
-#~ msgid "Show thermometer"
-#~ msgstr "Thermometer tonen"
-
-#~ msgid ""
-#~ "This program is made available under the European Public License "
-#~ "(EUPL-1.2)."
-#~ msgstr ""
-#~ "This programma is beschikbaar gemaakt onder de Europese openbare licentie "
-#~ "(EUPL-1.2)."
-
-#~ msgid "°C"
-#~ msgstr "°C"
-
-#~ msgid "Specify the thermal range to render"
-#~ msgstr "Het te renderen temperatuurbereik specificeren"
-
-#~ msgid "Zoom in and out"
-#~ msgstr "In- en uitzoomen"
-
-#~ msgid "The Blackbody application"
-#~ msgstr "Het programma Blackbody"

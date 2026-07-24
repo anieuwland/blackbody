@@ -139,7 +139,7 @@ fn file_group(thermogram: &Thermogram) -> Option<PreferencesGroup> {
     });
 
     let group = PreferencesGroup::new();
-    let row = ActionRow::builder().title(&parent_str).subtitle(gettext("Directory")).build();
+    let row = ActionRow::builder().title(&parent_str).subtitle(gettext("Folder")).build();
     row.add_suffix(&open_btn);
     row.set_activatable_widget(Some(&open_btn));
     group.add(&row);

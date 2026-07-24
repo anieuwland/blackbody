@@ -38,6 +38,7 @@ impl AppState {
     pub(super) fn show_open_folder_dialog(this: &Rc<Self>) {
         let dialog = gtk4::FileDialog::builder()
             .title(gettext("Open folder"))
+            .accept_label(gettext("Open _Folder"))
             .build();
         let that = this.clone();
         dialog.select_folder(Some(&this.ui.window), gio::Cancellable::NONE, move |result| {
