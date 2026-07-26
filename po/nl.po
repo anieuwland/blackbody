@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-24 22:13+0200\n"
+"POT-Creation-Date: 2026-07-26 11:04+0200\n"
 "PO-Revision-Date: 2021-01-02 13:11+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -25,12 +25,17 @@ msgid "Blackbody"
 msgstr "Blackbody"
 
 #: data/eu.nimmerfort.blackbody.desktop.in:3
-msgid "A thermogram viewer"
-msgstr "Een thermogramvertoner"
+msgid "Thermogram viewer"
+msgstr "Thermogramvertoner"
 
+#: data/eu.nimmerfort.blackbody.desktop.in:4
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:5
 msgid "Inspect thermograms"
 msgstr "Thermogrammen inspecteren"
+
+#: data/eu.nimmerfort.blackbody.desktop.in:11
+msgid "graphics;FLIR;thermography;science;infrared;"
+msgstr "grafisch;FLIR;thermografie;wetenschap;infrarood;warmtebeeld;"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:16
 msgid "Arthur Nieuwland"
@@ -100,8 +105,7 @@ msgstr "Renderen naar ingebedde kleurpaletten, indien aanwezig"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:37
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:120
-msgid ""
-"Rendering to many different colors palettes, including inferno and turbo"
+msgid "Rendering to many different color palettes, including inferno and turbo"
 msgstr ""
 "Naar uiteenlopende kleurpaletten renderen, onder andere inferno en turbo"
 
@@ -337,34 +341,34 @@ msgstr "Werkt op Linux en Windows"
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:132
 msgid ""
 "A thermogram of a bird in °Celsius, in Blackbody's default view using the "
-"embedded palette."
+"embedded palette"
 msgstr ""
 "Een thermogram van een vogel in °Celsius, in de standaardweergave van "
-"Blackbody met het ingebedde palet."
+"Blackbody met het ingebedde palet"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:136
 msgid ""
-"Blackbody's info pane of a high quality FLIR SC660 camera, in °Fahrenheit."
+"Blackbody's info pane of a high quality FLIR SC660 camera, in °Fahrenheit"
 msgstr ""
 "Het informatiepaneel van Blackbody voor een hoogwaardige FLIR SC660-camera, "
-"in °Fahrenheit."
+"in °Fahrenheit"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:140
-msgid "Spot measurements on a thermogram in °Fahrenheit with a custom palette."
-msgstr "Puntmetingen op een thermogram in °Fahrenheit met een aangepast palet."
+msgid "Spot measurements on a thermogram in °Fahrenheit with a custom palette"
+msgstr "Puntmetingen op een thermogram in °Fahrenheit met een aangepast palet"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:144
 msgid ""
 "A thermogram in Kelvin laid over the visible spectrum photo, using a custom "
-"palette."
+"palette"
 msgstr ""
 "Een thermogram in Kelvin over de foto in zichtbaar licht gelegd, met een "
-"aangepast palet."
+"aangepast palet"
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:148
-msgid "Zoomed in on a cat's head with a custom palette and temperature range."
+msgid "Zoomed in on a cat's head with a custom palette and temperature range"
 msgstr ""
-"Ingezoomd op de kop van een kat met een aangepast palet en temperatuurbereik."
+"Ingezoomd op de kop van een kat met een aangepast palet en temperatuurbereik"
 
 #: data/eu.nimmerfort.blackbody.gschema.xml:11
 msgid "Temperature unit"
@@ -516,6 +520,9 @@ msgid ""
 "\n"
 "Folder: {}"
 msgstr ""
+"De map bevat geen ondersteunde afbeeldingsbestanden (JPEG, TIFF of PNG).\n"
+"\n"
+"Map: {}"
 
 #: src/gtkui/app_window.rs:515
 msgid "Only this file is accessible — open its folder to browse"

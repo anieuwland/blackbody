@@ -1,9 +1,12 @@
 [Desktop Entry]
 Name=Blackbody
-Comment=A thermogram viewer
+GenericName=Thermogram viewer
+Comment=Inspect thermograms
 Exec=blackbody %u
 Terminal=false
 Type=Application
-Categories=GNOME;GTK;Graphics;2DGraphics;RasterGraphics;Viewer;
+Categories=GNOME;GTK;Graphics;2DGraphics;RasterGraphics;Viewer;Science;Physics;
 StartupNotify=true
 Icon=eu.nimmerfort.blackbody
+Keywords=graphics;FLIR;thermography;science;infrared;
+MimeType=image/jpeg;image/png;image/tiff;

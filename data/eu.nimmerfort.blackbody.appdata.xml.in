@@ -15,7 +15,7 @@
   <developer id="eu.nimmerfort">
     <name>Arthur Nieuwland</name>
   </developer>
-  <update_contact>anieuwland@nimmerfort.eu</update_contact>\
+  <update_contact>anieuwland@nimmerfort.eu</update_contact>
   <branding>
     <color type="primary" scheme_preference="light">#f3a507</color>
     <color type="primary" scheme_preference="dark">#af208f</color>
@@ -34,7 +34,7 @@
       <li>Metadata panel with camera info and GPS location, openable in a map</li>
       <li>Exporting renders to PNG and thermal data to TIFF or 16-bit centikelvin PNG</li>
       <li>Rendering to embedded color palettes, if present</li>
-      <li>Rendering to many different colors palettes, including inferno and turbo</li>
+      <li>Rendering to many different color palettes, including inferno and turbo</li>
       <li>Specifying the thermal range to render</li>
       <li>Zooming in and out</li>
       <li>Translated to multiple languages</li>
@@ -117,7 +117,7 @@
         <ul>
           <li>Loading FLIR thermograms from many cameras</li>
           <li>Loading single-band TIFFs assumed to be in °C</li>
-          <li>Rendering to many different colors palettes, including inferno and turbo</li>
+          <li>Rendering to many different color palettes, including inferno and turbo</li>
           <li>Specifying the thermal range to render</li>
           <li>Zooming in and out</li>
           <li>Translated to multiple languages</li>

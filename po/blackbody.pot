@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: blackbody\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-24 22:13+0200\n"
+"POT-Creation-Date: 2026-07-26 11:04+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,11 +24,16 @@ msgid "Blackbody"
 msgstr ""
 
 #: data/eu.nimmerfort.blackbody.desktop.in:3
-msgid "A thermogram viewer"
+msgid "Thermogram viewer"
 msgstr ""
 
+#: data/eu.nimmerfort.blackbody.desktop.in:4
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:5
 msgid "Inspect thermograms"
+msgstr ""
+
+#: data/eu.nimmerfort.blackbody.desktop.in:11
+msgid "graphics;FLIR;thermography;science;infrared;"
 msgstr ""
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:16
@@ -88,8 +93,7 @@ msgstr ""
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:37
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:120
-msgid ""
-"Rendering to many different colors palettes, including inferno and turbo"
+msgid "Rendering to many different color palettes, including inferno and turbo"
 msgstr ""
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:38
@@ -289,26 +293,26 @@ msgstr ""
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:132
 msgid ""
 "A thermogram of a bird in °Celsius, in Blackbody's default view using the "
-"embedded palette."
+"embedded palette"
 msgstr ""
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:136
 msgid ""
-"Blackbody's info pane of a high quality FLIR SC660 camera, in °Fahrenheit."
+"Blackbody's info pane of a high quality FLIR SC660 camera, in °Fahrenheit"
 msgstr ""
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:140
-msgid "Spot measurements on a thermogram in °Fahrenheit with a custom palette."
+msgid "Spot measurements on a thermogram in °Fahrenheit with a custom palette"
 msgstr ""
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:144
 msgid ""
 "A thermogram in Kelvin laid over the visible spectrum photo, using a custom "
-"palette."
+"palette"
 msgstr ""
 
 #: data/eu.nimmerfort.blackbody.appdata.xml.in:148
-msgid "Zoomed in on a cat's head with a custom palette and temperature range."
+msgid "Zoomed in on a cat's head with a custom palette and temperature range"
 msgstr ""
 
 #: data/eu.nimmerfort.blackbody.gschema.xml:11
