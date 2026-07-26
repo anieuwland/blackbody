@@ -20,6 +20,13 @@
     <color type="primary" scheme_preference="light">#f3a507</color>
     <color type="primary" scheme_preference="dark">#af208f</color>
   </branding>
+  <requires>
+    <display_length compare="ge">768</display_length>
+    <control>pointing</control>
+  </requires>
+  <recommends>
+    <control>keyboard</control>
+  </recommends>
 
   <description>
     <p>Blackbody is a viewer for FLIR thermograms and other thermal images. Explore temperatures under the cursor, render to different palettes and ranges, overlay the visible-light photo, and inspect embedded measurements and camera metadata.</p>
