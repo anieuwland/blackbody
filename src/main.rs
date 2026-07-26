@@ -23,8 +23,9 @@ pub fn main() -> ExitCode {
     application.connect_command_line(|app, cmdline| {
         match cmdline.arguments().get(1) {
             Some(arg) => {
+                let file = cmdline.create_file_for_arg(arg);
                 let state = AppState::new(app);
-                state.set_thermogram_from_path(Some(std::path::Path::new(arg)));
+                state.set_thermogram_from_path(file.path().as_deref());
             }
             None => app.activate(),
         }
