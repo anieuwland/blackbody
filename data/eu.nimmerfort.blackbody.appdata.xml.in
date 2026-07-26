@@ -129,23 +129,23 @@
 
   <screenshots>
     <screenshot type="default">
-        <caption>A thermogram of a bird in °Celsius, in Blackbody's default view using the embedded palette.</caption>
+        <caption>A thermogram of a bird in °Celsius, in Blackbody's default view using the embedded palette</caption>
         <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-01.png</image>
     </screenshot>
     <screenshot>
-        <caption>Blackbody's info pane of a high quality FLIR SC660 camera, in °Fahrenheit.</caption>
+        <caption>Blackbody's info pane of a high quality FLIR SC660 camera, in °Fahrenheit</caption>
         <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-02.png</image>
     </screenshot>
     <screenshot>
-        <caption>Spot measurements on a thermogram in °Fahrenheit with a custom palette.</caption>
+        <caption>Spot measurements on a thermogram in °Fahrenheit with a custom palette</caption>
         <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-03.png</image>
     </screenshot>
     <screenshot>
-        <caption>A thermogram in Kelvin laid over the visible spectrum photo, using a custom palette.</caption>
+        <caption>A thermogram in Kelvin laid over the visible spectrum photo, using a custom palette</caption>
         <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-04.png</image>
     </screenshot>
     <screenshot>
-        <caption>Zoomed in on a cat's head with a custom palette and temperature range.</caption>
+        <caption>Zoomed in on a cat's head with a custom palette and temperature range</caption>
         <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-05.png</image>
     </screenshot>
   </screenshots>
