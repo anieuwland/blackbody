@@ -43,6 +43,16 @@
   </description>
 
   <releases>
+    <release version="2.2.0" date="2026-07-26" urgency="low" type="stable">
+      <description>
+        <p>A small release integrating Blackbody better with the rest of your system:</p>
+        <ul>
+          <li>Blackbody can now open files from a file manager's "Open with" menu for JPEG, PNG, and TIFF files, including from within the Flatpak sandbox</li>
+          <li>Improved keywords and categories make Blackbody easier to find</li>
+        </ul>
+      </description>
+    </release>
+
     <release version="2.1.0" date="2026-07-20" urgency="low" type="stable">
       <description>
         <p>An incremental release improving how you browse and navigate thermograms:</p>

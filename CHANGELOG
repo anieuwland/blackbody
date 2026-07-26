@@ -1,5 +1,12 @@
 CHANGELOG
 ---------
+# 2.2.0 (2026-07-26)
+A small release integrating Blackbody better with the rest of your system:
+
+* Blackbody can now open files from a file manager's "Open with" menu for
+  JPEG, PNG, and TIFF files, including from within the Flatpak sandbox
+* Improved keywords and categories make Blackbody easier to find
+
 # 2.1.0 (2026-07-20)
 * Added "Open folder…" (Ctrl+Shift+O) to browse a whole directory with the
   keyboard (Left/Right/Home/End). Selecting a folder goes through the file
