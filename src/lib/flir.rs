@@ -29,7 +29,6 @@ impl FlirThermogram {
     /// In case of success, `Some<FlirThermogram>` is returned, otherwise `None`. Values are in
     /// centigrades, as specified by the `ThermogramTrait` contract.
     pub fn from_file(file_path: &Path) -> Option<FlirThermogram> {
-        
         FlirThermogram::read_thermal(file_path)
     }
 

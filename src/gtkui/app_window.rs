@@ -114,23 +114,14 @@ impl AppState {
         this
     }
 
-    /// Remove the trough margin on the touching sides so the two range scales
-    /// appear as one.
     fn install_css(&self) {
         let css = gtk4::CssProvider::new();
-        css.load_from_string(
-            "scale.range-min trough { margin-right: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; }
-             scale.range-max trough { margin-left:  0; border-top-left-radius:  0; border-bottom-left-radius:  0; }
-             box.osd { border-radius: 9px; }
-",
-        );
+        css.load_from_string("box.osd { border-radius: 9px; }");
         gtk4::style_context_add_provider_for_display(
             &gtk4::gdk::Display::default().unwrap(),
             &css,
             gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
-        self.ui.osd.min_scale.add_css_class("range-min");
-        self.ui.osd.max_scale.add_css_class("range-max");
     }
 
     /// "Open thermogram…" prompt shown on the canvas until a file is loaded.
@@ -161,9 +152,10 @@ impl AppState {
     /// Tab to the sliders.
     fn prevent_focus_stealing(&self) {
         let (header, osd) = (&self.ui.header, &self.ui.osd);
+        let [min_scale, max_scale] = osd.range_slider.scales();
         let controls: [&gtk4::Widget; 9] = [
-            osd.min_scale.upcast_ref(),
-            osd.max_scale.upcast_ref(),
+            min_scale.upcast_ref(),
+            max_scale.upcast_ref(),
             osd.zoom_button.upcast_ref(),
             osd.nav_prev_button.upcast_ref(),
             osd.nav_next_button.upcast_ref(),
@@ -233,7 +225,7 @@ impl AppState {
 
         *self.active_palette.borrow_mut() = PALETTES[self.palette_idx.get()].to_vec();
         Self::update_embedded_palette(self, embedded_palette);
-        self.configure_range_scales(min, max);
+        self.ui.osd.range_slider.configure(min, max);
         self.update_controls(has_info, has_optical, has_pip);
         self.remember_directory(path);
         self.show_osd();
@@ -241,19 +233,7 @@ impl AppState {
         self.ui.palette.color_bar.queue_draw();
     }
 
-    /// min_scale is inverted and stores -actual_min_temp, so:
-    ///   lower (right end) = -(current max),  upper (left end) = -(min - 20)
-    fn configure_range_scales(&self, min: f32, max: f32) {
-        let osd = &self.ui.osd;
-        osd.min_scale.adjustment().set_lower(-(max as f64));
-        osd.min_scale.adjustment().set_upper((20.0 - min) as f64);
-        osd.max_scale.adjustment().set_lower(min as f64);
-        osd.max_scale.adjustment().set_upper((max + 20.0) as f64);
-        osd.min_scale.set_value(-(min as f64));
-        osd.max_scale.set_value(max as f64);
-        osd.min_label.set_text(&self.temp_unit.get().format(min));
-        osd.max_label.set_text(&self.temp_unit.get().format(max));
-    }
+
 
     /// Enable the controls the loaded file supports and fall back to thermal
     /// mode if the active mode lost its data. Call after the thermogram is
@@ -292,12 +272,19 @@ impl AppState {
             self.show_error_dialog(
                 &gettext("No thermograms found"),
                 &tr(
-                    "The folder contains no supported image files (JPEG, TIFF or PNG).\n\nFolder: {}",
+                    "The folder contains no supported image files (JPEG, TIFF, PNG or IS2).\n\nFolder: {}",
                     &[dir.to_str().unwrap_or("<invalid path>")],
                 ),
             );
             return;
         };
+        // Populate the browse list before the first load: if that file fails
+        // to decode, `show_load_error` keeps navigation alive so the user can
+        // step past it. On success `load_thermogram` re-scans via
+        // `remember_directory`, which is harmless.
+        *self.dir_files.borrow_mut() = files;
+        self.dir_idx.set(0);
+        self.nav_hint_shown.set(false);
         self.navigate_to(&first);
     }
 
@@ -316,6 +303,9 @@ impl AppState {
         *self.thermogram.borrow_mut() = None;
         self.clear_canvas();
         self.disable_controls();
+        // The StatusPage doesn't paint an opaque background, so the startup
+        // placeholder would shine through if the first opened file fails.
+        self.ui.canvas.placeholder.set_visible(false);
 
         let page = &self.ui.canvas.error_page;
         page.set_title(&name);
@@ -442,6 +432,7 @@ impl AppState {
             TempUnit::from_key(a.state().as_ref().and_then(|v| v.str()).unwrap_or("celsius"))
         };
         this.temp_unit.set(unit_of(&action));
+        this.ui.osd.range_slider.set_unit(this.temp_unit.get());
         let that = this.clone();
         action.connect_notify_local(Some("state"), move |action, _| {
             that.temp_unit.set(unit_of(action));
@@ -453,8 +444,7 @@ impl AppState {
     /// Tooltips and the thermal render need nothing: they compute on demand.
     fn refresh_temperature_displays(&self) {
         let unit = self.temp_unit.get();
-        self.ui.osd.min_label.set_text(&unit.format(self.min_temp.get()));
-        self.ui.osd.max_label.set_text(&unit.format(self.max_temp.get()));
+        self.ui.osd.range_slider.set_unit(unit);
         let thermogram = self.thermogram.borrow().as_ref().map(Arc::clone);
         if let Some(t) = thermogram {
             self.populate_info_sidebar(&t);
@@ -555,7 +545,7 @@ fn scan_dir_files(dir: &Path) -> Vec<PathBuf> {
         .map(|e| e.path())
         .filter(|p| {
             let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
-            matches!(ext.as_str(), "jpg" | "jpeg" | "tif" | "tiff" | "png")
+            matches!(ext.as_str(), "jpg" | "jpeg" | "tif" | "tiff" | "png" | "is2")
         })
         .collect();
     files.sort();

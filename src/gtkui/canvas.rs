@@ -187,33 +187,15 @@ impl AppState {
     }
 
     fn connect_range_scales(this: &Rc<Self>) {
-        // min_scale stores -actual_min; negate to recover temperature.
+        let slider = &this.ui.osd.range_slider;
+        slider.attach_bubble(&this.ui.canvas.overlay);
         let that = this.clone();
-        this.ui.osd.min_scale.connect_value_changed(move |scale| {
-            that.set_range_min(-(scale.value() as f32));
+        slider.connect_changed(move |min, max| {
+            that.min_temp.set(min);
+            that.max_temp.set(max);
+            that.draw_render_threaded();
+            that.ui.palette.color_bar.queue_draw();
         });
-        // max_scale stores actual_max.
-        let that = this.clone();
-        this.ui.osd.max_scale.connect_value_changed(move |scale| {
-            that.set_range_max(scale.value() as f32);
-        });
-    }
-
-    fn set_range_min(&self, min: f32) {
-        self.min_temp.set(min);
-        self.ui.osd.min_label.set_text(&self.temp_unit.get().format(min));
-        self.ui.osd.max_scale.adjustment().set_lower(min as f64);
-        self.draw_render_threaded();
-        self.ui.palette.color_bar.queue_draw();
-    }
-
-    fn set_range_max(&self, max: f32) {
-        self.max_temp.set(max);
-        self.ui.osd.max_label.set_text(&self.temp_unit.get().format(max));
-        // min_scale is inverted, so its lower bound is -actual_max.
-        self.ui.osd.min_scale.adjustment().set_lower(-(max as f64));
-        self.draw_render_threaded();
-        self.ui.palette.color_bar.queue_draw();
     }
 
     /// Ctrl+scroll → zoom; plain scroll → pan (handled by ScrolledWindow)

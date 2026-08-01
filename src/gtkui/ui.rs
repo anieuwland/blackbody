@@ -5,11 +5,14 @@
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+use gtk4::prelude::BoxExt;
 use gtk4::{
-    Builder, Button, DrawingArea, FileFilter, Label, MenuButton, Orientation, Overlay, Scale,
+    Builder, Button, DrawingArea, FileFilter, Label, MenuButton, Orientation, Overlay,
     ScrolledWindow, ToggleButton,
 };
 use libadwaita as adw;
+
+use super::range_slider::RangeSlider;
 
 /// The header bar: the display mode toggle group and the popover/sidebar buttons.
 pub(super) struct HeaderUi {
@@ -31,18 +34,15 @@ pub(super) struct CanvasUi {
     pub(super) error_page: adw::StatusPage,
 }
 
-/// The on-screen display floating over the canvas: temperature range scales
-/// and the zoom menu, plus the fade animations.
+/// The on-screen display floating over the canvas: the temperature range
+/// slider and the zoom menu, plus the fade animations.
 pub(super) struct OsdUi {
     pub(super) container: gtk4::Box,
     pub(super) show_anim: adw::TimedAnimation,
     pub(super) hide_anim: adw::TimedAnimation,
     pub(super) hide_source: Rc<Cell<Option<glib::SourceId>>>,
     pub(super) range_bar: gtk4::Box,
-    pub(super) min_scale: Scale,
-    pub(super) max_scale: Scale,
-    pub(super) min_label: Label,
-    pub(super) max_label: Label,
+    pub(super) range_slider: Rc<RangeSlider>,
     pub(super) zoom_button: MenuButton,
     pub(super) zoom_label: Label,
     /// Directory navigation pill, visible only when the open file has
@@ -113,16 +113,16 @@ impl OsdUi {
         let container: gtk4::Box = builder.object("osd_container").unwrap();
         let show_target = adw::PropertyAnimationTarget::new(&container, "opacity");
         let hide_target = adw::PropertyAnimationTarget::new(&container, "opacity");
+        let range_bar: gtk4::Box = builder.object("range_bar").unwrap();
+        let range_slider = RangeSlider::new();
+        range_bar.append(range_slider.widget());
         OsdUi {
             show_anim: adw::TimedAnimation::new(&container, 0.0, 1.0, 200, show_target),
             hide_anim: adw::TimedAnimation::new(&container, 1.0, 0.0, 1000, hide_target),
             hide_source: Rc::new(Cell::new(None)),
             container,
-            range_bar: builder.object("range_bar").unwrap(),
-            min_scale: builder.object("min_scale").unwrap(),
-            max_scale: builder.object("max_scale").unwrap(),
-            min_label: builder.object("min_label").unwrap(),
-            max_label: builder.object("max_label").unwrap(),
+            range_bar,
+            range_slider,
             zoom_button: builder.object("zoom_button").unwrap(),
             zoom_label: builder.object("zoom_label").unwrap(),
             nav_bar: builder.object("nav_bar").unwrap(),

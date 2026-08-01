@@ -28,6 +28,15 @@ impl TempUnit {
         }
     }
 
+    /// Inverse of `convert`: a value entered in this display unit, in celsius.
+    pub(super) fn to_celsius(self, value: f32) -> f32 {
+        match self {
+            TempUnit::Celsius => value,
+            TempUnit::Fahrenheit => (value - 32.0) * 5.0 / 9.0,
+            TempUnit::Kelvin => value - 273.15,
+        }
+    }
+
     pub(super) fn suffix(self) -> &'static str {
         match self {
             TempUnit::Celsius => "°C",

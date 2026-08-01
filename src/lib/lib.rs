@@ -41,6 +41,7 @@
 
 pub mod error;
 pub mod flir;
+pub mod fluke;
 pub mod palettes;
 pub mod png;
 pub mod thermogram;
@@ -49,6 +50,7 @@ pub mod tiff;
 
 pub use crate::error::Error;
 pub use crate::flir::FlirThermogram;
+pub use crate::fluke::FlukeThermogram;
 pub use flyr::measurement_info::Measurement;
 pub use crate::png::PngThermogram;
 pub use crate::thermogram::Thermogram;

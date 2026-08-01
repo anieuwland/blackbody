@@ -8,4 +8,5 @@ src/gtkui/canvas.rs
 src/gtkui/dialogs.rs
 src/gtkui/osd.rs
 src/gtkui/palette_ui.rs
+src/gtkui/range_slider.rs
 src/gtkui/sidebar.rs

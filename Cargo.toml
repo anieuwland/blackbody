@@ -6,6 +6,7 @@ path = "src/main.rs"
 ndarray = "0.17"
 tiff = "0.6.0"
 flyr = "0.7.0"
+serendip = { path = "../serendip" }
 
 [dependencies.cairo-rs]
 version = "0.22"

@@ -20,10 +20,12 @@ pub enum Thermogram {
     Flir(FlirThermogram),
     Tiff(TiffThermogram),
     Png(PngThermogram),
+    Fluke(FlukeThermogram),
 }
 
 impl Thermogram {
-    /// Tries to recognize the file type based on its magic number and return a `Thermogram`.
+    /// Tries to recognize the file type and return a `Thermogram`. Fluke `.is2` files are
+    /// recognized by their extension; all other formats by their magic number.
     ///
     /// # Arguments
     /// * `path` - A path to a thermogram file.
@@ -49,6 +51,17 @@ impl Thermogram {
     /// }
     /// ```
     pub fn from_file(path: &Path) -> Result<Self, Error> {
+        // Fluke is2 files do not have consistent and distinctive magic bytes
+        let is_is2 = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|e| e.eq_ignore_ascii_case("is2"));
+        if is_is2 {
+            return FlukeThermogram::from_file(path)
+                .map(Thermogram::Fluke)
+                .ok_or_else(|| Error::Decode("corrupt or unsupported Fluke IS2 file".into()));
+        }
+
         let mut file = File::open(path)?;
         let mut magic = [0u8; 4];
         file.read_exact(&mut magic)?;
@@ -81,14 +94,14 @@ impl Thermogram {
     pub fn capture_params(&self) -> Option<CaptureParams> {
         match self {
             Thermogram::Flir(t) => Some(t.capture_params()),
-            Thermogram::Tiff(_) | Thermogram::Png(_) => None,
+            Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Fluke(_) => None,
         }
     }
 
     pub fn camera_metadata(&self) -> Option<&CameraMetadata> {
         match self {
             Thermogram::Flir(t) => t.camera_metadata(),
-            Thermogram::Tiff(_) | Thermogram::Png(_) => None,
+            Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Fluke(_) => None,
         }
     }
 
@@ -96,14 +109,14 @@ impl Thermogram {
     pub fn measurements(&self) -> &[flyr::measurement_info::Measurement] {
         match self {
             Thermogram::Flir(t) => t.measurements(),
-            Thermogram::Tiff(_) | Thermogram::Png(_) => &[],
+            Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Fluke(_) => &[],
         }
     }
 
     pub fn has_pip(&self) -> bool {
         match self {
             Thermogram::Flir(t) => t.has_pip(),
-            Thermogram::Tiff(_) | Thermogram::Png(_) => false,
+            Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Fluke(_) => false,
         }
     }
 
@@ -116,7 +129,7 @@ impl Thermogram {
     ) -> Option<Array<u8, Ix3>> {
         match self {
             Thermogram::Flir(t) => t.picture_in_picture(min_temp, max_temp, palette),
-            Thermogram::Tiff(_) | Thermogram::Png(_) => None,
+            Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Fluke(_) => None,
         }
     }
 }
@@ -130,6 +143,7 @@ impl ThermogramTrait for Thermogram {
             Thermogram::Flir(t) => t.thermal(),
             Thermogram::Tiff(t) => t.thermal(),
             Thermogram::Png(t) => t.thermal(),
+            Thermogram::Fluke(t) => t.thermal(),
         }
     }
 
@@ -138,6 +152,7 @@ impl ThermogramTrait for Thermogram {
             Thermogram::Flir(t) => t.optical(),
             Thermogram::Tiff(t) => t.optical(),
             Thermogram::Png(t) => t.optical(),
+            Thermogram::Fluke(t) => t.optical(),
         }
     }
 
@@ -146,6 +161,7 @@ impl ThermogramTrait for Thermogram {
             Thermogram::Flir(t) => t.identifier(),
             Thermogram::Tiff(t) => t.identifier(),
             Thermogram::Png(t) => t.identifier(),
+            Thermogram::Fluke(t) => t.identifier(),
         }
     }
 
@@ -154,6 +170,7 @@ impl ThermogramTrait for Thermogram {
             Thermogram::Flir(t) => t.path(),
             Thermogram::Tiff(t) => t.path(),
             Thermogram::Png(t) => t.path(),
+            Thermogram::Fluke(t) => t.path(),
         }
     }
 
@@ -162,6 +179,7 @@ impl ThermogramTrait for Thermogram {
             Thermogram::Flir(t) => t.palette(),
             Thermogram::Tiff(t) => t.palette(),
             Thermogram::Png(t) => t.palette(),
+            Thermogram::Fluke(t) => t.palette(),
         }
     }
 }
