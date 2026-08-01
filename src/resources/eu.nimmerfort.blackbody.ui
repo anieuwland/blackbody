@@ -86,17 +86,47 @@
   </menu>
 
   <object class="GtkFileFilter" id="filter_thermograms">
+    <property name="name" translatable="yes">Thermograms (FLIR, Fluke, images)</property>
     <mime-types>
       <mime-type>image/jpeg</mime-type>
       <mime-type>image/tiff</mime-type>
       <mime-type>image/png</mime-type>
     </mime-types>
-    <!-- Fluke .is2 has no registered MIME type; match by suffix. -->
+    <!-- Fluke .is2 and FLIR .fff have no registered MIME type; match by suffix. -->
+    <suffixes>
+      <suffix>is2</suffix>
+      <suffix>fff</suffix>
+    </suffixes>
+  </object>
+  <object class="GtkFileFilter" id="filter_flir">
+    <property name="name" translatable="yes">FLIR (jpeg, fff)</property>
+    <mime-types>
+      <mime-type>image/jpeg</mime-type>
+    </mime-types>
+    <suffixes>
+      <suffix>fff</suffix>
+    </suffixes>
+  </object>
+  <object class="GtkFileFilter" id="filter_fluke">
+    <property name="name" translatable="yes">Fluke (is2)</property>
     <suffixes>
       <suffix>is2</suffix>
     </suffixes>
   </object>
+  <object class="GtkFileFilter" id="filter_tiff">
+    <property name="name" translatable="yes">TIFF images (single band)</property>
+    <mime-types>
+      <mime-type>image/tiff</mime-type>
+    </mime-types>
+  </object>
+  <object class="GtkFileFilter" id="filter_png">
+    <property name="name" translatable="yes">PNG images (single band, 16 bit)</property>
+    <mime-types>
+      <mime-type>image/png</mime-type>
+    </mime-types>
+  </object>
   <object class="GtkFileFilter" id="filter_all_files">
+    <property name="name" translatable="yes">All files</property>
     <patterns><pattern>*</pattern></patterns>
   </object>
 

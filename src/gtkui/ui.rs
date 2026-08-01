@@ -79,6 +79,10 @@ pub(super) struct Ui {
     pub(super) sidebar: SidebarUi,
     pub(super) palette: PaletteUi,
     pub(super) filter_thermograms: FileFilter,
+    pub(super) filter_flir: FileFilter,
+    pub(super) filter_fluke: FileFilter,
+    pub(super) filter_tiff: FileFilter,
+    pub(super) filter_png: FileFilter,
     pub(super) filter_all_files: FileFilter,
 }
 
@@ -165,6 +169,10 @@ impl Ui {
             sidebar: SidebarUi::from_builder(builder),
             palette: PaletteUi::from_builder(builder),
             filter_thermograms: builder.object("filter_thermograms").unwrap(),
+            filter_flir: builder.object("filter_flir").unwrap(),
+            filter_fluke: builder.object("filter_fluke").unwrap(),
+            filter_tiff: builder.object("filter_tiff").unwrap(),
+            filter_png: builder.object("filter_png").unwrap(),
             filter_all_files: builder.object("filter_all_files").unwrap(),
         }
     }

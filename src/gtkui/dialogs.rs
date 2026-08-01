@@ -17,6 +17,10 @@ impl AppState {
     pub(super) fn show_open_dialog(this: &Rc<Self>) {
         let filters = gio::ListStore::new::<FileFilter>();
         filters.append(&this.ui.filter_thermograms);
+        filters.append(&this.ui.filter_flir);
+        filters.append(&this.ui.filter_fluke);
+        filters.append(&this.ui.filter_tiff);
+        filters.append(&this.ui.filter_png);
         filters.append(&this.ui.filter_all_files);
         let dialog = gtk4::FileDialog::builder()
             .title(gettext("Open thermogram"))

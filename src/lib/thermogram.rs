@@ -67,9 +67,10 @@ impl Thermogram {
         file.read_exact(&mut magic)?;
 
         // TODO JPG: Other magic numbers
-        if magic[..3] == [255, 216, 255] {
+        // FLIR: either a JPEG containing FLIR APP1 segments, or a raw FFF/AFF stream.
+        if magic[..3] == [255, 216, 255] || magic == *b"FFF\0" || magic == *b"AFF\0" {
             return FlirThermogram::from_file(path).map(Thermogram::Flir).ok_or_else(|| {
-                Error::Decode("not a FLIR JPEG, or the camera model is unsupported".into())
+                Error::Decode("not a FLIR file, or the camera model is unsupported".into())
             });
         }
 
