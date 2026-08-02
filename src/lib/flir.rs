@@ -3,7 +3,7 @@ use flyr::thermogram::FlyrThermogram;
 use ndarray::*;
 use std::path::{Path, PathBuf};
 
-use crate::{CaptureParams, ThermogramTrait};
+use crate::{CaptureParams, Measurement, ThermogramTrait};
 
 /// This is the struct and `ThermogramTrait` implementation for FLIR thermograms, using
 /// [flyr](https://crates.io/crates/flyr).
@@ -66,8 +66,8 @@ impl FlirThermogram {
 
     /// Measurement tools (spots, areas, lines, …) embedded in the file.
     /// Coordinates are in thermal-image pixels.
-    pub fn measurements(&self) -> &[flyr::measurement_info::Measurement] {
-        &self.thermogram.measurements
+    pub fn measurements(&self) -> Vec<Measurement> {
+        self.thermogram.measurements.iter().map(Into::into).collect()
     }
 
     pub fn has_pip(&self) -> bool {
@@ -163,7 +163,8 @@ mod tests {
     fn area_stats_match_camera_overlay() {
         let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../flyr-rs/thermograms/flir_sc660_1.jpg");
         let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
-        let area = t.measurements().iter()
+        let measurements = t.measurements();
+        let area = measurements.iter()
             .find(|m| matches!(m, Measurement::Area { .. }))
             .expect("sc660_1 should contain an area measurement");
         let s = t.measurement_stats(area).expect("area stats");
@@ -179,7 +180,8 @@ mod tests {
             env!("CARGO_MANIFEST_DIR"), "/../flyr-rs/thermograms/flir_thermocam_b400_2.jpg"
         );
         let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
-        let ellipse = t.measurements().iter()
+        let measurements = t.measurements();
+        let ellipse = measurements.iter()
             .find(|m| matches!(m, Measurement::Ellipse { .. }))
             .expect("b400_2 should contain an ellipse measurement");
         let s = t.measurement_stats(ellipse).expect("ellipse stats");

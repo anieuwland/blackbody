@@ -47,11 +47,12 @@ pub mod png;
 pub mod thermogram;
 pub mod thermogram_trait;
 pub mod tiff;
+pub mod measurements;
 
 pub use crate::error::Error;
 pub use crate::flir::FlirThermogram;
 pub use crate::fluke::FlukeThermogram;
-pub use flyr::measurement_info::Measurement;
+pub use crate::measurements::Measurement;
 pub use crate::png::PngThermogram;
 pub use crate::thermogram::Thermogram;
 pub use crate::thermogram_trait::{CaptureParams, TempStats, ThermogramTrait};

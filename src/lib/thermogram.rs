@@ -107,10 +107,11 @@ impl Thermogram {
     }
 
     /// Measurement tools embedded in the file, in thermal-image pixel coordinates.
-    pub fn measurements(&self) -> &[flyr::measurement_info::Measurement] {
+    pub fn measurements(&self) -> Vec<Measurement> {
         match self {
             Thermogram::Flir(t) => t.measurements(),
-            Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Fluke(_) => &[],
+            Thermogram::Fluke(t) => t.measurements(),
+            Thermogram::Tiff(_) | Thermogram::Png(_) => Vec::with_capacity(0),
         }
     }
 

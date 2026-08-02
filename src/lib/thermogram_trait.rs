@@ -185,7 +185,7 @@ pub trait ThermogramTrait {
             }
             // FLIR area params are x, y, width, height (verified against camera-rendered
             // overlays and exiftool); flyr 0.7 misnames width/height as x2/y2.
-            Measurement::Area { x1: x, y1: y, x2: width, y2: height, .. } => {
+            Measurement::Area { x, y, width, height, .. } => {
                 let (x, y) = (*x as usize, *y as usize);
                 (y..y + *height as usize)
                     .flat_map(|py| (x..x + *width as usize).map(move |px| (px, py)))
@@ -260,7 +260,7 @@ pub trait ThermogramTrait {
 }
 
 /// Pixels along a line, sampled once per step on the longest axis.
-fn line_points(x1: u16, y1: u16, x2: u16, y2: u16) -> impl Iterator<Item = (usize, usize)> {
+fn line_points(x1: u32, y1: u32, x2: u32, y2: u32) -> impl Iterator<Item = (usize, usize)> {
     let (x1, y1, x2, y2) = (x1 as f32, y1 as f32, x2 as f32, y2 as f32);
     let steps = (x2 - x1).abs().max((y2 - y1).abs()).max(1.0) as usize;
     (0..=steps).map(move |i| {
@@ -291,7 +291,7 @@ mod tests {
         assert_eq!((spot.min, spot.max, spot.avg), (12.0, 12.0, 12.0));
 
         // Area params are x, y, width, height: a 2×1 box at (1, 0)
-        let area = Measurement::Area { label: "".into(), x1: 1, y1: 0, x2: 2, y2: 1 };
+        let area = Measurement::Area { label: "".into(), x: 1, y: 0, width: 2, height: 1 };
         let a = t.measurement_stats(&area).unwrap();
         assert_eq!((a.min, a.max, a.avg), (1.0, 2.0, 1.5));
 

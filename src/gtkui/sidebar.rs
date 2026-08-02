@@ -84,7 +84,7 @@ impl AppState {
 
         let group = PreferencesGroup::new();
         for m in measurements {
-            group.add(&measurement_row(thermogram, m, self.temp_unit.get()));
+            group.add(&measurement_row(thermogram, &m, self.temp_unit.get()));
         }
         sidebar.append(&group);
     }
@@ -251,7 +251,7 @@ fn describe_measurement(m: &Measurement) -> (String, &str, String) {
             (gettext("Endpoint"), label, format!("({x}, {y})"))
         }
         // Area params are x, y, width, height (flyr 0.7 misnames w/h as x2/y2)
-        Measurement::Area { label, x1, y1, x2: w, y2: h } => {
+        Measurement::Area { label, x: x1, y: y1, width: w, height: h } => {
             (gettext("Area"), label, format!("({x1}, {y1}) {w} × {h} px"))
         }
         Measurement::Line { label, x1, y1, x2, y2 } => {

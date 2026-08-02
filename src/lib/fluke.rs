@@ -2,7 +2,7 @@ use serendip::SerendipThermogram;
 use ndarray::*;
 use std::path::{Path, PathBuf};
 
-use crate::ThermogramTrait;
+use crate::{Measurement, ThermogramTrait};
 
 /// This is the struct and `ThermogramTrait` implementation for Fluke thermograms, using
 /// [serendip](https://crates.io/crates/serendip).
@@ -40,10 +40,13 @@ impl FlukeThermogram {
             thermal_buffer,
         })
     }
-}
 
-impl FlukeThermogram {
-
+    pub fn measurements(&self) -> Vec<Measurement> {
+        let markers = match &self.thermogram {
+            SerendipThermogram::Zip(t) => &t.markers,
+        };
+        markers.iter().map(Into::into).collect()
+    }
 }
 
 impl ThermogramTrait for FlukeThermogram {

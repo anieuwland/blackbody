@@ -183,7 +183,7 @@ impl AppState {
         }
         let thermogram = self.thermogram.borrow();
         let Some(thermogram) = thermogram.as_ref() else { return };
-        draw_measurement_overlay(ctx, thermogram.measurements(), scale, off_x, off_y);
+        draw_measurement_overlay(ctx, &thermogram.measurements(), scale, off_x, off_y);
     }
 
     fn connect_range_scales(this: &Rc<Self>) {
@@ -425,8 +425,8 @@ fn draw_measurement_overlay(
 /// Add one measurement's outline to the current path. Coordinates are thermal
 /// pixels; `scale`/`off_*` map them into widget space, targeting pixel centres.
 fn trace_measurement(ctx: &cairo::Context, m: &Measurement, scale: f64, off_x: f64, off_y: f64) {
-    let px = |v: u16| off_x + (v as f64 + 0.5) * scale;
-    let py = |v: u16| off_y + (v as f64 + 0.5) * scale;
+    let px = |v: u32| off_x + (v as f64 + 0.5) * scale;
+    let py = |v: u32| off_y + (v as f64 + 0.5) * scale;
     let arm = 6.0f64.max(0.5 * scale);
     match m {
         Measurement::Spot { x, y, .. } | Measurement::Endpoint { x, y, .. } => {
@@ -437,7 +437,7 @@ fn trace_measurement(ctx: &cairo::Context, m: &Measurement, scale: f64, off_x: f
             ctx.line_to(cx, cy + arm);
         }
         // Area params are x, y, width, height (flyr 0.7 misnames w/h as x2/y2)
-        Measurement::Area { x1, y1, x2: w, y2: h, .. } => {
+        Measurement::Area { x: x1, y: y1, width: w, height: h, .. } => {
             ctx.rectangle(px(*x1), py(*y1), *w as f64 * scale, *h as f64 * scale);
         }
         Measurement::Line { x1, y1, x2, y2, .. } => {
