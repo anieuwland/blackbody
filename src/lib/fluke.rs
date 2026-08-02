@@ -4,13 +4,8 @@ use std::path::{Path, PathBuf};
 
 use crate::ThermogramTrait;
 
-/// This is the struct and `ThermogramTrait` implementation for FLIR thermograms, using
-/// [flyr](https://crates.io/crates/flyr).
-///
-/// While a file can be directly read with `from_file`, it is recommended to instead use the
-/// `Thermogram::from_file` instead. The latter detects what kind of file (TIFF, FLIR) it is dealing
-/// with, subsequently choosing the right reader for it. This way your application support different
-/// thermogram formats.
+/// This is the struct and `ThermogramTrait` implementation for Fluke thermograms, using
+/// [serendip](https://crates.io/crates/serendip).
 #[derive(Clone, Debug)]
 pub struct FlukeThermogram {
     pub thermogram: SerendipThermogram,
@@ -77,16 +72,4 @@ impl From<&FlukeThermogram> for Array<f32, Ix2> {
     fn from(thermogram: &FlukeThermogram) -> Array<f32, Ix2> {
         thermogram.thermal().clone()
     }
-}
-
-fn ycc_to_rgb(y: u8, cb: u8, cr: u8) -> [f32; 3] {
-    let r = y as f32 + 1.4075 * (cr as f32 - 128f32);
-    let g = y as f32 - 0.3455 * (cb as f32 - 128f32) - (0.7169 * (cr as f32 - 128f32));
-    let b = y as f32 + 1.7790 * (cb as f32 - 128f32);
-
-    let r = r.clamp(0f32, 255f32) / 255f32;
-    let g = g.clamp(0f32, 255f32) / 255f32;
-    let b = b.clamp(0f32, 255f32) / 255f32;
-
-    [r, g, b]
 }

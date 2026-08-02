@@ -55,3 +55,7 @@ Compiling for Windows is more involved, but does work.
 4. Run with Wine or zip up the release dir and ru non Windows! When using wine `XDG_DATA_DIRS` is correctly set however: `XDG_DATA_DIRS=blackbody-windows/share wine blackbody.exe`. In Windows it doesn't seem to matter.
 
 Reference: [Cross-compiling Rust Linux -> Windows](https://gtk-rs.org/docs-src/tutorial/cross)
+
+## Comparable to
+
+* [ThermView](https://github.com/v0l/thermview)
