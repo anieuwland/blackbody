@@ -5,7 +5,7 @@ version = "0.6.0"
 license = "EUPL-1.2"
 authors = [ "Arthur Nieuwland <anieuwland@nimmerfort.eu>",]
 edition = "2024"
-repository = "https://github.com/anieuwland/blackbody/libblackbody"
+repository = "https://github.com/anieuwland/blackbody/tree/main/libblackbody"
 exclude = ["thermograms/"]
 
 [dependencies]

@@ -8,7 +8,7 @@ version = "2.1.0"
 license = "EUPL-1.2"
 authors = [ "Arthur Nieuwland <anieuwland@nimmerfort.eu>",]
 edition = "2024"
-repository = "https://bitbucket.org/nimmerwoner/blackbody/"
+repository = "https://github.com/anieuwland/blackbody"
 
 [[bin]]
 name = "blackbody"

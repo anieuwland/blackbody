@@ -163,7 +163,7 @@ impl AppState {
                  palettes and ranges, overlay the visible-light photo, and \
                  inspect embedded measurements and camera metadata.",
             ))
-            .website("https://bitbucket.org/nimmerwoner/blackbody/")
+            .website("https://github.com/anieuwland/blackbody")
             .license("EUPL-1.2")
             .build()
             .present(Some(&self.ui.window));

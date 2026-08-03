@@ -7,10 +7,10 @@
   <launchable type="desktop-id">eu.nimmerfort.blackbody.desktop</launchable>
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>EUPL-1.2</project_license>
-  <url type="homepage">https://bitbucket.org/nimmerwoner/blackbody/</url>
-  <url type="bugtracker">https://bitbucket.org/nimmerwoner/blackbody/issues/</url>
-  <url type="vcs-browser">https://bitbucket.org/nimmerwoner/blackbody/</url>
-  <url type="translate">https://bitbucket.org/nimmerwoner/blackbody/src/master/po/</url>
+  <url type="homepage">https://github.com/anieuwland/blackbody</url>
+  <url type="bugtracker">https://github.com/anieuwland/blackbody/issues</url>
+  <url type="vcs-browser">https://github.com/anieuwland/blackbody</url>
+  <url type="translate">https://github.com/anieuwland/blackbody/tree/main/po</url>
   <url type="contact">https://nimmerfort.eu/</url>
   <content_rating type="oars-1.1" />
   <translation type="gettext">blackbody</translation>
