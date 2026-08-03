@@ -51,7 +51,7 @@ impl ThermogramTrait for FlukeThermogram {
         &self.thermal_buffer
     }
 
-    fn optical(&self) -> Option<Array<u8, Ix3>> {
+    fn visual(&self) -> Option<Array<u8, Ix3>> {
         let bytes = self.thermogram.visual()?;
         let (width, height, visual) = decode_jpeg(bytes)?;
         Array::from(visual)

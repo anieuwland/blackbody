@@ -74,7 +74,7 @@ impl ThermogramTrait for TiffThermogram {
         &self.thermal
     }
 
-    fn optical(&self) -> Option<Array<u8, Ix3>> {
+    fn visual(&self) -> Option<Array<u8, Ix3>> {
         None
     }
 

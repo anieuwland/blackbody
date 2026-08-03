@@ -384,7 +384,7 @@ fn render_for_mode(
             .picture_in_picture(min, max, palette)
             .unwrap_or_else(|| thermogram.render(min, max, palette))
     } else if !thermal_mode {
-        thermogram.optical().unwrap_or_else(|| thermogram.render(min, max, palette))
+        thermogram.visual().unwrap_or_else(|| thermogram.render(min, max, palette))
     } else {
         thermogram.render(min, max, palette)
     }

@@ -149,12 +149,12 @@ impl ThermogramTrait for Thermogram {
         }
     }
 
-    fn optical(&self) -> Option<Array<u8, Ix3>> {
+    fn visual(&self) -> Option<Array<u8, Ix3>> {
         match self {
-            Thermogram::Flir(t) => t.optical(),
-            Thermogram::Tiff(t) => t.optical(),
-            Thermogram::Png(t) => t.optical(),
-            Thermogram::Fluke(t) => t.optical(),
+            Thermogram::Flir(t) => t.visual(),
+            Thermogram::Tiff(t) => t.visual(),
+            Thermogram::Png(t) => t.visual(),
+            Thermogram::Fluke(t) => t.visual(),
         }
     }
 

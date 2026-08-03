@@ -40,9 +40,9 @@ pub trait ThermogramTrait {
     /// Returns a reference to the 2D array of thermal data in celsius.
     fn thermal(&self) -> &Array<f32, Ix2>;
 
-    /// Returns reference to the raw RGB values of the thermogram's corresponding optical photo, if
-    /// present. Otherwise `None`.
-    fn optical(&self) -> Option<Array<u8, Ix3>>;
+    /// Returns reference to the raw RGB values of the thermogram's corresponding
+    /// visual light photo, if present. Otherwise `None`.
+    fn visual(&self) -> Option<Array<u8, Ix3>>;
 
     /// Provide the identifier for this thermogram, which is typically the file path. It can also be
     /// a randomly generated uuid or similar, however, if there is no path associated with the data.
@@ -52,7 +52,7 @@ pub trait ThermogramTrait {
     fn path(&self) -> Option<&PathBuf>;
 
     /// Returns the palette this thermogram was originally rendered with, if available
-    fn palette(&self) -> Option<Vec<[f32; 3]>>;
+    fn palette(&self) -> Option<Vec<[f32; 3]>> { None }
 
     /// Render the thermogram with the given color palette and using the given minimum and maximum
     /// temperature bounds.
@@ -240,7 +240,7 @@ pub trait ThermogramTrait {
     }
 
     fn has_optical(&self) -> bool {
-        self.optical().is_some()
+        self.visual().is_some()
     }
 
     fn has_palette(&self) -> bool {
@@ -276,7 +276,7 @@ mod tests {
     struct Fake(Array<f32, Ix2>);
     impl ThermogramTrait for Fake {
         fn thermal(&self) -> &Array<f32, Ix2> { &self.0 }
-        fn optical(&self) -> Option<Array<u8, Ix3>> { None }
+        fn visual(&self) -> Option<Array<u8, Ix3>> { None }
         fn identifier(&self) -> &str { "fake" }
         fn path(&self) -> Option<&PathBuf> { None }
         fn palette(&self) -> Option<Vec<[f32; 3]>> { None }

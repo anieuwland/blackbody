@@ -111,7 +111,7 @@ impl ThermogramTrait for FlirThermogram {
         &self.thermal_buffer
     }
 
-    fn optical(&self) -> Option<Array<u8, Ix3>> {
+    fn visual(&self) -> Option<Array<u8, Ix3>> {
         self.thermogram.optical_array().ok()
     }
 
