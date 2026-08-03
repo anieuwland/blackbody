@@ -114,7 +114,7 @@ mod tests {
     /// defaults (Png) must both resolve correctly through the enum.
     #[test]
     fn capability_methods_dispatch_through_enum() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../flyr-rs/thermograms/flir_e5_2-pip.jpg");
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_e5_2-pip.jpg");
         let flir = Thermogram::from_file(Path::new(path)).expect("test thermogram");
         assert!(matches!(flir, Thermogram::Flir(_)));
         assert!(flir.capture_params().is_some());

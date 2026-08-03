@@ -146,19 +146,13 @@ name = "blackbody"
 version = "2.1.0"
 dependencies = [
  "cairo-rs",
- "enum_dispatch",
- "flyr",
- "gdk-pixbuf",
  "gettext-rs",
  "gio",
  "glib",
  "gtk4",
- "image",
  "libadwaita",
- "log",
+ "libblackbody",
  "ndarray",
- "serendip",
- "tiff",
 ]
 
 [[package]]
@@ -511,8 +505,6 @@ dependencies = [
 [[package]]
 name = "flyr"
 version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f22e4015c7ec3793c6150f1abcd37da2df9f21f9b34272d4eec529c48520c2f"
 dependencies = [
  "binrw",
  "image",
@@ -1070,6 +1062,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "libblackbody"
+version = "0.6.0"
+dependencies = [
+ "enum_dispatch",
+ "flyr",
+ "image",
+ "log",
+ "ndarray",
+ "serendip",
+ "tiff",
+]
+
+[[package]]
 name = "libc"
 version = "0.2.189"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1537,7 +1542,7 @@ dependencies = [
 
 [[package]]
 name = "serendip"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "env_logger",
  "log",

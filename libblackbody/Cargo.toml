@@ -1,0 +1,22 @@
+[package]
+name = "libblackbody"
+description = "Decode thermograms regardless of format - FLIR, Fluke, TIFF, PNG - providing a standard interface for all."
+version = "0.6.0"
+license = "EUPL-1.2"
+authors = [ "Arthur Nieuwland <anieuwland@nimmerfort.eu>",]
+edition = "2024"
+repository = "https://github.com/anieuwland/blackbody/libblackbody"
+exclude = ["thermograms/"]
+
+[dependencies]
+ndarray = "0.17"
+tiff = "0.11"
+flyr = { path = "../../flyr-rs", version = "0.7.1" }
+serendip = { path = "../../serendip", version = "0.3.0" }
+log = "0.4"
+enum_dispatch = "0.3"
+
+[dependencies.image]
+version = "0.25"
+default-features = false
+features = ["png", "jpeg"]

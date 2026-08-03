@@ -159,7 +159,7 @@ mod tests {
 
     #[test]
     fn area_stats_match_camera_overlay() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../flyr-rs/thermograms/flir_sc660_1.jpg");
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_sc660_1.jpg");
         let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
         let measurements = t.measurements();
         let area = measurements.iter()
@@ -175,7 +175,7 @@ mod tests {
     #[test]
     fn ellipse_stats_match_camera_overlay() {
         let path = concat!(
-            env!("CARGO_MANIFEST_DIR"), "/../flyr-rs/thermograms/flir_thermocam_b400_2.jpg"
+            env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_thermocam_b400_2.jpg"
         );
         let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
         let measurements = t.measurements();
@@ -189,7 +189,7 @@ mod tests {
 
     #[test]
     fn pip_composite_has_optical_shape() {
-        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../flyr-rs/thermograms/flir_e5_2-pip.jpg");
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_e5_2-pip.jpg");
         let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
         assert!(t.has_pip());
         let img = t

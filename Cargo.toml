@@ -1,3 +1,6 @@
+[workspace]
+members = [ "libblackbody",]
+
 [package]
 name = "blackbody"
 description = "Blackbody is an image viewer for thermograms."
@@ -11,22 +14,11 @@ repository = "https://bitbucket.org/nimmerwoner/blackbody/"
 name = "blackbody"
 path = "src/main.rs"
 
-[lib]
-name = "libblackbody"
-path = "src/lib/lib.rs"
-
 [dependencies]
+libblackbody = { path = "libblackbody", version = "0.6.0" }
 ndarray = "0.17"
-tiff = "0.11"
-flyr = "0.7.1"
-serendip = { path = "../serendip" }
-log = "0.4"
-enum_dispatch = "0.3"
 
 [dependencies.cairo-rs]
-version = "0.22"
-
-[dependencies.gdk-pixbuf]
 version = "0.22"
 
 [dependencies.gettext-rs]
@@ -46,8 +38,3 @@ features = [ "v4_12",]
 [dependencies.libadwaita]
 version = "0.9"
 features = [ "v1_7",]
-
-[dependencies.image]
-version = "0.25"
-default-features = false
-features = ["png", "jpeg"]
