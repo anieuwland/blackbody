@@ -20,7 +20,6 @@ use gtk4::{
 
 use crate::domain::units::TempUnit;
 
-
 /// Extra draggable room beyond the thermogram's own range, in celsius.
 /// The user can widen it further by editing the extreme labels.
 const RANGE_MARGIN: f32 = 20.0;
@@ -82,9 +81,7 @@ impl RangeSlider {
         max_edit.set_margin_end(8);
         for edit in [&min_edit, &max_edit] {
             edit.set_valign(gtk4::Align::Center);
-            edit.set_tooltip_text(Some(&gettextrs::gettext(
-                "Click to edit the slider's extreme",
-            )));
+            edit.set_tooltip_text(Some(&gettextrs::gettext("Click to edit the slider's extreme")));
         }
 
         let bubble = Label::new(None);
@@ -187,8 +184,7 @@ impl RangeSlider {
     }
 
     fn connect_scales(this: &Rc<Self>) {
-        let pairs =
-            [(this.min_scale.clone(), Handle::Min), (this.max_scale.clone(), Handle::Max)];
+        let pairs = [(this.min_scale.clone(), Handle::Min), (this.max_scale.clone(), Handle::Max)];
         for (scale, handle) in pairs {
             let that = this.clone();
             scale.connect_value_changed(move |scale| that.on_value_changed(scale, handle));
@@ -252,10 +248,11 @@ impl RangeSlider {
         self.bubble.set_text(&self.unit.get().format(scale.value() as f32));
         let (_, natural) = self.bubble.preferred_size();
         let width = natural.width() as f64;
-        let left = (point.x() as f64 - width / 2.0)
-            .clamp(0.0, (host.width() as f64 - width).max(0.0));
+        let left =
+            (point.x() as f64 - width / 2.0).clamp(0.0, (host.width() as f64 - width).max(0.0));
         self.bubble.set_margin_start(left as i32);
-        self.bubble.set_margin_bottom((host.height() as f64 - point.y() as f64 + BUBBLE_GAP) as i32);
+        self.bubble
+            .set_margin_bottom((host.height() as f64 - point.y() as f64 + BUBBLE_GAP) as i32);
     }
 
     /// Route pointer input to whichever scale's handle is nearest, since the
@@ -375,8 +372,9 @@ fn install_css() {
 
 #[cfg(test)]
 mod tests {
+    use crate::domain::units::TempUnit;
+
     use super::parse_temp;
-    use crate::gtkui::units::TempUnit;
 
     #[test]
     fn parses_plain_and_suffixed_input() {
