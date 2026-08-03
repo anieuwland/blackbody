@@ -3,6 +3,7 @@ data/eu.nimmerfort.blackbody.metainfo.xml.in
 data/eu.nimmerfort.blackbody.gschema.xml
 src/resources/eu.nimmerfort.blackbody.ui
 src/main.rs
+src/domain/capture_params.rs
 src/gtkui/app_window.rs
 src/gtkui/canvas.rs
 src/gtkui/dialogs.rs

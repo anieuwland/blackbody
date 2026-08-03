@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: blackbody\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-03 14:23+0200\n"
+"POT-Creation-Date: 2026-08-03 17:23+0200\n"
 "PO-Revision-Date: 2026-07-12 00:00+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -524,6 +524,30 @@ msgstr "Termograma siguiente (Derecha)"
 msgid "Zoom"
 msgstr "Ampliación"
 
+#: src/domain/capture_params.rs:11 src/domain/capture_params.rs:18
+msgid "Emissivity"
+msgstr "Emisividad"
+
+#: src/domain/capture_params.rs:12
+msgid "Object distance"
+msgstr "Distancia al objeto"
+
+#: src/domain/capture_params.rs:13
+msgid "Reflected temperature"
+msgstr "Temperatura reflejada"
+
+#: src/domain/capture_params.rs:14
+msgid "Relative humidity"
+msgstr "Humedad relativa"
+
+#: src/domain/capture_params.rs:19
+msgid "Transmission"
+msgstr "Transmisión"
+
+#: src/domain/capture_params.rs:20
+msgid "Background temperature"
+msgstr "Temperatura de fondo"
+
 #: src/gtkui/app_window.rs:201
 msgid "Could not open file"
 msgstr "No se pudo abrir el archivo"
@@ -699,111 +723,95 @@ msgstr "Divergentes"
 msgid "Coolwarm"
 msgstr "Coolwarm"
 
-#: src/gtkui/sidebar.rs:108
+#: src/gtkui/sidebar.rs:110
 msgid "Show in image"
 msgstr "Mostrar en la imagen"
 
-#: src/gtkui/sidebar.rs:127
+#: src/gtkui/sidebar.rs:129
 msgid "No measurements"
 msgstr "Sin mediciones"
 
-#: src/gtkui/sidebar.rs:137
+#: src/gtkui/sidebar.rs:139
 msgid "No information"
 msgstr "Sin información"
 
-#: src/gtkui/sidebar.rs:164
+#: src/gtkui/sidebar.rs:166
 msgid "Folder"
 msgstr "Carpeta"
 
-#: src/gtkui/sidebar.rs:174
+#: src/gtkui/sidebar.rs:176
 msgid "Dimensions"
 msgstr "Dimensiones"
 
-#: src/gtkui/sidebar.rs:181
+#: src/gtkui/sidebar.rs:183
 msgid "Format"
 msgstr "Formato"
 
-#: src/gtkui/sidebar.rs:184
+#: src/gtkui/sidebar.rs:186
 msgid "File size"
 msgstr "Tamaño del archivo"
 
-#: src/gtkui/sidebar.rs:186
+#: src/gtkui/sidebar.rs:188
 msgid "Created"
 msgstr "Creado"
 
-#: src/gtkui/sidebar.rs:189
+#: src/gtkui/sidebar.rs:191
 msgid "Modified"
 msgstr "Modificado"
 
-#: src/gtkui/sidebar.rs:199
+#: src/gtkui/sidebar.rs:201
 msgid "Make"
 msgstr "Fabricante"
 
-#: src/gtkui/sidebar.rs:200
+#: src/gtkui/sidebar.rs:202
 msgid "Model"
 msgstr "Modelo"
 
-#: src/gtkui/sidebar.rs:201
+#: src/gtkui/sidebar.rs:203
 msgid "Focal length"
 msgstr "Distancia focal"
 
-#: src/gtkui/sidebar.rs:202
+#: src/gtkui/sidebar.rs:204
 msgid "Photographed"
 msgstr "Fotografiado"
 
-#: src/gtkui/sidebar.rs:218
+#: src/gtkui/sidebar.rs:220
 msgid "Show on map"
 msgstr "Mostrar en el mapa"
 
-#: src/gtkui/sidebar.rs:232
+#: src/gtkui/sidebar.rs:234
 msgid "Location"
 msgstr "Ubicación"
 
-#: src/gtkui/sidebar.rs:242
-msgid "Emissivity"
-msgstr "Emisividad"
-
-#: src/gtkui/sidebar.rs:243
-msgid "Object distance"
-msgstr "Distancia al objeto"
-
-#: src/gtkui/sidebar.rs:244
-msgid "Reflected temperature"
-msgstr "Temperatura reflejada"
-
-#: src/gtkui/sidebar.rs:245
-msgid "Relative humidity"
-msgstr "Humedad relativa"
-
-#: src/gtkui/sidebar.rs:259
+#: src/gtkui/sidebar.rs:256
 #, rust-format
 msgid "avg {} · {} – {}"
 msgstr "prom. {} · {} – {}"
 
-#: src/gtkui/sidebar.rs:271
+#: src/gtkui/sidebar.rs:268
 msgid "Spot"
 msgstr "Punto"
 
-#: src/gtkui/sidebar.rs:273
+#: src/gtkui/sidebar.rs:270
 msgid "Endpoint"
 msgstr "Extremo"
 
-#: src/gtkui/sidebar.rs:277
+#: src/gtkui/sidebar.rs:274
 msgid "Area"
 msgstr "Área"
 
-#: src/gtkui/sidebar.rs:280
+#: src/gtkui/sidebar.rs:277
 msgid "Line"
 msgstr "Línea"
 
-#: src/gtkui/sidebar.rs:286 src/gtkui/sidebar.rs:288
+#: src/gtkui/sidebar.rs:283 src/gtkui/sidebar.rs:285
 msgid "Ellipse"
 msgstr "Elipse"
 
-#: src/gtkui/sidebar.rs:289
+#: src/gtkui/sidebar.rs:286
 msgid "Alarm"
 msgstr "Alarma"
 
-#: src/gtkui/sidebar.rs:290
+#: src/gtkui/sidebar.rs:287
 msgid "Difference"
 msgstr "Diferencia"

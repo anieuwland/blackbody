@@ -18,7 +18,8 @@ use gtk4::{
     PropagationPhase, Scale,
 };
 
-use super::units::TempUnit;
+use crate::domain::units::TempUnit;
+
 
 /// Extra draggable room beyond the thermogram's own range, in celsius.
 /// The user can widen it further by editing the extreme labels.

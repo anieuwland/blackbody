@@ -2,15 +2,6 @@ use std::cmp::{Ordering, PartialOrd};
 use std::fs::File;
 use std::path::PathBuf;
 
-/// Capture parameters and Planck constants from the camera info record.
-#[derive(Clone, Debug)]
-pub struct IrCaptureParams {
-    pub emissivity: f32,
-    pub object_distance_m: f32,
-    pub reflected_temp_k: f32,
-    pub relative_humidity: f32,
-}
-
 use enum_dispatch::enum_dispatch;
 use flyr::camera_metadata::CameraMetadata;
 use image::{save_buffer, ColorType};
@@ -41,12 +32,6 @@ pub trait ThermogramTrait {
 
     /// Returns the palette this thermogram was originally rendered with, if available.
     fn palette(&self) -> Option<Vec<[f32; 3]>> {
-        // Override in implementing format if available.
-        None
-    }
-
-    /// Capture parameters and Planck constants, if the format provides them.
-    fn capture_params(&self) -> Option<IrCaptureParams> {
         // Override in implementing format if available.
         None
     }
@@ -214,5 +199,4 @@ pub trait ThermogramTrait {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 }

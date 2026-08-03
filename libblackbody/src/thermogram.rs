@@ -16,10 +16,10 @@ use crate::*;
 #[derive(Clone, Debug)]
 #[enum_dispatch(ThermogramTrait)]
 pub enum Thermogram {
-    Flir(FlirThermogram),
-    Tiff(TiffThermogram),
-    Png(PngThermogram),
-    Fluke(FlukeThermogram),
+    Flir(pub FlirThermogram),
+    Tiff(pub TiffThermogram),
+    Png(pub PngThermogram),
+    Fluke(pub FlukeThermogram),
 }
 
 impl Thermogram {
@@ -117,7 +117,6 @@ mod tests {
         let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_e5_2-pip.jpg");
         let flir = Thermogram::from_file(Path::new(path)).expect("test thermogram");
         assert!(matches!(flir, Thermogram::Flir(_)));
-        assert!(flir.capture_params().is_some());
         assert!(flir.camera_metadata().is_some());
         assert!(flir.has_pip());
 
@@ -130,7 +129,6 @@ mod tests {
         let _ = std::fs::remove_file(&path);
         let png = png.expect("16-bit grayscale PNG decodes");
         assert!(matches!(png, Thermogram::Png(_)));
-        assert!(png.capture_params().is_none());
         assert!(png.camera_metadata().is_none());
         assert!(png.measurements().is_empty());
         assert!(!png.has_pip());

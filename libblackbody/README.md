@@ -49,7 +49,6 @@ pub trait ThermogramTrait {
     fn min_temp(&self) -> f32;
     fn max_temp(&self) -> f32;
     fn palette(&self) -> Option<Vec<[f32; 3]>>;
-    fn capture_params(&self) -> Option<CaptureParams>;
     fn camera_metadata(&self) -> Option<&CameraMetadata>;
     fn measurements(&self) -> Vec<Measurement>;
     fn measurement_stats(&self, measurement: &Measurement) -> Option<TempStats>;

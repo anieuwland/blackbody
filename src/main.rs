@@ -2,6 +2,7 @@
 
 mod config;
 mod gtkui;
+mod domain;
 
 use gettextrs::*;
 use glib::ExitCode;

@@ -19,7 +19,7 @@ use libadwaita as adw;
 use super::dialogs::tr;
 use super::palettes::PALETTES;
 use super::ui::Ui;
-use super::units::TempUnit;
+use crate::domain::units::TempUnit;
 use libblackbody::{Error, Thermogram, ThermogramTrait};
 
 const UI: &str = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui";

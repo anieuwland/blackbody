@@ -2,7 +2,7 @@
 //! internally; conversion happens only when formatting for the screen.
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
-pub(super) enum TempUnit {
+pub enum TempUnit {
     #[default]
     Celsius,
     Fahrenheit,
@@ -12,7 +12,7 @@ pub(super) enum TempUnit {
 impl TempUnit {
     /// GSettings key value / action target ↔ unit. Unknown strings fall back
     /// to Celsius rather than erroring: the value comes from user config.
-    pub(super) fn from_key(key: &str) -> TempUnit {
+    pub fn from_key(key: &str) -> TempUnit {
         match key {
             "fahrenheit" => TempUnit::Fahrenheit,
             "kelvin" => TempUnit::Kelvin,
@@ -20,7 +20,7 @@ impl TempUnit {
         }
     }
 
-    pub(super) fn convert(self, celsius: f32) -> f32 {
+    pub fn convert(self, celsius: f32) -> f32 {
         match self {
             TempUnit::Celsius => celsius,
             TempUnit::Fahrenheit => celsius * 9.0 / 5.0 + 32.0,
@@ -29,7 +29,7 @@ impl TempUnit {
     }
 
     /// Inverse of `convert`: a value entered in this display unit, in celsius.
-    pub(super) fn to_celsius(self, value: f32) -> f32 {
+    pub fn to_celsius(self, value: f32) -> f32 {
         match self {
             TempUnit::Celsius => value,
             TempUnit::Fahrenheit => (value - 32.0) * 5.0 / 9.0,
@@ -37,7 +37,7 @@ impl TempUnit {
         }
     }
 
-    pub(super) fn suffix(self) -> &'static str {
+    pub fn suffix(self) -> &'static str {
         match self {
             TempUnit::Celsius => "°C",
             TempUnit::Fahrenheit => "°F",
@@ -46,7 +46,7 @@ impl TempUnit {
     }
 
     /// "23.5 °C" / "74.3 °F" / "296.6 K"
-    pub(super) fn format(self, celsius: f32) -> String {
+    pub fn format(self, celsius: f32) -> String {
         format!("{:.1} {}", self.convert(celsius), self.suffix())
     }
 }

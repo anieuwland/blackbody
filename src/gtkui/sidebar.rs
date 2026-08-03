@@ -10,9 +10,11 @@ use libadwaita as adw;
 use libadwaita::prelude::*;
 use libadwaita::{ActionRow, PreferencesGroup};
 
+use crate::domain::capture_params::get_make_dependent_params;
+use crate::domain::units::TempUnit;
+
 use super::app_window::AppState;
 use super::dialogs::tr;
-use super::units::TempUnit;
 use libblackbody::{Measurement, Thermogram, ThermogramTrait};
 
 impl AppState {
@@ -238,12 +240,7 @@ fn location_row(lat: f64, lon: f64) -> ActionRow {
 
 fn capture_group(thermogram: &Thermogram, unit: TempUnit) -> PreferencesGroup {
     let group = PreferencesGroup::new();
-    if let Some(cp) = thermogram.capture_params() {
-        add_row(&group, &gettext("Emissivity"), &format!("{:.2}", cp.emissivity));
-        add_row(&group, &gettext("Object distance"), &format!("{:.2} m", cp.object_distance_m));
-        add_row(&group, &gettext("Reflected temperature"), &unit.format(cp.reflected_temp_k - 273.15));
-        add_row(&group, &gettext("Relative humidity"), &format!("{:.0}%", cp.relative_humidity * 100.0));
-    }
+    get_make_dependent_params(thermogram, &unit).iter().for_each(|(k, v)| add_row(&group, k, v));
     group
 }
 
@@ -253,7 +250,7 @@ fn measurement_row(thermogram: &Thermogram, m: &Measurement, unit: TempUnit) -> 
         "" => format!("{kind} {coords}"),
         l => format!("{kind} ‘{l}’ {coords}"),
     };
-    let value = match thermogram.measurement_stats(m) {
+    let value = match m.measurement_stats(thermogram.thermal()) {
         Some(s) if s.min == s.max => unit.format(s.avg),
         Some(s) => tr(
             "avg {} · {} – {}",

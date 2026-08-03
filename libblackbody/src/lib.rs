@@ -58,5 +58,5 @@ pub use crate::fluke::FlukeThermogram;
 pub use crate::measurements::Measurement;
 pub use crate::png::PngThermogram;
 pub use crate::thermogram::Thermogram;
-pub use crate::thermogram_trait::{IrCaptureParams, ThermogramTrait};
+pub use crate::thermogram_trait::ThermogramTrait;
 pub use crate::tiff::TiffThermogram;
