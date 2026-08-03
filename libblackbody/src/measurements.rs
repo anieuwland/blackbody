@@ -96,17 +96,15 @@ impl From<&Fluke> for Measurement {
         match m {
             Fluke::Point { coords, metadata } => Measurement::Spot {
                 label: metadata.label2.clone(),
-                // TODO Move the division by 2 to the domain model (specific to 1 camera)
-                x: (coords.x / 2).into(),
-                y: (coords.y / 2).into(),
+                x: coords.x.into(),
+                y: coords.y.into(),
             },
             Fluke::Box { start, end, metadata } => Measurement::Area {
                 label: metadata.label2.clone(),
-                // TODO Move the division by 2 to the domain model (specific to 1 camera)
-                x: start.x.min(end.x) / 2,
-                y: start.y.min(end.y) / 2,
-                width: end.x.abs_diff(start.x) / 2,
-                height: end.y.abs_diff(start.y) / 2,
+                x: start.x.min(end.x),
+                y: start.y.min(end.y),
+                width: end.x.abs_diff(start.x),
+                height: end.y.abs_diff(start.y),
             },
         }
     }
@@ -138,8 +136,6 @@ impl Measurement {
             Measurement::Spot { x, y, .. } | Measurement::Endpoint { x, y, .. } => {
                 vec![temp_at(*x as usize, *y as usize)]
             }
-            // FLIR area params are x, y, width, height (verified against camera-rendered
-            // overlays and exiftool); flyr 0.7 misnames width/height as x2/y2.
             Measurement::Area { x, y, width, height, .. } => {
                 let (x, y) = (*x as usize, *y as usize);
                 (y..y + *height as usize)

@@ -66,10 +66,7 @@ impl ThermogramTrait for FlukeThermogram {
     }
 
     fn measurements(&self) -> Vec<Measurement> {
-        let markers = match &self.thermogram {
-            SerendipThermogram::Zip(t) => &t.markers,
-        };
-        markers.iter().map(Into::into).collect()
+        self.thermogram.markers().iter().map(Into::into).collect()
     }
 }
 
