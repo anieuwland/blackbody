@@ -4,18 +4,11 @@ use std::path::PathBuf;
 
 /// Capture parameters and Planck constants from the camera info record.
 #[derive(Clone, Debug)]
-pub struct CaptureParams {
+pub struct IrCaptureParams {
     pub emissivity: f32,
     pub object_distance_m: f32,
-    /// Reflected apparent temperature in Kelvin.
     pub reflected_temp_k: f32,
-    /// Relative humidity (0.0–1.0).
     pub relative_humidity: f32,
-    pub planck_r1: f32,
-    pub planck_r2: f32,
-    pub planck_b: f32,
-    pub planck_f: f32,
-    pub planck_o: i32,
 }
 
 use enum_dispatch::enum_dispatch;
@@ -28,15 +21,6 @@ use crate::palettes;
 use crate::{
     Error, FlirThermogram, FlukeThermogram, Measurement, PngThermogram, Thermogram, TiffThermogram,
 };
-
-/// Temperature statistics over a measurement tool's pixels, in celsius.
-/// For single-pixel tools (spots, endpoints) min, max and avg are equal.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct TempStats {
-    pub min: f32,
-    pub max: f32,
-    pub avg: f32,
-}
 
 /// All supported thermogram formats implement this trait.
 #[enum_dispatch]
@@ -62,7 +46,7 @@ pub trait ThermogramTrait {
     }
 
     /// Capture parameters and Planck constants, if the format provides them.
-    fn capture_params(&self) -> Option<CaptureParams> {
+    fn capture_params(&self) -> Option<IrCaptureParams> {
         // Override in implementing format if available.
         None
     }
@@ -209,81 +193,6 @@ pub trait ThermogramTrait {
         [thermal.nrows(), thermal.ncols()]
     }
 
-    /// Temperature statistics for a measurement tool, or `None` for tools whose
-    /// geometry is not decoded (ellipses, alarms, differences).
-    ///
-    /// Measurement coordinates come from the file and are clamped to the thermal
-    /// dimensions, so corrupt records cannot index out of bounds.
-    fn measurement_stats(&self, measurement: &Measurement) -> Option<TempStats> {
-        let thermal = self.thermal();
-        let (h, w) = (thermal.nrows(), thermal.ncols());
-        if h == 0 || w == 0 {
-            return None;
-        }
-        let temp_at = move |x: usize, y: usize| thermal[[y.min(h - 1), x.min(w - 1)]];
-
-        let temps: Vec<f32> = match measurement {
-            Measurement::Spot { x, y, .. } | Measurement::Endpoint { x, y, .. } => {
-                vec![temp_at(*x as usize, *y as usize)]
-            }
-            // FLIR area params are x, y, width, height (verified against camera-rendered
-            // overlays and exiftool); flyr 0.7 misnames width/height as x2/y2.
-            Measurement::Area { x, y, width, height, .. } => {
-                let (x, y) = (*x as usize, *y as usize);
-                (y..y + *height as usize)
-                    .flat_map(|py| (x..x + *width as usize).map(move |px| (px, py)))
-                    .map(|(px, py)| temp_at(px, py))
-                    .collect()
-            }
-            Measurement::Line { x1, y1, x2, y2, .. } => {
-                line_points(*x1, *y1, *x2, *y2).map(|(x, y)| temp_at(x, y)).collect()
-            }
-            // Ellipse params are centre, then the endpoints of the two semi-axes:
-            // xc, yc, x1, y1, x2, y2 (verified against a camera-rendered overlay).
-            Measurement::Ellipse { params, .. } if params.len() >= 6 => {
-                let (xc, yc) = (params[0] as f32, params[1] as f32);
-                let (ux, uy) = (params[2] as f32 - xc, params[3] as f32 - yc);
-                let (vx, vy) = (params[4] as f32 - xc, params[5] as f32 - yc);
-                let (u2, v2) = (ux * ux + uy * uy, vx * vx + vy * vy);
-                if u2 == 0.0 || v2 == 0.0 {
-                    return None;
-                }
-                // A pixel is inside iff its offset d from the centre, decomposed onto the
-                // semi-axes as a = d·u/|u|², b = d·v/|v|², satisfies a² + b² ≤ 1.
-                let r = u2.sqrt().max(v2.sqrt()).ceil() as isize;
-                let (xc_i, yc_i) = (xc as isize, yc as isize);
-                ((yc_i - r).max(0)..=(yc_i + r).min(h as isize - 1))
-                    .flat_map(|py| {
-                        ((xc_i - r).max(0)..=(xc_i + r).min(w as isize - 1)).map(move |px| (px, py))
-                    })
-                    .filter(|&(px, py)| {
-                        let (dx, dy) = (px as f32 - xc, py as f32 - yc);
-                        let a = (dx * ux + dy * uy) / u2;
-                        let b = (dx * vx + dy * vy) / v2;
-                        a * a + b * b <= 1.0
-                    })
-                    .map(|(px, py)| temp_at(px as usize, py as usize))
-                    .collect()
-            }
-
-            // Measurements for which it is not clear yet how to handle them
-            Measurement::Ellipse { .. }
-            | Measurement::Alarm { .. }
-            | Measurement::Difference { .. } => {
-                return None;
-            }
-        };
-
-        if temps.is_empty() {
-            return None;
-        }
-        let n = temps.len() as f32;
-        let min = temps.iter().cloned().fold(f32::MAX, f32::min);
-        let max = temps.iter().cloned().fold(f32::MIN, f32::max);
-        let avg = temps.iter().sum::<f32>() / n;
-        Some(TempStats { min, max, avg })
-    }
-
     fn has_optical(&self) -> bool {
         self.visual().is_some()
     }
@@ -303,79 +212,7 @@ pub trait ThermogramTrait {
     }
 }
 
-/// Pixels along a line, sampled once per step on the longest axis.
-fn line_points(x1: u32, y1: u32, x2: u32, y2: u32) -> impl Iterator<Item = (usize, usize)> {
-    let (x1, y1, x2, y2) = (x1 as f32, y1 as f32, x2 as f32, y2 as f32);
-    let steps = (x2 - x1).abs().max((y2 - y1).abs()).max(1.0) as usize;
-    (0..=steps).map(move |i| {
-        let t = i as f32 / steps as f32;
-        ((x1 + (x2 - x1) * t).round() as usize, (y1 + (y2 - y1) * t).round() as usize)
-    })
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    struct Fake(Array<f32, Ix2>);
-    impl ThermogramTrait for Fake {
-        fn thermal(&self) -> &Array<f32, Ix2> {
-            &self.0
-        }
-        fn visual(&self) -> Option<Array<u8, Ix3>> {
-            None
-        }
-        fn identifier(&self) -> &str {
-            "fake"
-        }
-        fn path(&self) -> Option<&PathBuf> {
-            None
-        }
-        fn palette(&self) -> Option<Vec<[f32; 3]>> {
-            None
-        }
-    }
-
-    #[test]
-    fn measurement_stats_spot_area_line() {
-        // 2x3 grid: row 0 = [0, 1, 2], row 1 = [10, 11, 12]
-        let t = Fake(Array::from_shape_vec((2, 3), vec![0.0, 1.0, 2.0, 10.0, 11.0, 12.0]).unwrap());
-
-        let spot =
-            t.measurement_stats(&Measurement::Spot { label: "".into(), x: 2, y: 1 }).unwrap();
-        assert_eq!((spot.min, spot.max, spot.avg), (12.0, 12.0, 12.0));
-
-        // Area params are x, y, width, height: a 2×1 box at (1, 0)
-        let area = Measurement::Area { label: "".into(), x: 1, y: 0, width: 2, height: 1 };
-        let a = t.measurement_stats(&area).unwrap();
-        assert_eq!((a.min, a.max, a.avg), (1.0, 2.0, 1.5));
-
-        let line = Measurement::Line { label: "".into(), x1: 0, y1: 0, x2: 2, y2: 0 };
-        let l = t.measurement_stats(&line).unwrap();
-        assert_eq!((l.min, l.max, l.avg), (0.0, 2.0, 1.0));
-
-        // Out-of-bounds coordinates clamp instead of panicking
-        let oob =
-            t.measurement_stats(&Measurement::Spot { label: "".into(), x: 99, y: 99 }).unwrap();
-        assert_eq!(oob.avg, 12.0);
-
-        let ellipse = Measurement::Ellipse { label: "".into(), params: vec![] };
-        assert!(t.measurement_stats(&ellipse).is_none());
-    }
-
-    #[test]
-    fn measurement_stats_ellipse() {
-        // 5x5 grid with value y*10 + x
-        let t = Fake(Array::from_shape_fn((5, 5), |(y, x)| (y * 10 + x) as f32));
-
-        // Circle: centre (2, 2), semi-axis endpoints (3, 2) and (2, 1) → radius 1.
-        // Inside: (2,2), (1,2), (3,2), (2,1), (2,3) → 22, 21, 23, 12, 32.
-        let circle = Measurement::Ellipse { label: "".into(), params: vec![2, 2, 3, 2, 2, 1] };
-        let c = t.measurement_stats(&circle).unwrap();
-        assert_eq!((c.min, c.max, c.avg), (12.0, 32.0, 22.0));
-
-        // Degenerate axis → no stats
-        let flat = Measurement::Ellipse { label: "".into(), params: vec![2, 2, 3, 2, 2, 2] };
-        assert!(t.measurement_stats(&flat).is_none());
-    }
 }

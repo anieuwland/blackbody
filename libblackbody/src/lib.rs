@@ -42,6 +42,7 @@
 //! Issue tracking happens in the [Blackbody repository](https://github.com/anieuwland/blackbody/issues).
 
 pub mod error;
+pub mod fake;
 pub mod flir;
 pub mod fluke;
 pub mod palettes;
@@ -57,5 +58,5 @@ pub use crate::fluke::FlukeThermogram;
 pub use crate::measurements::Measurement;
 pub use crate::png::PngThermogram;
 pub use crate::thermogram::Thermogram;
-pub use crate::thermogram_trait::{CaptureParams, TempStats, ThermogramTrait};
+pub use crate::thermogram_trait::{IrCaptureParams, ThermogramTrait};
 pub use crate::tiff::TiffThermogram;
