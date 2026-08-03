@@ -18,13 +18,16 @@ pub struct CaptureParams {
     pub planck_o: i32,
 }
 
+use enum_dispatch::enum_dispatch;
+use flyr::camera_metadata::CameraMetadata;
 use image::{save_buffer, ColorType};
 use ndarray::*;
 use tiff::encoder::*;
 
 use crate::palettes;
-use crate::Error;
-use crate::Measurement;
+use crate::{
+    Error, FlirThermogram, FlukeThermogram, Measurement, PngThermogram, Thermogram, TiffThermogram,
+};
 
 /// Temperature statistics over a measurement tool's pixels, in celsius.
 /// For single-pixel tools (spots, endpoints) min, max and avg are equal.
@@ -36,6 +39,7 @@ pub struct TempStats {
 }
 
 /// All supported thermogram formats implement this trait.
+#[enum_dispatch]
 pub trait ThermogramTrait {
     /// Returns a reference to the 2D array of thermal data in celsius.
     fn thermal(&self) -> &Array<f32, Ix2>;
@@ -51,8 +55,45 @@ pub trait ThermogramTrait {
     /// Returns the file path, or `None` if not a file.
     fn path(&self) -> Option<&PathBuf>;
 
-    /// Returns the palette this thermogram was originally rendered with, if available
-    fn palette(&self) -> Option<Vec<[f32; 3]>> { None }
+    /// Returns the palette this thermogram was originally rendered with, if available.
+    fn palette(&self) -> Option<Vec<[f32; 3]>> {
+        // Override in implementing format if available.
+        None
+    }
+
+    /// Capture parameters and Planck constants, if the format provides them.
+    fn capture_params(&self) -> Option<CaptureParams> {
+        // Override in implementing format if available.
+        None
+    }
+
+    /// Camera metadata (make, model, lens, GPS, …), if present.
+    fn camera_metadata(&self) -> Option<&CameraMetadata> {
+        // Override in implementing format if available.
+        None
+    }
+
+    /// Measurement tools embedded in the file, in thermal-image pixel coordinates.
+    fn measurements(&self) -> Vec<Measurement> {
+        // Override in implementing format if available.
+        Vec::new()
+    }
+
+    /// Whether the file has picture-in-picture geometry and an embedded optical image.
+    fn has_pip(&self) -> bool {
+        // Override in implementing format if available.
+        false
+    }
+
+    /// Thermal render composited onto the optical image, if the file has PIP geometry.
+    fn picture_in_picture(
+        &self,
+        _min_temp: f32,
+        _max_temp: f32,
+        _palette: &[[f32; 3]],
+    ) -> Option<Array<u8, Ix3>> {
+        None
+    }
 
     /// Render the thermogram with the given color palette and using the given minimum and maximum
     /// temperature bounds.
@@ -112,7 +153,9 @@ pub trait ThermogramTrait {
     fn export_thermal_png(&self, path: &PathBuf) -> Result<(), Error> {
         let w = self.thermal_shape()[1] as u32;
         let h = self.thermal_shape()[0] as u32;
-        let pixels: Vec<u16> = self.thermal().iter()
+        let pixels: Vec<u16> = self
+            .thermal()
+            .iter()
             .map(|&c| (c * 100.0 + 27315.0).clamp(0.0, 65535.0) as u16)
             .collect();
         image::ImageBuffer::<image::Luma<u16>, _>::from_raw(w, h, pixels)
@@ -222,9 +265,11 @@ pub trait ThermogramTrait {
                     .map(|(px, py)| temp_at(px as usize, py as usize))
                     .collect()
             }
-            // ponytail: raw-parameter tools are skipped; decode their geometry
-            // when a camera that uses them shows up.
-            Measurement::Ellipse { .. } | Measurement::Alarm { .. } | Measurement::Difference { .. } => {
+
+            // Measurements for which it is not clear yet how to handle them
+            Measurement::Ellipse { .. }
+            | Measurement::Alarm { .. }
+            | Measurement::Difference { .. } => {
                 return None;
             }
         };
@@ -256,7 +301,6 @@ pub trait ThermogramTrait {
     fn max_temp(&self) -> f32 {
         self.thermal().fold(f32::MIN, |acc, elem| acc.max(*elem))
     }
-
 }
 
 /// Pixels along a line, sampled once per step on the longest axis.
@@ -275,11 +319,21 @@ mod tests {
 
     struct Fake(Array<f32, Ix2>);
     impl ThermogramTrait for Fake {
-        fn thermal(&self) -> &Array<f32, Ix2> { &self.0 }
-        fn visual(&self) -> Option<Array<u8, Ix3>> { None }
-        fn identifier(&self) -> &str { "fake" }
-        fn path(&self) -> Option<&PathBuf> { None }
-        fn palette(&self) -> Option<Vec<[f32; 3]>> { None }
+        fn thermal(&self) -> &Array<f32, Ix2> {
+            &self.0
+        }
+        fn visual(&self) -> Option<Array<u8, Ix3>> {
+            None
+        }
+        fn identifier(&self) -> &str {
+            "fake"
+        }
+        fn path(&self) -> Option<&PathBuf> {
+            None
+        }
+        fn palette(&self) -> Option<Vec<[f32; 3]>> {
+            None
+        }
     }
 
     #[test]
@@ -287,7 +341,8 @@ mod tests {
         // 2x3 grid: row 0 = [0, 1, 2], row 1 = [10, 11, 12]
         let t = Fake(Array::from_shape_vec((2, 3), vec![0.0, 1.0, 2.0, 10.0, 11.0, 12.0]).unwrap());
 
-        let spot = t.measurement_stats(&Measurement::Spot { label: "".into(), x: 2, y: 1 }).unwrap();
+        let spot =
+            t.measurement_stats(&Measurement::Spot { label: "".into(), x: 2, y: 1 }).unwrap();
         assert_eq!((spot.min, spot.max, spot.avg), (12.0, 12.0, 12.0));
 
         // Area params are x, y, width, height: a 2×1 box at (1, 0)
@@ -300,7 +355,8 @@ mod tests {
         assert_eq!((l.min, l.max, l.avg), (0.0, 2.0, 1.0));
 
         // Out-of-bounds coordinates clamp instead of panicking
-        let oob = t.measurement_stats(&Measurement::Spot { label: "".into(), x: 99, y: 99 }).unwrap();
+        let oob =
+            t.measurement_stats(&Measurement::Spot { label: "".into(), x: 99, y: 99 }).unwrap();
         assert_eq!(oob.avg, 12.0);
 
         let ellipse = Measurement::Ellipse { label: "".into(), params: vec![] };

@@ -37,13 +37,6 @@ impl FlukeThermogram {
 
         Some(FlukeThermogram { thermogram, file_path: file_path.to_path_buf(), thermal_buffer })
     }
-
-    pub fn measurements(&self) -> Vec<Measurement> {
-        let markers = match &self.thermogram {
-            SerendipThermogram::Zip(t) => &t.markers,
-        };
-        markers.iter().map(Into::into).collect()
-    }
 }
 
 impl ThermogramTrait for FlukeThermogram {
@@ -70,6 +63,13 @@ impl ThermogramTrait for FlukeThermogram {
 
     fn palette(&self) -> Option<Vec<[f32; 3]>> {
         None
+    }
+
+    fn measurements(&self) -> Vec<Measurement> {
+        let markers = match &self.thermogram {
+            SerendipThermogram::Zip(t) => &t.markers,
+        };
+        markers.iter().map(Into::into).collect()
     }
 }
 

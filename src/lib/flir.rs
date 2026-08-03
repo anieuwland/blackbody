@@ -44,10 +44,33 @@ impl FlirThermogram {
     }
 }
 
-impl FlirThermogram {
-    pub fn capture_params(&self) -> CaptureParams {
+impl ThermogramTrait for FlirThermogram {
+    fn thermal(&self) -> &Array<f32, Ix2> {
+        &self.thermal_buffer
+    }
+
+    fn visual(&self) -> Option<Array<u8, Ix3>> {
+        self.thermogram.optical_array().ok()
+    }
+
+    fn identifier(&self) -> &str {
+        self.file_path.file_name().and_then(|n| n.to_str()).unwrap_or("<thermogram>")
+    }
+
+    fn path(&self) -> Option<&PathBuf> {
+        Some(&self.file_path)
+    }
+
+    fn palette(&self) -> Option<Vec<[f32; 3]>> {
+        self.thermogram
+            .palette_info
+            .as_ref()
+            .map(|info| info.palette.iter().map(|[y, cb, cr]| ycc_to_rgb(*y, *cr, *cb)).collect())
+    }
+
+    fn capture_params(&self) -> Option<CaptureParams> {
         let ci = &self.thermogram.camera_info;
-        CaptureParams {
+        Some(CaptureParams {
             emissivity: ci.emissivity,
             object_distance_m: ci.object_distance,
             reflected_temp_k: ci.reflected_apparent_temperature,
@@ -57,26 +80,26 @@ impl FlirThermogram {
             planck_b: ci.planck_b,
             planck_f: ci.planck_f,
             planck_o: ci.planck_o,
-        }
+        })
     }
 
-    pub fn camera_metadata(&self) -> Option<&CameraMetadata> {
+    fn camera_metadata(&self) -> Option<&CameraMetadata> {
         self.thermogram.camera_metadata.as_ref()
     }
 
     /// Measurement tools (spots, areas, lines, …) embedded in the file.
     /// Coordinates are in thermal-image pixels.
-    pub fn measurements(&self) -> Vec<Measurement> {
+    fn measurements(&self) -> Vec<Measurement> {
         self.thermogram.measurements.iter().map(Into::into).collect()
     }
 
-    pub fn has_pip(&self) -> bool {
+    fn has_pip(&self) -> bool {
         self.thermogram.pip_info.is_some() && self.thermogram.embedded_image.is_some()
     }
 
     /// Composite the thermal render onto the optical image using the embedded PIP geometry.
     /// Temperatures in celsius, palette colors in 0.0–1.0 RGB, as elsewhere in this crate.
-    pub fn picture_in_picture(
+    fn picture_in_picture(
         &self,
         min_temp: f32,
         max_temp: f32,
@@ -103,31 +126,6 @@ impl FlirThermogram {
         };
         let rgb: Vec<u8> = rgba.chunks_exact(4).flat_map(|p| [p[0], p[1], p[2]]).collect();
         Array::from_shape_vec((h, w, 3), rgb).ok()
-    }
-}
-
-impl ThermogramTrait for FlirThermogram {
-    fn thermal(&self) -> &Array<f32, Ix2> {
-        &self.thermal_buffer
-    }
-
-    fn visual(&self) -> Option<Array<u8, Ix3>> {
-        self.thermogram.optical_array().ok()
-    }
-
-    fn identifier(&self) -> &str {
-        self.file_path.file_name().and_then(|n| n.to_str()).unwrap_or("<thermogram>")
-    }
-
-    fn path(&self) -> Option<&PathBuf> {
-        Some(&self.file_path)
-    }
-
-    fn palette(&self) -> Option<Vec<[f32; 3]>> {
-        self.thermogram
-            .palette_info
-            .as_ref()
-            .map(|info| info.palette.iter().map(|[y, cb, cr]| ycc_to_rgb(*y, *cr, *cb)).collect())
     }
 }
 

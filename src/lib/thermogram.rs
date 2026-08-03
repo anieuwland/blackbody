@@ -1,9 +1,7 @@
-use ndarray::*;
+use enum_dispatch::enum_dispatch;
 use std::fs::File;
 use std::io::Read;
-use std::path::{Path, PathBuf};
-
-use flyr::camera_metadata::CameraMetadata;
+use std::path::Path;
 
 use crate::*;
 
@@ -16,6 +14,7 @@ use crate::*;
 // published API; the size gap only matters for moves, which are rare here.
 #[allow(clippy::large_enum_variant)]
 #[derive(Clone, Debug)]
+#[enum_dispatch(ThermogramTrait)]
 pub enum Thermogram {
     Flir(FlirThermogram),
     Tiff(TiffThermogram),
@@ -91,107 +90,6 @@ impl Thermogram {
     }
 }
 
-impl Thermogram {
-    pub fn capture_params(&self) -> Option<CaptureParams> {
-        match self {
-            Thermogram::Flir(t) => Some(t.capture_params()),
-            Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Fluke(_) => None,
-        }
-    }
-
-    pub fn camera_metadata(&self) -> Option<&CameraMetadata> {
-        match self {
-            Thermogram::Flir(t) => t.camera_metadata(),
-            Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Fluke(_) => None,
-        }
-    }
-
-    /// Measurement tools embedded in the file, in thermal-image pixel coordinates.
-    pub fn measurements(&self) -> Vec<Measurement> {
-        match self {
-            Thermogram::Flir(t) => t.measurements(),
-            Thermogram::Fluke(t) => t.measurements(),
-            Thermogram::Tiff(_) | Thermogram::Png(_) => Vec::with_capacity(0),
-        }
-    }
-
-    pub fn has_pip(&self) -> bool {
-        match self {
-            Thermogram::Flir(t) => t.has_pip(),
-            Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Fluke(_) => false,
-        }
-    }
-
-    /// Thermal render composited onto the optical image, if the file has PIP geometry.
-    pub fn picture_in_picture(
-        &self,
-        min_temp: f32,
-        max_temp: f32,
-        palette: &[[f32; 3]],
-    ) -> Option<Array<u8, Ix3>> {
-        match self {
-            Thermogram::Flir(t) => t.picture_in_picture(min_temp, max_temp, palette),
-            Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Fluke(_) => None,
-        }
-    }
-}
-
-/// The `ThermogramTrait` implemented for the `Thermogram` enum. Method calls are forwarded to the
-/// specific format wrapped by the enum. Consult the trait for documentation on the supported
-/// methods.
-impl ThermogramTrait for Thermogram {
-    fn thermal(&self) -> &Array<f32, Ix2> {
-        match self {
-            Thermogram::Flir(t) => t.thermal(),
-            Thermogram::Tiff(t) => t.thermal(),
-            Thermogram::Png(t) => t.thermal(),
-            Thermogram::Fluke(t) => t.thermal(),
-        }
-    }
-
-    fn visual(&self) -> Option<Array<u8, Ix3>> {
-        match self {
-            Thermogram::Flir(t) => t.visual(),
-            Thermogram::Tiff(t) => t.visual(),
-            Thermogram::Png(t) => t.visual(),
-            Thermogram::Fluke(t) => t.visual(),
-        }
-    }
-
-    fn identifier(&self) -> &str {
-        match self {
-            Thermogram::Flir(t) => t.identifier(),
-            Thermogram::Tiff(t) => t.identifier(),
-            Thermogram::Png(t) => t.identifier(),
-            Thermogram::Fluke(t) => t.identifier(),
-        }
-    }
-
-    fn path(&self) -> Option<&PathBuf> {
-        match self {
-            Thermogram::Flir(t) => t.path(),
-            Thermogram::Tiff(t) => t.path(),
-            Thermogram::Png(t) => t.path(),
-            Thermogram::Fluke(t) => t.path(),
-        }
-    }
-
-    fn palette(&self) -> Option<Vec<[f32; 3]>> {
-        match self {
-            Thermogram::Flir(t) => t.palette(),
-            Thermogram::Tiff(t) => t.palette(),
-            Thermogram::Png(t) => t.palette(),
-            Thermogram::Fluke(t) => t.palette(),
-        }
-    }
-}
-
-impl From<&Thermogram> for Array<f32, Ix2> {
-    fn from(thermogram: &Thermogram) -> Array<f32, Ix2> {
-        thermogram.thermal().clone()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -209,6 +107,34 @@ mod tests {
         let r = Thermogram::from_file(&path);
         let _ = std::fs::remove_file(&path);
         assert!(matches!(r, Err(Error::UnrecognizedFormat(m)) if &m == b"text"));
+    }
+
+    /// Pins down enum_dispatch's handling of default trait methods: the generated
+    /// enum impl forwards every method to the inner type, so overrides (Flir) and
+    /// defaults (Png) must both resolve correctly through the enum.
+    #[test]
+    fn capability_methods_dispatch_through_enum() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/../flyr-rs/thermograms/flir_e5_2-pip.jpg");
+        let flir = Thermogram::from_file(Path::new(path)).expect("test thermogram");
+        assert!(matches!(flir, Thermogram::Flir(_)));
+        assert!(flir.capture_params().is_some());
+        assert!(flir.camera_metadata().is_some());
+        assert!(flir.has_pip());
+
+        let path = std::env::temp_dir().join("blackbody_enum_dispatch_pin_test.png");
+        image::ImageBuffer::<image::Luma<u16>, _>::from_raw(2, 2, vec![27315u16; 4])
+            .unwrap()
+            .save(&path)
+            .unwrap();
+        let png = Thermogram::from_file(&path);
+        let _ = std::fs::remove_file(&path);
+        let png = png.expect("16-bit grayscale PNG decodes");
+        assert!(matches!(png, Thermogram::Png(_)));
+        assert!(png.capture_params().is_none());
+        assert!(png.camera_metadata().is_none());
+        assert!(png.measurements().is_empty());
+        assert!(!png.has_pip());
+        assert!(png.picture_in_picture(0.0, 100.0, &palettes::TURBO).is_none());
     }
 
     #[test]
