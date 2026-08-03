@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: blackbody\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-02 01:46+0200\n"
+"POT-Creation-Date: 2026-08-03 14:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -488,11 +488,11 @@ msgid ""
 "Cause: {}"
 msgstr ""
 
-#: src/gtkui/app_window.rs:273
+#: src/gtkui/app_window.rs:270
 msgid "No thermograms found"
 msgstr ""
 
-#: src/gtkui/app_window.rs:275
+#: src/gtkui/app_window.rs:272
 #, rust-format
 msgid ""
 "The folder contains no supported image files (JPEG, TIFF, PNG, IS2 or FFF).\n"
@@ -500,11 +500,11 @@ msgid ""
 "Folder: {}"
 msgstr ""
 
-#: src/gtkui/app_window.rs:505
+#: src/gtkui/app_window.rs:494
 msgid "Only this file is accessible — open its folder to browse"
 msgstr ""
 
-#: src/gtkui/app_window.rs:506
+#: src/gtkui/app_window.rs:495
 msgid "Open Folder…"
 msgstr ""
 
@@ -633,111 +633,111 @@ msgstr ""
 msgid "Coolwarm"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:95
+#: src/gtkui/sidebar.rs:108
 msgid "Show in image"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:114
-msgid "No Measurements"
+#: src/gtkui/sidebar.rs:127
+msgid "No measurements"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:115
-msgid "This thermogram contains no measurement tools"
-msgstr ""
-
-#: src/gtkui/sidebar.rs:142
-msgid "Folder"
-msgstr ""
-
-#: src/gtkui/sidebar.rs:152
-msgid "Dimensions"
-msgstr ""
-
-#: src/gtkui/sidebar.rs:159
-msgid "Format"
-msgstr ""
-
-#: src/gtkui/sidebar.rs:162
-msgid "File size"
+#: src/gtkui/sidebar.rs:137
+msgid "No information"
 msgstr ""
 
 #: src/gtkui/sidebar.rs:164
+msgid "Folder"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:174
+msgid "Dimensions"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:181
+msgid "Format"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:184
+msgid "File size"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:186
 msgid "Created"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:167
+#: src/gtkui/sidebar.rs:189
 msgid "Modified"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:177
+#: src/gtkui/sidebar.rs:199
 msgid "Make"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:178
+#: src/gtkui/sidebar.rs:200
 msgid "Model"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:179
+#: src/gtkui/sidebar.rs:201
 msgid "Focal length"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:180
+#: src/gtkui/sidebar.rs:202
 msgid "Photographed"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:196
+#: src/gtkui/sidebar.rs:218
 msgid "Show on map"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:210
+#: src/gtkui/sidebar.rs:232
 msgid "Location"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:220
+#: src/gtkui/sidebar.rs:242
 msgid "Emissivity"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:221
+#: src/gtkui/sidebar.rs:243
 msgid "Object distance"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:222
+#: src/gtkui/sidebar.rs:244
 msgid "Reflected temperature"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:223
+#: src/gtkui/sidebar.rs:245
 msgid "Relative humidity"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:237
+#: src/gtkui/sidebar.rs:259
 #, rust-format
 msgid "avg {} · {} – {}"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:249
+#: src/gtkui/sidebar.rs:271
 msgid "Spot"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:251
+#: src/gtkui/sidebar.rs:273
 msgid "Endpoint"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:255
+#: src/gtkui/sidebar.rs:277
 msgid "Area"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:258
+#: src/gtkui/sidebar.rs:280
 msgid "Line"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:264 src/gtkui/sidebar.rs:266
+#: src/gtkui/sidebar.rs:286 src/gtkui/sidebar.rs:288
 msgid "Ellipse"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:267
+#: src/gtkui/sidebar.rs:289
 msgid "Alarm"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:268
+#: src/gtkui/sidebar.rs:290
 msgid "Difference"
 msgstr ""

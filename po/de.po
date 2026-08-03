@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-02 01:46+0200\n"
+"POT-Creation-Date: 2026-08-03 14:23+0200\n"
 "PO-Revision-Date: 2020-10-16 13:52+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -555,11 +555,11 @@ msgstr ""
 "Datei: {}\n"
 "Ursache: {}"
 
-#: src/gtkui/app_window.rs:273
+#: src/gtkui/app_window.rs:270
 msgid "No thermograms found"
 msgstr "Keine Thermogramme gefunden"
 
-#: src/gtkui/app_window.rs:275
+#: src/gtkui/app_window.rs:272
 #, rust-format
 msgid ""
 "The folder contains no supported image files (JPEG, TIFF, PNG, IS2 or FFF).\n"
@@ -571,11 +571,11 @@ msgstr ""
 "\n"
 "Ordner: {}"
 
-#: src/gtkui/app_window.rs:505
+#: src/gtkui/app_window.rs:494
 msgid "Only this file is accessible — open its folder to browse"
 msgstr "Nur diese Datei ist zugänglich — zum Blättern den Ordner öffnen"
 
-#: src/gtkui/app_window.rs:506
+#: src/gtkui/app_window.rs:495
 msgid "Open Folder…"
 msgstr "Ordner öffnen…"
 
@@ -712,111 +712,111 @@ msgstr "Divergierend"
 msgid "Coolwarm"
 msgstr "Kühlwarm"
 
-#: src/gtkui/sidebar.rs:95
+#: src/gtkui/sidebar.rs:108
 msgid "Show in image"
 msgstr "Im Bild anzeigen"
 
-#: src/gtkui/sidebar.rs:114
-msgid "No Measurements"
+#: src/gtkui/sidebar.rs:127
+msgid "No measurements"
 msgstr "Keine Messungen"
 
-#: src/gtkui/sidebar.rs:115
-msgid "This thermogram contains no measurement tools"
-msgstr "Dieses Thermogramm enthält keine Messwerkzeuge"
+#: src/gtkui/sidebar.rs:137
+msgid "No information"
+msgstr "Keine Informationen"
 
-#: src/gtkui/sidebar.rs:142
+#: src/gtkui/sidebar.rs:164
 msgid "Folder"
 msgstr "Ordner"
 
-#: src/gtkui/sidebar.rs:152
+#: src/gtkui/sidebar.rs:174
 msgid "Dimensions"
 msgstr "Abmessungen"
 
-#: src/gtkui/sidebar.rs:159
+#: src/gtkui/sidebar.rs:181
 msgid "Format"
 msgstr "Format"
 
-#: src/gtkui/sidebar.rs:162
+#: src/gtkui/sidebar.rs:184
 msgid "File size"
 msgstr "Dateigröße"
 
-#: src/gtkui/sidebar.rs:164
+#: src/gtkui/sidebar.rs:186
 msgid "Created"
 msgstr "Erstellt"
 
-#: src/gtkui/sidebar.rs:167
+#: src/gtkui/sidebar.rs:189
 msgid "Modified"
 msgstr "Geändert"
 
-#: src/gtkui/sidebar.rs:177
+#: src/gtkui/sidebar.rs:199
 msgid "Make"
 msgstr "Hersteller"
 
-#: src/gtkui/sidebar.rs:178
+#: src/gtkui/sidebar.rs:200
 msgid "Model"
 msgstr "Modell"
 
-#: src/gtkui/sidebar.rs:179
+#: src/gtkui/sidebar.rs:201
 msgid "Focal length"
 msgstr "Brennweite"
 
-#: src/gtkui/sidebar.rs:180
+#: src/gtkui/sidebar.rs:202
 msgid "Photographed"
 msgstr "Aufgenommen"
 
-#: src/gtkui/sidebar.rs:196
+#: src/gtkui/sidebar.rs:218
 msgid "Show on map"
 msgstr "Auf Karte anzeigen"
 
-#: src/gtkui/sidebar.rs:210
+#: src/gtkui/sidebar.rs:232
 msgid "Location"
 msgstr "Ort"
 
-#: src/gtkui/sidebar.rs:220
+#: src/gtkui/sidebar.rs:242
 msgid "Emissivity"
 msgstr "Emissionsgrad"
 
-#: src/gtkui/sidebar.rs:221
+#: src/gtkui/sidebar.rs:243
 msgid "Object distance"
 msgstr "Objektabstand"
 
-#: src/gtkui/sidebar.rs:222
+#: src/gtkui/sidebar.rs:244
 msgid "Reflected temperature"
 msgstr "Reflektierte Temperatur"
 
-#: src/gtkui/sidebar.rs:223
+#: src/gtkui/sidebar.rs:245
 msgid "Relative humidity"
 msgstr "Relative Luftfeuchtigkeit"
 
-#: src/gtkui/sidebar.rs:237
+#: src/gtkui/sidebar.rs:259
 #, rust-format
 msgid "avg {} · {} – {}"
 msgstr "Ø {} · {} – {}"
 
-#: src/gtkui/sidebar.rs:249
+#: src/gtkui/sidebar.rs:271
 msgid "Spot"
 msgstr "Messpunkt"
 
-#: src/gtkui/sidebar.rs:251
+#: src/gtkui/sidebar.rs:273
 msgid "Endpoint"
 msgstr "Endpunkt"
 
-#: src/gtkui/sidebar.rs:255
+#: src/gtkui/sidebar.rs:277
 msgid "Area"
 msgstr "Fläche"
 
-#: src/gtkui/sidebar.rs:258
+#: src/gtkui/sidebar.rs:280
 msgid "Line"
 msgstr "Linie"
 
-#: src/gtkui/sidebar.rs:264 src/gtkui/sidebar.rs:266
+#: src/gtkui/sidebar.rs:286 src/gtkui/sidebar.rs:288
 msgid "Ellipse"
 msgstr "Ellipse"
 
-#: src/gtkui/sidebar.rs:267
+#: src/gtkui/sidebar.rs:289
 msgid "Alarm"
 msgstr "Alarm"
 
-#: src/gtkui/sidebar.rs:268
+#: src/gtkui/sidebar.rs:290
 msgid "Difference"
 msgstr "Differenz"

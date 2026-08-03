@@ -214,10 +214,9 @@ impl AppState {
         let (min, max) = (thermogram.min_temp(), thermogram.max_temp());
         self.min_temp.set(min);
         self.max_temp.set(max);
-        self.populate_info_sidebar(&thermogram);
-        self.populate_measurements_sidebar(&thermogram);
+        self.populate_info_sidebar(Some(&thermogram));
+        self.populate_measurements_sidebar(Some(&thermogram));
 
-        let has_info = thermogram.capture_params().is_some();
         let has_optical = thermogram.has_optical();
         let has_pip = thermogram.has_pip();
         let embedded_palette = thermogram.palette();
@@ -226,7 +225,7 @@ impl AppState {
         *self.active_palette.borrow_mut() = PALETTES[self.palette_idx.get()].to_vec();
         Self::update_embedded_palette(self, embedded_palette);
         self.ui.osd.range_slider.configure(min, max);
-        self.update_controls(has_info, has_optical, has_pip);
+        self.update_controls(has_optical, has_pip);
         self.remember_directory(path);
         self.show_osd();
         self.draw_render_threaded();
@@ -238,7 +237,7 @@ impl AppState {
     /// Enable the controls the loaded file supports and fall back to thermal
     /// mode if the active mode lost its data. Call after the thermogram is
     /// stored: switching the mode triggers a re-render.
-    fn update_controls(&self, has_info: bool, has_optical: bool, has_pip: bool) {
+    fn update_controls(&self, has_optical: bool, has_pip: bool) {
         self.ui.canvas.placeholder.set_visible(false);
         self.ui.canvas.error_page.set_visible(false);
         self.ui.osd.zoom_button.set_sensitive(true);
@@ -246,9 +245,7 @@ impl AppState {
         self.action_render.set_enabled(true);
 
         let header = &self.ui.header;
-        header.info_button.set_sensitive(has_info);
-        // Always available once a file is open: without measurements the
-        // sidebar shows an empty state instead.
+        header.info_button.set_sensitive(true);
         header.measurements_button.set_sensitive(true);
         let modes = &header.mode_group;
         modes.set_sensitive(true);
@@ -303,9 +300,9 @@ impl AppState {
         *self.thermogram.borrow_mut() = None;
         self.clear_canvas();
         self.disable_controls();
-        // The StatusPage doesn't paint an opaque background, so the startup
-        // placeholder would shine through if the first opened file fails.
         self.ui.canvas.placeholder.set_visible(false);
+        self.populate_info_sidebar(None);
+        self.populate_measurements_sidebar(None);
 
         let page = &self.ui.canvas.error_page;
         page.set_title(&name);
@@ -320,16 +317,10 @@ impl AppState {
     /// re-enables on the next successful load. Untoggling the sidebar buttons
     /// also closes the sidebar, whose content belongs to the previous file.
     fn disable_controls(&self) {
+        self.ui.header.mode_group.set_sensitive(false);
         self.ui.osd.zoom_button.set_sensitive(false);
         self.action_export.set_enabled(false);
         self.action_render.set_enabled(false);
-
-        let header = &self.ui.header;
-        header.info_button.set_active(false);
-        header.measurements_button.set_active(false);
-        header.info_button.set_sensitive(false);
-        header.measurements_button.set_sensitive(false);
-        header.mode_group.set_sensitive(false);
     }
 
     fn remember_directory(&self, path: &Path) {
@@ -445,11 +436,9 @@ impl AppState {
     fn refresh_temperature_displays(&self) {
         let unit = self.temp_unit.get();
         self.ui.osd.range_slider.set_unit(unit);
-        let thermogram = self.thermogram.borrow().as_ref().map(Arc::clone);
-        if let Some(t) = thermogram {
-            self.populate_info_sidebar(&t);
-            self.populate_measurements_sidebar(&t);
-        }
+        let thermogram = self.thermogram.borrow();
+        self.populate_info_sidebar(thermogram.as_deref());
+        self.populate_measurements_sidebar(thermogram.as_deref());
     }
 
     /// Left/Right/Home/End browse the directory of the open file.

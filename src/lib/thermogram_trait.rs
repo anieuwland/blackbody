@@ -73,7 +73,7 @@ pub trait ThermogramTrait {
         None
     }
 
-    /// Measurement tools embedded in the file, in thermal-image pixel coordinates.
+    /// Measurements embedded in the file, in thermal-image pixel coordinates.
     fn measurements(&self) -> Vec<Measurement> {
         // Override in implementing format if available.
         Vec::new()

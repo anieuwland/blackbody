@@ -87,7 +87,7 @@ impl ThermogramTrait for FlirThermogram {
         self.thermogram.camera_metadata.as_ref()
     }
 
-    /// Measurement tools (spots, areas, lines, …) embedded in the file.
+    /// Measurements (spots, areas, lines, …) embedded in the file.
     /// Coordinates are in thermal-image pixels.
     fn measurements(&self) -> Vec<Measurement> {
         self.thermogram.measurements.iter().map(Into::into).collect()

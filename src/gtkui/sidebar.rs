@@ -56,37 +56,50 @@ impl AppState {
         );
     }
 
-    pub(super) fn populate_info_sidebar(&self, thermogram: &Thermogram) {
+    pub(super) fn populate_info_sidebar(&self, thermogram: Option<&Thermogram>) {
         let sidebar = &self.ui.sidebar.info;
         while let Some(child) = sidebar.first_child() {
             sidebar.remove(&child);
         }
-        if let Some(group) = file_group(thermogram) {
-            sidebar.append(&group);
+
+        if let Some(t) = thermogram {
+            if let Some(group) = file_group(t) {
+                sidebar.append(&group);
+            }
+            sidebar.append(&image_group(t));
+            sidebar.append(&camera_group(t));
+            sidebar.append(&capture_group(&t, self.temp_unit.get()));
         }
-        sidebar.append(&image_group(thermogram));
-        sidebar.append(&camera_group(thermogram));
-        sidebar.append(&capture_group(thermogram, self.temp_unit.get()));
+        else {
+            sidebar.append(&no_info_page());
+            return;
+        }
     }
 
-    pub(super) fn populate_measurements_sidebar(&self, thermogram: &Thermogram) {
+    pub(super) fn populate_measurements_sidebar(&self, thermogram: Option<&Thermogram>) {
         let sidebar = &self.ui.sidebar.measurements;
         while let Some(child) = sidebar.first_child() {
             sidebar.remove(&child);
         }
 
-        let measurements = thermogram.measurements();
-        if measurements.is_empty() {
+        if let Some(t) = thermogram {
+            let measurements = t.measurements();
+            if measurements.is_empty() {
+                sidebar.append(&no_measurements_page());
+                return;
+            }
+            sidebar.append(&self.overlay_switch_group());
+
+            let group = PreferencesGroup::new();
+            for m in measurements {
+                group.add(&measurement_row(t, &m, self.temp_unit.get()));
+            }
+            sidebar.append(&group);
+        }
+        else {
             sidebar.append(&no_measurements_page());
             return;
         }
-        sidebar.append(&self.overlay_switch_group());
-
-        let group = PreferencesGroup::new();
-        for m in measurements {
-            group.add(&measurement_row(thermogram, &m, self.temp_unit.get()));
-        }
-        sidebar.append(&group);
     }
 
     /// The "Show in image" switch controlling the measurement overlay.
@@ -107,12 +120,21 @@ impl AppState {
     }
 }
 
-/// Dimmed placeholder shown when the file contains no measurement tools.
+/// Dimmed placeholder shown when the file contains no measurements.
 fn no_measurements_page() -> adw::StatusPage {
     adw::StatusPage::builder()
         .icon_name("find-location-symbolic")
-        .title(gettext("No Measurements"))
-        .description(gettext("This thermogram contains no measurement tools"))
+        .title(gettext("No measurements"))
+        .vexpand(true)
+        .css_classes(["compact"])
+        .build()
+}
+
+/// Dimmed placeholder shown when no thermogram is loaded.
+fn no_info_page() -> adw::StatusPage {
+    adw::StatusPage::builder()
+        .icon_name("info-outline-symbolic")
+        .title(gettext("No information"))
         .vexpand(true)
         .css_classes(["compact"])
         .build()
