@@ -9,8 +9,9 @@ use crate::thermogram_trait::ThermogramTrait;
 /// `image-rs/tiff`.
 ///
 /// A 'TIFF thermogram' is basically any TIFF file with a channel of data, assumed to be
-/// thermographic. Integer types (U16, U32, U64) are treated as centikelvin and converted to Celsius
-/// by subtracting 27315 and dividing by 100. U8 and float types (F32, F64) are used as-is.
+/// thermographic. Bigger integer types (I/U16+) are treated as centikelvin and converted to Celsius
+/// by subtracting 27315 and dividing by 100. Float types (F16, F32, F64) are used as-is. U/I8 is
+/// refused, as it isn't clear what temperatures 0-255 can meaningfully hold.
 ///
 /// While a file can be directly read with `from_file`, it is recommended to instead use the
 /// `Thermogram::from_file` instead. The latter detects what kind of file (TIFF, FLIR) it is dealing
@@ -23,14 +24,14 @@ pub struct TiffThermogram {
 }
 
 impl TiffThermogram {
-    /// Read a FLIR file referenced by a path.
+    /// Read a Tiff file referenced by a path.
     ///
     /// # Arguments
     /// * `file_path` - The path to the FLIR file to read.
     ///
     /// # Returns
-    /// In case of success, `Some<FlirThermogram>` is returned, otherwise `None`. Values are in
-    /// centigrades, as specified by the `ThermogramTrait` contract.
+    /// In case of success, `Some<TiffThermogram>` is returned, otherwise `None`. Values are in
+    /// centicelsius, as specified by the `ThermogramTrait` contract.
     pub fn from_file(file_path: &Path) -> Option<Self> {
         let thermal = Self::read_thermal(file_path)?;
         Some(Self { thermal, file_path: file_path.to_path_buf() })
@@ -47,10 +48,15 @@ impl TiffThermogram {
         let centikelvin_to_celsius = |values: Vec<f32>| to_array(values).map(|a| (a - 27315.0) / 100.0);
 
         match tiff.read_image().ok()? {
-            DecodingResult::U8(v) => to_array(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::U8(_) => None,
             DecodingResult::U16(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
             DecodingResult::U32(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
             DecodingResult::U64(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::I8(_) => None,
+            DecodingResult::I16(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::I32(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::I64(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::F16(v) => to_array(v.into_iter().map(f32::from).collect()),
             DecodingResult::F32(v) => to_array(v),
             DecodingResult::F64(v) => to_array(v.into_iter().map(|x| x as f32).collect()),
         }
