@@ -1,11 +1,13 @@
 # Blackbody
 
-An image viewer specialized in rendering thermograms. For an animated example, visit [here](PREVIEW.md) (loads a 7.5MB image). 
+Inspect thermograms with Blackbody, a thermogram viewer for Windows and Linux, building on the library libblackbody. For an animated example, visit [here](PREVIEW.md) (loads a 7.5MB image). 
 
 ![Screenshot of the application](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-01.png)
 
 ## Features
+
 * Opens many FLIR thermograms, especially recent ones
+* Other supported formats: Some Fluke, PNG, TIFF
 * Licensed under the EUPL, it is free software, both in price and in user rights
 * Works on Linux and Windows
 * Renders to several different color palettes (grayscale, [turbo](https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html), inferno, and more)
@@ -59,3 +61,8 @@ Reference: [Cross-compiling Rust Linux -> Windows](https://gtk-rs.org/docs-src/t
 ## Comparable to
 
 * [ThermView](https://github.com/v0l/thermview)
+
+## Source code
+
+* **[bitbucket](https://bitbucket.org/nimmerwoner/blackbody/)** - Original where the build pipeline still lives.
+* **[Github]()
