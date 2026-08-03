@@ -158,7 +158,7 @@ dependencies = [
  "log",
  "ndarray",
  "serendip",
- "tiff 0.11.3",
+ "tiff",
 ]
 
 [[package]]
@@ -510,15 +510,15 @@ dependencies = [
 
 [[package]]
 name = "flyr"
-version = "0.7.0"
+version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de96db4c06473f128057a38fc83a1bfc3eda107d600090da2d8b2933e0b331e6"
+checksum = "2f22e4015c7ec3793c6150f1abcd37da2df9f21f9b34272d4eec529c48520c2f"
 dependencies = [
  "binrw",
  "image",
  "kamadak-exif",
  "ndarray",
- "tiff 0.9.1",
+ "tiff",
  "wasm-bindgen",
  "web-sys",
 ]
@@ -929,7 +929,7 @@ dependencies = [
  "moxcms",
  "num-traits",
  "png",
- "tiff 0.11.3",
+ "tiff",
  "zune-core",
  "zune-jpeg",
 ]
@@ -1013,12 +1013,6 @@ dependencies = [
  "getrandom 0.4.3",
  "libc",
 ]
-
-[[package]]
-name = "jpeg-decoder"
-version = "0.3.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00810f1d8b74be64b13dbf3db89ac67740615d6c891f0e7b6179326533011a07"
 
 [[package]]
 name = "js-sys"
@@ -1663,17 +1657,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 3.0.3",
-]
-
-[[package]]
-name = "tiff"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba1310fcea54c6a9a4fd1aad794ecc02c31682f6bfbecdf460bf19533eed1e3e"
-dependencies = [
- "flate2",
- "jpeg-decoder",
- "weezl",
 ]
 
 [[package]]
