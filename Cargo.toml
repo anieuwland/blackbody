@@ -18,6 +18,7 @@ path = "src/main.rs"
 clap = { version = "4.6", features = ["derive"] }
 libblackbody = { path = "libblackbody", version = "0.6.0" }
 ndarray = "0.17"
+log = "0.4"
 
 [dependencies.cairo-rs]
 version = "0.22"
@@ -36,6 +37,7 @@ version = "0.22"
 
 [dependencies.glib]
 version = "0.22"
+features = ["log"]
 
 [dependencies.gtk4]
 version = "0.11"

@@ -11,8 +11,15 @@ use libadwaita::prelude::*;
 
 use crate::gtkui::app_window::AppState;
 
+static GLIB_LOGGER: glib::GlibLogger = glib::GlibLogger::new(
+    glib::GlibLoggerFormat::Plain,
+    glib::GlibLoggerDomain::CrateTarget,
+);
+
 pub fn main() -> ExitCode {
     println!("Launching Blackbody {}", config::VERSION);
+    log::set_logger(&GLIB_LOGGER).unwrap();
+    log::set_max_level(log::LevelFilter::Debug);
     init_env();
 
     let application = adw::Application::new(

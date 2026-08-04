@@ -154,6 +154,7 @@ dependencies = [
  "image",
  "libadwaita",
  "libblackbody",
+ "log",
  "ndarray",
 ]
 
@@ -779,6 +780,7 @@ dependencies = [
  "glib-sys",
  "gobject-sys",
  "libc",
+ "log",
  "memchr",
  "smallvec",
 ]
