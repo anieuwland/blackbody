@@ -3,6 +3,8 @@
 * Decode PNGs as thermograms
 * Access camera metadata
 * Access measurements/markers
+* Palette support for Fluke thermograms
+* `render_defaults` uses the embedded render range for FLIR files, if present
 
 # 0.5.0 and earlier
 * Added support for reading thermal FLIR data

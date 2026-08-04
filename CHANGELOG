@@ -1,5 +1,11 @@
 CHANGELOG
 ---------
+
+# 3.0.0
+
+* Fluke support (Ti400, Ti401p, Tis75)
+* Use embedded render range for FLIR thermograms
+
 # 2.2.0 (2026-07-26)
 A small release integrating Blackbody better with the rest of your system:
 

@@ -61,14 +61,19 @@ impl ThermogramTrait for FlukeThermogram {
         Some(&self.file_path)
     }
 
+    /// Palette in RGB, normalized to 0.0–1.0. Alpha is discarded.
     fn palette(&self) -> Option<Vec<[f32; 3]>> {
-        None
+        self.thermogram.palette().map(|p| {
+            p.iter()
+                .map(|c| c.rgb().map(|channel| f32::from(channel) / 255.0))
+                .collect()
+        })
     }
 
-    fn embedded_render_range(&self) -> Option<[f32; 2]> {
-        let scale = self.thermogram.ir_image_info().scale?;
-        Some([scale.min, scale.max])
-    }
+    // fn embedded_render_range(&self) -> Option<[f32; 2]> {
+    //     let scale = self.thermogram.ir_image_info().scale?;
+    //     Some([scale.min, scale.max])
+    // }
 
     fn measurements(&self) -> Vec<Measurement> {
         self.thermogram.markers().iter().map(Into::into).collect()
