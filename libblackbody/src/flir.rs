@@ -36,11 +36,7 @@ impl FlirThermogram {
         let thermogram = FlyrThermogram::new_from_path(file_path).ok()?;
         let thermal_buffer = thermogram.celsius_array()?;
 
-        Some(FlirThermogram {
-            thermogram,
-            file_path: file_path.to_path_buf(),
-            thermal_buffer,
-        })
+        Some(FlirThermogram { thermogram, file_path: file_path.to_path_buf(), thermal_buffer })
     }
 }
 
@@ -92,10 +88,7 @@ impl ThermogramTrait for FlirThermogram {
     ) -> Option<Array<u8, Ix3>> {
         let to_u8 = |f: f32| (f * 255.0) as u8;
         let colors = palette.iter().map(|c| [to_u8(c[0]), to_u8(c[1]), to_u8(c[2])]).collect();
-        let normalization = flyr::units::Normalization::Explicit {
-            min: min_temp + 273.15,
-            max: max_temp + 273.15,
-        };
+        let normalization = flyr::units::Normalization::Explicit { min: min_temp + 273.15, max: max_temp + 273.15 };
         let rgba = self
             .thermogram
             .picture_in_picture(&flyr::units::Palette::Custom(colors), &normalization)
@@ -111,6 +104,10 @@ impl ThermogramTrait for FlirThermogram {
         };
         let rgb: Vec<u8> = rgba.chunks_exact(4).flat_map(|p| [p[0], p[1], p[2]]).collect();
         Array::from_shape_vec((h, w, 3), rgb).ok()
+    }
+
+    fn embedded_render_range(&self) -> Option<[f32; 2]> {
+        Some(self.thermogram.embedded_range(flyr::units::Temperature::Celsius))
     }
 }
 

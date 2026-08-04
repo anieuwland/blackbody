@@ -115,7 +115,8 @@ pub trait ThermogramTrait {
     /// Render the thermogram using the minimum and maximum thermal value and the
     // `palette::TURBO` palette.
     fn render_defaults(&self) -> Array<u8, Ix3> {
-        self.render(self.min_temp(), self.max_temp(), &palettes::TURBO)
+        let range = self.embedded_render_range().unwrap_or_else(|| [self.min_temp(), self.max_temp()]);
+        self.render(range[0], range[1], &palettes::TURBO)
     }
 
     /// Export thermal data to a 16-bit grayscale PNG in centikelvin.
@@ -184,6 +185,10 @@ pub trait ThermogramTrait {
 
     fn has_palette(&self) -> bool {
         self.palette().is_some()
+    }
+
+    fn embedded_render_range(&self) -> Option<[f32; 2]> {
+        None
     }
 
     /// Returns the lowest temperature in the thermogram, or `f32::MAX` if there is no such value.

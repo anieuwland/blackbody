@@ -211,9 +211,9 @@ impl AppState {
 
     fn load_thermogram(self: &Rc<Self>, thermogram: Thermogram, path: &Path) {
         self.ui.window.set_title(Some(thermogram.identifier()));
-        let (min, max) = (thermogram.min_temp(), thermogram.max_temp());
-        self.min_temp.set(min);
-        self.max_temp.set(max);
+        let [min, max] = &thermogram.embedded_render_range().unwrap_or_else(|| [thermogram.min_temp(), thermogram.max_temp()]);
+        self.min_temp.set(*min);
+        self.max_temp.set(*max);
         self.populate_info_sidebar(Some(&thermogram));
         self.populate_measurements_sidebar(Some(&thermogram));
 
@@ -224,7 +224,7 @@ impl AppState {
 
         *self.active_palette.borrow_mut() = PALETTES[self.palette_idx.get()].to_vec();
         Self::update_embedded_palette(self, embedded_palette);
-        self.ui.osd.range_slider.configure(min, max);
+        self.ui.osd.range_slider.configure(*min, *max);
         self.update_controls(has_optical, has_pip);
         self.remember_directory(path);
         self.show_osd();
