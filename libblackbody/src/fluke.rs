@@ -70,10 +70,10 @@ impl ThermogramTrait for FlukeThermogram {
         })
     }
 
-    // fn embedded_render_range(&self) -> Option<[f32; 2]> {
-    //     let scale = self.thermogram.ir_image_info().scale?;
-    //     Some([scale.min, scale.max])
-    // }
+    fn embedded_render_range(&self) -> Option<[f32; 2]> {
+        let scale = self.thermogram.ir_image_info().scale?;
+        Some([scale.min, scale.max])
+    }
 
     fn measurements(&self) -> Vec<Measurement> {
         self.thermogram.markers().iter().map(Into::into).collect()
