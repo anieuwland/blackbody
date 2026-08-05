@@ -146,16 +146,14 @@ impl AppState {
     }
 
     /// Clicking the controls must not move keyboard focus onto them: a focused
-    /// Scale consumes Left/Right/Home/End itself, breaking the directory
-    /// navigation keys after adjusting temperature or zoom with the mouse.
-    /// Pointer interaction doesn't need focus, and keyboard users can still
-    /// Tab to the sliders.
+    /// slider handle consumes Left/Right/Home/End itself, breaking the
+    /// directory navigation keys after adjusting temperature or zoom with the
+    /// mouse. Pointer interaction doesn't need focus, and keyboard users can
+    /// still Tab to the slider's handles.
     fn prevent_focus_stealing(&self) {
         let (header, osd) = (&self.ui.header, &self.ui.osd);
-        let [min_scale, max_scale] = osd.range_slider.scales();
-        let controls: [&gtk4::Widget; 9] = [
-            min_scale.upcast_ref(),
-            max_scale.upcast_ref(),
+        let controls: [&gtk4::Widget; 8] = [
+            osd.range_slider.scale_widget(),
             osd.zoom_button.upcast_ref(),
             osd.nav_prev_button.upcast_ref(),
             osd.nav_next_button.upcast_ref(),

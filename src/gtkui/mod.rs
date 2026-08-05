@@ -1,6 +1,7 @@
 pub mod app_window;
 mod canvas;
 mod dialogs;
+mod double_scale;
 mod osd;
 mod palette_ui;
 mod palettes;
