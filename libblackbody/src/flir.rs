@@ -1,5 +1,5 @@
 use flyr::camera_metadata::CameraMetadata;
-use flyr::thermogram::FlyrThermogram;
+use flyr::thermogram::Thermogram as Flyr;
 use ndarray::*;
 use std::path::{Path, PathBuf};
 
@@ -14,7 +14,7 @@ use crate::{Measurement, ThermogramTrait};
 /// thermogram formats.
 #[derive(Clone, Debug)]
 pub struct FlirThermogram {
-    pub thermogram: FlyrThermogram,
+    pub thermogram: Flyr,
     file_path: PathBuf,
     thermal_buffer: Array<f32, Ix2>,
 }
@@ -33,7 +33,7 @@ impl FlirThermogram {
     }
 
     fn read_thermal(file_path: &Path) -> Option<FlirThermogram> {
-        let thermogram = FlyrThermogram::new_from_path(file_path).ok()?;
+        let thermogram = Thermogram::new_from_path(file_path).ok()?;
         let thermal_buffer = thermogram.celsius_array()?;
 
         Some(FlirThermogram { thermogram, file_path: file_path.to_path_buf(), thermal_buffer })

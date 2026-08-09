@@ -1,5 +1,5 @@
 use ndarray::*;
-use serendip::SerendipThermogram;
+use serendip::Thermogram as Serendip;
 use std::path::{Path, PathBuf};
 
 use crate::{Measurement, ThermogramTrait};
@@ -8,7 +8,7 @@ use crate::{Measurement, ThermogramTrait};
 /// [serendip](https://crates.io/crates/serendip).
 #[derive(Clone, Debug)]
 pub struct FlukeThermogram {
-    pub thermogram: SerendipThermogram,
+    pub thermogram: Serendip,
     file_path: PathBuf,
     thermal_buffer: Array<f32, Ix2>,
 }
@@ -27,7 +27,7 @@ impl FlukeThermogram {
     }
 
     fn read_thermal(file_path: &Path) -> Option<FlukeThermogram> {
-        let thermogram = SerendipThermogram::new_from_path(file_path).ok()?;
+        let thermogram = Thermogram::new_from_path(file_path).ok()?;
 
         let w = thermogram.width().into();
         let h = thermogram.height().into();
