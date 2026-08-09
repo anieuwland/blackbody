@@ -15,9 +15,9 @@ pub fn get_make_dependent_params(thermogram: &Thermogram, unit: &TempUnit) -> Ve
         },
         Thermogram::Fluke(src) => {
             let t = &src.thermogram;
-            params.push((gettext("Emissivity"), format!("{:.2}", t.ir_image_info().emissivity)));
-            params.push((gettext("Transmission"), format!("{:.2}", t.ir_image_info().transmission)));
-            params.push((gettext("Background temperature"), unit.format(t.ir_image_info().background_temperature)));
+            params.push((gettext("Emissivity"), format!("{:.2}", t.ir_image_info().emissivity())));
+            params.push((gettext("Transmission"), format!("{:.2}", t.ir_image_info().transmission())));
+            params.push((gettext("Background temperature"), unit.format(t.ir_image_info().background_temperature())));
         },
         Thermogram::Tiff(_) | Thermogram::Png(_) => {},
     };

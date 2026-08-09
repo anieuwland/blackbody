@@ -1,4 +1,3 @@
-use log::{debug, error};
 use ndarray::*;
 use serendip::SerendipThermogram;
 use std::path::{Path, PathBuf};
@@ -32,7 +31,7 @@ impl FlukeThermogram {
 
         let w = thermogram.width().into();
         let h = thermogram.height().into();
-        let data: Vec<f32> = thermogram.kelvin()?.iter().map(|k| k - 273.15).collect();
+        let data: Vec<f32> = thermogram.kelvin()?.pixels().map(|k| k - 273.15).collect();
         let thermal_buffer = Array::from(data).into_shape_with_order(((h, w), Order::C)).ok()?;
 
         Some(FlukeThermogram { thermogram, file_path: file_path.to_path_buf(), thermal_buffer })
@@ -45,12 +44,10 @@ impl ThermogramTrait for FlukeThermogram {
     }
 
     fn visual(&self) -> Option<Array<u8, Ix3>> {
-        let bytes = self.thermogram.visual()?;
-        let (width, height, visual) = decode_jpeg(bytes)?;
-        Array::from(visual)
-            .into_shape_with_order(((height, width, 3), Order::C))
-            .inspect_err(|e| error!("{e}"))
-            .ok()
+        let visual = self.thermogram.visual()?;
+        let (w, h) = (visual.width(), visual.height());
+        let data: Vec<u8> = visual.pixels().flat_map(|p| [p.r, p.g, p.b]).collect();
+        Array::from(data).into_shape_with_order(((h, w, 3), Order::C)).ok()
     }
 
     fn identifier(&self) -> &str {
@@ -65,13 +62,13 @@ impl ThermogramTrait for FlukeThermogram {
     fn palette(&self) -> Option<Vec<[f32; 3]>> {
         self.thermogram.palette().map(|p| {
             p.iter()
-                .map(|c| c.rgb().map(|channel| f32::from(channel) / 255.0))
+                .map(|c| [c.r, c.g, c.b].map(|channel| f32::from(channel) / 255.0))
                 .collect()
         })
     }
 
     fn embedded_render_range(&self) -> Option<[f32; 2]> {
-        let scale = self.thermogram.ir_image_info().scale?;
+        let scale = self.thermogram.embedded_render_range()?;
         Some([scale.min, scale.max])
     }
 
@@ -84,15 +81,4 @@ impl From<&FlukeThermogram> for Array<f32, Ix2> {
     fn from(thermogram: &FlukeThermogram) -> Array<f32, Ix2> {
         thermogram.thermal().clone()
     }
-}
-
-fn decode_jpeg(bytes: &[u8]) -> Option<(usize, usize, Vec<u8>)> {
-    debug!("Decoding jpeg");
-    let img = image::load_from_memory_with_format(bytes, image::ImageFormat::Jpeg)
-        .inspect_err(|e| debug!("JPEG decode failed: {e}"))
-        .ok()?
-        .into_rgb8();
-    let (width, height) = (img.width() as usize, img.height() as usize);
-    debug!("Decoded image dimensions: {width}×{height}");
-    Some((width, height, img.into_raw()))
 }

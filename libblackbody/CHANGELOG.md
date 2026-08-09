@@ -1,5 +1,5 @@
 # 0.6.0
-* Fluke support via the `serendip` crate
+* Fluke is2 support via the `serendip` crate
 * Decode PNGs as thermograms
 * Access camera metadata
 * Access measurements/markers
