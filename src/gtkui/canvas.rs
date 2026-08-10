@@ -13,7 +13,8 @@ use glib::object::SendWeakRef;
 use glib::MainContext;
 use gtk4::prelude::*;
 use gtk4::{EventControllerMotion, EventControllerScroll, EventControllerScrollFlags, Tooltip};
-use ndarray::{Array, Ix3};
+use imgref::ImgVec;
+use rgb::RGB8;
 
 use super::app_window::AppState;
 use libblackbody::{Measurement, Thermogram, ThermogramTrait};
@@ -84,9 +85,8 @@ impl AppState {
                 return; // superseded while queued; skip the expensive render
             }
             let image = render_for_mode(&thermogram, min, max, &palette, thermal_mode, pip_mode);
-            let Some(bytes) = image.as_slice() else { return };
-            let (h, w) = (image.shape()[0] as i32, image.shape()[1] as i32);
-            let bgra = rgb_to_bgra(bytes);
+            let (w, h) = (image.width() as i32, image.height() as i32);
+            let bgra = rgb_to_bgra(image);
             MainContext::default().invoke(move || {
                 if generation.load(Ordering::Relaxed) != my_gen {
                     return; // a newer render already published
@@ -129,7 +129,7 @@ impl AppState {
             return false;
         };
 
-        let temp = thermogram.thermal()[[iy, ix]];
+        let temp = thermogram.thermal()[(ix, iy)];
         tooltip.set_text(Some(&self.temp_unit.get().format(temp)));
         true
     }
@@ -378,7 +378,7 @@ fn render_for_mode(
     palette: &[[f32; 3]],
     thermal_mode: bool,
     pip_mode: bool,
-) -> Array<u8, Ix3> {
+) -> ImgVec<RGB8> {
     if pip_mode {
         thermogram
             .picture_in_picture(min, max, palette)
@@ -390,15 +390,11 @@ fn render_for_mode(
     }
 }
 
-/// Convert tightly packed RGB to Cairo Rgb24 (4 bytes/pixel: BGRX on little-endian).
-fn rgb_to_bgra(bytes: &[u8]) -> Vec<u8> {
-    let mut bgra = vec![0u8; bytes.len() / 3 * 4];
-    for (i, pixel) in bytes.chunks_exact(3).enumerate() {
-        let j = i * 4;
-        bgra[j]     = pixel[2]; // B
-        bgra[j + 1] = pixel[1]; // G
-        bgra[j + 2] = pixel[0]; // R
-    }
+/// Convert an RGB image to Cairo Rgb24 pixels (4 bytes/pixel: BGRX on little-endian).
+/// Iterating pixels (not the raw buffer) keeps this correct for non-contiguous images.
+fn rgb_to_bgra(image: ImgVec<RGB8>) -> Vec<u8> {
+    let mut bgra = Vec::with_capacity(image.width() * image.height() * 4);
+    bgra.extend(image.pixels().flat_map(|p| [p.b, p.g, p.r, 0]));
     bgra
 }
 

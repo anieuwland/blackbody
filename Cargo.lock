@@ -152,10 +152,11 @@ dependencies = [
  "glib",
  "gtk4",
  "image",
+ "imgref",
  "libadwaita",
  "libblackbody",
  "log",
- "ndarray",
+ "rgb",
 ]
 
 [[package]]
@@ -1118,8 +1119,9 @@ dependencies = [
  "enum_dispatch",
  "flyr",
  "image",
+ "imgref",
  "log",
- "ndarray",
+ "rgb",
  "serendip",
  "tiff",
 ]
