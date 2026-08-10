@@ -1,5 +1,6 @@
-use ndarray::*;
-use serendip::Thermogram as Serendip;
+use imgref::{Img, ImgVec};
+use rgb::RGB8;
+use serendip::{Thermogram as Serendip};
 use std::path::{Path, PathBuf};
 
 use crate::{Measurement, ThermogramTrait};
@@ -9,8 +10,8 @@ use crate::{Measurement, ThermogramTrait};
 #[derive(Clone, Debug)]
 pub struct FlukeThermogram {
     pub thermogram: Serendip,
-    file_path: PathBuf,
-    thermal_buffer: Array<f32, Ix2>,
+    pub file_path: PathBuf,
+    thermal: ImgVec<f32>,
 }
 
 impl FlukeThermogram {
@@ -21,33 +22,37 @@ impl FlukeThermogram {
     ///
     /// # Returns
     /// In case of success, `Some<FlukeThermogram>` is returned, otherwise `None`. Values are in
-    /// centigrades, as specified by the `ThermogramTrait` contract.
+    /// celsius, as specified by the `ThermogramTrait` contract.
     pub fn from_file(file_path: &Path) -> Option<FlukeThermogram> {
         FlukeThermogram::read_thermal(file_path)
     }
 
     fn read_thermal(file_path: &Path) -> Option<FlukeThermogram> {
-        let thermogram = Thermogram::new_from_path(file_path).ok()?;
+        let thermogram = Serendip::new_from_path(file_path).ok()?;
+        let kelvin = thermogram.kelvin()?;
 
-        let w = thermogram.width().into();
-        let h = thermogram.height().into();
-        let data: Vec<f32> = thermogram.kelvin()?.pixels().map(|k| k - 273.15).collect();
-        let thermal_buffer = Array::from(data).into_shape_with_order(((h, w), Order::C)).ok()?;
+        // FIXME Standardize on kelvin in libblackbody (Ugly transform to celsius)
+        let (buf, w, h) = kelvin.into_contiguous_buf();
+        let thermal = Img::new(buf.into_iter().map(|k| k - 273.15).collect(), w, h);
 
-        Some(FlukeThermogram { thermogram, file_path: file_path.to_path_buf(), thermal_buffer })
+        Some(FlukeThermogram { thermogram, file_path: file_path.to_path_buf(), thermal })
     }
 }
 
 impl ThermogramTrait for FlukeThermogram {
-    fn thermal(&self) -> &Array<f32, Ix2> {
-        &self.thermal_buffer
+    fn thermal(&self) -> &ImgVec<f32> {
+        &self.thermal
     }
 
-    fn visual(&self) -> Option<Array<u8, Ix3>> {
-        let visual = self.thermogram.visual()?;
-        let (w, h) = (visual.width(), visual.height());
-        let data: Vec<u8> = visual.pixels().flat_map(|p| [p.r, p.g, p.b]).collect();
-        Array::from(data).into_shape_with_order(((h, w, 3), Order::C)).ok()
+    fn visual(&self) -> Option<ImgVec<RGB8>> {
+        self.thermogram.visual()
+    }
+
+    fn has_optical(&self) -> bool {
+        match &self.thermogram {
+            Serendip::Zip(t) => !t.visuals.is_empty(),
+            Serendip::Blob(t) => t.visual_data.is_some(),
+        }
     }
 
     fn identifier(&self) -> &str {
@@ -61,9 +66,7 @@ impl ThermogramTrait for FlukeThermogram {
     /// Palette in RGB, normalized to 0.0–1.0. Alpha is discarded.
     fn palette(&self) -> Option<Vec<[f32; 3]>> {
         self.thermogram.palette().map(|p| {
-            p.iter()
-                .map(|c| [c.r, c.g, c.b].map(|channel| f32::from(channel) / 255.0))
-                .collect()
+            p.iter().map(|c| [c.r, c.g, c.b].map(|channel| f32::from(channel) / 255.0)).collect()
         })
     }
 
@@ -74,11 +77,5 @@ impl ThermogramTrait for FlukeThermogram {
 
     fn measurements(&self) -> Vec<Measurement> {
         self.thermogram.markers().iter().map(Into::into).collect()
-    }
-}
-
-impl From<&FlukeThermogram> for Array<f32, Ix2> {
-    fn from(thermogram: &FlukeThermogram) -> Array<f32, Ix2> {
-        thermogram.thermal().clone()
     }
 }

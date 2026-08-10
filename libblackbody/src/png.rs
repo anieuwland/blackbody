@@ -1,5 +1,6 @@
 use image::DynamicImage;
-use ndarray::*;
+use imgref::{Img, ImgVec};
+use rgb::RGB8;
 use std::path::{Path, PathBuf};
 
 use crate::thermogram_trait::ThermogramTrait;
@@ -10,8 +11,8 @@ use crate::thermogram_trait::ThermogramTrait;
 /// `celsius = (raw_u16 - 27315) / 100`
 #[derive(Clone, Debug)]
 pub struct PngThermogram {
-    thermal: Array<f32, Ix2>,
-    file_path: PathBuf,
+    pub file_path: PathBuf,
+    thermal: ImgVec<f32>,
 }
 
 impl PngThermogram {
@@ -26,14 +27,14 @@ impl PngThermogram {
             .into_iter()
             .map(|v| (v as f32 - 27315.0) / 100.0)
             .collect();
-        let thermal = Array::from_shape_vec((h as usize, w as usize), values).ok()?;
+        let thermal = Img::new(values, w as usize, h as usize);
         Some(Self { thermal, file_path: file_path.to_path_buf() })
     }
 }
 
 impl ThermogramTrait for PngThermogram {
-    fn thermal(&self) -> &Array<f32, Ix2> { &self.thermal }
-    fn visual(&self) -> Option<Array<u8, Ix3>> { None }
+    fn thermal(&self) -> &ImgVec<f32> { &self.thermal }
+    fn visual(&self) -> Option<ImgVec<RGB8>> { None }
     fn identifier(&self) -> &str {
         self.file_path.file_name().and_then(|n| n.to_str()).unwrap_or("<thermogram>")
     }

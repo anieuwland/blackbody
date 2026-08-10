@@ -1,5 +1,5 @@
 use flyr::measurement_info::Measurement as Flir;
-use ndarray::{Array, Ix2};
+use imgref::ImgVec;
 use serendip::markers::Marker as Fluke;
 
 /// Measurement shapes supported by libblackbody.
@@ -125,12 +125,12 @@ impl Measurement {
     ///
     /// Measurement coordinates come from the file and are clamped to the thermal
     /// dimensions, so corrupt records cannot index out of bounds.
-    pub fn measurement_stats(&self, thermal: &Array<f32, Ix2>) -> Option<TempStats> {
-        let (h, w) = (thermal.nrows(), thermal.ncols());
+    pub fn measurement_stats(&self, thermal: &ImgVec<f32>) -> Option<TempStats> {
+        let (w, h) = (thermal.width(), thermal.height());
         if h == 0 || w == 0 {
             return None;
         }
-        let temp_at = move |x: usize, y: usize| thermal[[y.min(h - 1), x.min(w - 1)]];
+        let temp_at = move |x: usize, y: usize| thermal[(x.min(w - 1), y.min(h - 1))];
 
         let temps: Vec<f32> = match self {
             Measurement::Spot { x, y, .. } | Measurement::Endpoint { x, y, .. } => {
@@ -207,14 +207,14 @@ fn line_points(x1: u32, y1: u32, x2: u32, y2: u32) -> impl Iterator<Item = (usiz
 mod tests {
     use std::path::Path;
 
-    use ndarray::Array;
+    use imgref::Img;
 
     use crate::{FlirThermogram, Measurement, ThermogramTrait, fake::Fake};
 
     #[test]
     fn measurement_stats_spot_area_line() {
         // 2x3 grid: row 0 = [0, 1, 2], row 1 = [10, 11, 12]
-        let t = Fake(Array::from_shape_vec((2, 3), vec![0.0, 1.0, 2.0, 10.0, 11.0, 12.0]).unwrap());
+        let t = Fake(Img::new(vec![0.0, 1.0, 2.0, 10.0, 11.0, 12.0], 3, 2));
 
         let spot = Measurement::Spot { label: "".into(), x: 2, y: 1 };
         let s = spot.measurement_stats(t.thermal()).unwrap();
@@ -235,13 +235,14 @@ mod tests {
         assert_eq!(oob.avg, 12.0);
 
         let ellipse = Measurement::Ellipse { label: "".into(), params: vec![] };
-        assert!(ellipse.measurement_stats(&t.thermal()).is_none());
+        assert!(ellipse.measurement_stats(t.thermal()).is_none());
     }
 
     #[test]
     fn measurement_stats_ellipse() {
         // 5x5 grid with value y*10 + x
-        let t = Fake(Array::from_shape_fn((5, 5), |(y, x)| (y * 10 + x) as f32));
+        let values: Vec<f32> = (0..5).flat_map(|y| (0..5).map(move |x| (y * 10 + x) as f32)).collect();
+        let t = Fake(Img::new(values, 5, 5));
 
         // Circle: centre (2, 2), semi-axis endpoints (3, 2) and (2, 1) → radius 1.
         // Inside: (2,2), (1,2), (3,2), (2,1), (2,3) → 22, 21, 23, 12, 32.

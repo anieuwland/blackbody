@@ -1,16 +1,17 @@
 use std::path::PathBuf;
 
-use ndarray::{Array, Ix2, Ix3};
+use imgref::ImgVec;
+use rgb::RGB8;
 
 use crate::ThermogramTrait;
 
-pub struct Fake(pub Array<f32, Ix2>);
+pub struct Fake(pub ImgVec<f32>);
 
 impl ThermogramTrait for Fake {
-    fn thermal(&self) -> &Array<f32, Ix2> {
+    fn thermal(&self) -> &ImgVec<f32> {
         &self.0
     }
-    fn visual(&self) -> Option<Array<u8, Ix3>> {
+    fn visual(&self) -> Option<ImgVec<RGB8>> {
         None
     }
     fn identifier(&self) -> &str {

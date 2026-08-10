@@ -1,6 +1,7 @@
-use ndarray::*;
 use std::fs::File;
 use std::path::{Path, PathBuf};
+use imgref::{Img, ImgVec};
+use rgb::RGB8;
 use tiff::decoder::DecodingResult;
 
 use crate::thermogram_trait::ThermogramTrait;
@@ -19,19 +20,19 @@ use crate::thermogram_trait::ThermogramTrait;
 /// thermogram formats.
 #[derive(Clone, Debug)]
 pub struct TiffThermogram {
-    thermal: Array<f32, Ix2>,
-    file_path: PathBuf,
+    pub file_path: PathBuf,
+    thermal: ImgVec<f32>,
 }
 
 impl TiffThermogram {
     /// Read a Tiff file referenced by a path.
     ///
     /// # Arguments
-    /// * `file_path` - The path to the FLIR file to read.
+    /// * `file_path` - The path to the TIFF file to read.
     ///
     /// # Returns
     /// In case of success, `Some<TiffThermogram>` is returned, otherwise `None`. Values are in
-    /// centicelsius, as specified by the `ThermogramTrait` contract.
+    /// celsius, as specified by the `ThermogramTrait` contract.
     pub fn from_file(file_path: &Path) -> Option<Self> {
         let thermal = Self::read_thermal(file_path)?;
         Some(Self { thermal, file_path: file_path.to_path_buf() })
@@ -39,42 +40,39 @@ impl TiffThermogram {
 
     /// Decodes the first image in the TIFF. Any decode failure (corrupt file,
     /// unexpected sample count) yields `None` rather than a panic.
-    fn read_thermal(file_path: &Path) -> Option<Array<f32, Ix2>> {
+    fn read_thermal(file_path: &Path) -> Option<ImgVec<f32>> {
         let file = File::open(file_path).ok()?;
         let mut tiff = tiff::decoder::Decoder::new(file).ok()?;
         let (width, height) = tiff.dimensions().ok()?;
-        let dims = (height as usize, width as usize);
-        let to_array = |values: Vec<f32>| Array::from_shape_vec(dims, values).ok();
-        let centikelvin_to_celsius = |values: Vec<f32>| to_array(values).map(|a| (a - 27315.0) / 100.0);
+        let to_imgvec = |values: Vec<f32>| {
+            (values.len() == width as usize * height as usize)
+                .then(|| Img::new(values, width as usize, height as usize))
+        };
+        let centikelvin_to_celsius = |values: Vec<f32>| {
+            to_imgvec(values.into_iter().map(|a| (a - 27315.0) / 100.0).collect())
+        };
 
         match tiff.read_image().ok()? {
-            DecodingResult::U8(_) => None,
+            DecodingResult::U8(_) | DecodingResult::I8(_) => None,
             DecodingResult::U16(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
             DecodingResult::U32(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
             DecodingResult::U64(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
-            DecodingResult::I8(_) => None,
             DecodingResult::I16(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
             DecodingResult::I32(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
             DecodingResult::I64(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
-            DecodingResult::F16(v) => to_array(v.into_iter().map(f32::from).collect()),
-            DecodingResult::F32(v) => to_array(v),
-            DecodingResult::F64(v) => to_array(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::F16(v) => to_imgvec(v.into_iter().map(f32::from).collect()),
+            DecodingResult::F32(v) => to_imgvec(v),
+            DecodingResult::F64(v) => to_imgvec(v.into_iter().map(|x| x as f32).collect()),
         }
     }
 }
 
-impl From<&TiffThermogram> for Array<f32, Ix2> {
-    fn from(thermogram: &TiffThermogram) -> Array<f32, Ix2> {
-        thermogram.thermal().clone()
-    }
-}
-
 impl ThermogramTrait for TiffThermogram {
-    fn thermal(&self) -> &Array<f32, Ix2> {
+    fn thermal(&self) -> &ImgVec<f32> {
         &self.thermal
     }
 
-    fn visual(&self) -> Option<Array<u8, Ix3>> {
+    fn visual(&self) -> Option<ImgVec<RGB8>> {
         None
     }
 
