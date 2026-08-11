@@ -70,7 +70,7 @@ impl ThermogramTrait for FlirThermogram {
         Some(Img::new(bytes.as_rgb().to_vec(), width, height))
     }
 
-    fn has_optical(&self) -> bool {
+    fn has_visual(&self) -> bool {
         self.thermogram.embedded_image.is_some()
     }
 
@@ -103,7 +103,7 @@ impl ThermogramTrait for FlirThermogram {
         self.thermogram.pip_info.is_some() && self.thermogram.embedded_image.is_some()
     }
 
-    /// Composite the thermal render onto the optical image using the embedded PIP geometry.
+    /// Composite the thermal render onto the visual light image using the embedded PiP geometry.
     /// Temperatures in celsius, palette colors in 0.0–1.0 RGB, as elsewhere in this crate.
     fn picture_in_picture(
         &self,
@@ -119,7 +119,7 @@ impl ThermogramTrait for FlirThermogram {
             .picture_in_picture(&flyr::units::Palette::Custom(colors), &normalization)
             .ok()?;
 
-        // The composite has the orientation-corrected optical dimensions.
+        // The composite has the orientation-corrected visual light dimensions.
         let ei = self.thermogram.embedded_image.as_ref()?;
         let orientation = self.thermogram.orientation.unwrap_or(1);
         let (w, h) = if (5..=8).contains(&orientation) {
@@ -129,7 +129,7 @@ impl ThermogramTrait for FlirThermogram {
         };
         let (expected, length) = (w * h * 4, rgba.len());
         if expected != length {
-            warn!("PIP composite did not contain expected amount of bytes: expected {expected}, got {length}");
+            warn!("PiP composite did not contain expected amount of bytes: expected {expected}, got {length}");
             return None;
         }
 
@@ -160,14 +160,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn pip_composite_has_optical_shape() {
+    fn pip_composite_has_visual_shape() {
         let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_e5_2-pip.jpg");
         let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
         assert!(t.has_pip());
         let img = t
             .picture_in_picture(t.min_temp(), t.max_temp(), &crate::palettes::TURBO)
             .expect("pip composite");
-        // Optical is 640x480 vs 120x90 thermal; RGB channels last.
-        assert_eq!([img.height(), img.width()], [480, 640]);
+        // Visual is 640x480 vs 120x90 thermal; RGB channels last.
+        assert_eq!([img.width(), img.height()], [640, 480]);
     }
 }

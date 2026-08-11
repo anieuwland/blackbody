@@ -254,7 +254,7 @@ msgstr ""
 "fonctionnalités :"
 
 #: data/eu.nimmerfort.blackbody.metainfo.xml.in:100
-msgid "Ability to view optical images (photos) in FLIR images"
+msgid "Ability to view visual images (photos) in FLIR images"
 msgstr "Possibilité d’afficher les images optiques (photos) des images FLIR"
 
 #: data/eu.nimmerfort.blackbody.metainfo.xml.in:101

@@ -109,7 +109,7 @@ impl AppState {
 
     fn query_tooltip(&self, x: i32, y: i32, tooltip: &Tooltip) -> bool {
         // Temperature readout only makes sense on the thermal render: the
-        // optical and PIP images have different dimensions and geometry.
+        // visual and PiP images have different dimensions and geometry.
         if !self.is_thermal_mode() {
             return false;
         }
@@ -177,7 +177,7 @@ impl AppState {
         let _ = ctx.restore();
 
         // ponytail: measurement coords are thermal pixels, which map 1:1 onto the
-        // thermal render only; add the PIP transform if overlays are wanted there.
+        // thermal render only; add the PiP transform if overlays are wanted there.
         if !self.draw_measurements.get() || !self.is_thermal_mode() {
             return;
         }
@@ -361,7 +361,7 @@ impl AppState {
 }
 
 /// The pixels for the given display mode, falling back to the thermal render
-/// when the file lacks the optical/PIP data.
+/// when the file lacks the visual/PiP data.
 /// The open-hand cursor, falling back to the legacy X11 name "openhand" for
 /// themes that don't ship the CSS name. `set_cursor_from_name` alone would
 /// fall back to the arrow, which reads as "dragging is not possible".

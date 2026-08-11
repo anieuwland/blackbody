@@ -215,7 +215,7 @@ impl AppState {
         self.populate_info_sidebar(Some(&thermogram));
         self.populate_measurements_sidebar(Some(&thermogram));
 
-        let has_optical = thermogram.has_optical();
+        let has_visual = thermogram.has_visual();
         let has_pip = thermogram.has_pip();
         let embedded_palette = thermogram.palette();
         *self.thermogram.borrow_mut() = Some(Arc::new(thermogram));
@@ -223,7 +223,7 @@ impl AppState {
         *self.active_palette.borrow_mut() = PALETTES[self.palette_idx.get()].to_vec();
         Self::update_embedded_palette(self, embedded_palette);
         self.ui.osd.range_slider.configure(*min, *max);
-        self.update_controls(has_optical, has_pip);
+        self.update_controls(has_visual, has_pip);
         self.remember_directory(path);
         self.show_osd();
         self.draw_render_threaded();
@@ -235,7 +235,7 @@ impl AppState {
     /// Enable the controls the loaded file supports and fall back to thermal
     /// mode if the active mode lost its data. Call after the thermogram is
     /// stored: switching the mode triggers a re-render.
-    fn update_controls(&self, has_optical: bool, has_pip: bool) {
+    fn update_controls(&self, has_visual: bool, has_pip: bool) {
         self.ui.canvas.placeholder.set_visible(false);
         self.ui.canvas.error_page.set_visible(false);
         self.ui.osd.zoom_button.set_sensitive(true);
@@ -247,10 +247,10 @@ impl AppState {
         header.measurements_button.set_sensitive(true);
         let modes = &header.mode_group;
         modes.set_sensitive(true);
-        modes.toggle_by_name("visible").unwrap().set_enabled(has_optical);
+        modes.toggle_by_name("visible").unwrap().set_enabled(has_visual);
         modes.toggle_by_name("overlay").unwrap().set_enabled(has_pip);
         let active = modes.active_name();
-        if (!has_optical && active.as_deref() == Some("visible"))
+        if (!has_visual && active.as_deref() == Some("visible"))
             || (!has_pip && active.as_deref() == Some("overlay"))
         {
             modes.set_active_name(Some("thermal"));

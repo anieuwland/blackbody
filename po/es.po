@@ -246,7 +246,7 @@ msgstr ""
 "Esta versión renueva la interfaz y añade características nuevas importantes:"
 
 #: data/eu.nimmerfort.blackbody.metainfo.xml.in:100
-msgid "Ability to view optical images (photos) in FLIR images"
+msgid "Ability to view visual images (photos) in FLIR images"
 msgstr "Posibilidad de ver las imágenes ópticas (fotos) de las imágenes FLIR"
 
 #: data/eu.nimmerfort.blackbody.metainfo.xml.in:101

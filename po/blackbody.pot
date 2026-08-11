@@ -222,7 +222,7 @@ msgid "This release overhauls the UI and adds important new features:"
 msgstr ""
 
 #: data/eu.nimmerfort.blackbody.metainfo.xml.in:100
-msgid "Ability to view optical images (photos) in FLIR images"
+msgid "Ability to view visual images (photos) in FLIR images"
 msgstr ""
 
 #: data/eu.nimmerfort.blackbody.metainfo.xml.in:101

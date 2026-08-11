@@ -48,7 +48,7 @@ impl ThermogramTrait for FlukeThermogram {
         self.thermogram.visual()
     }
 
-    fn has_optical(&self) -> bool {
+    fn has_visual(&self) -> bool {
         match &self.thermogram {
             Serendip::Zip(t) => !t.visuals.is_empty(),
             Serendip::Blob(t) => t.visual_data.is_some(),

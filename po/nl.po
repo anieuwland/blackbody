@@ -251,7 +251,7 @@ msgstr ""
 "functionaliteit toe:"
 
 #: data/eu.nimmerfort.blackbody.metainfo.xml.in:100
-msgid "Ability to view optical images (photos) in FLIR images"
+msgid "Ability to view visual images (photos) in FLIR images"
 msgstr ""
 "Mogelijkheid om optische beelden (foto's) in FLIR-bestanden te bekijken"
 

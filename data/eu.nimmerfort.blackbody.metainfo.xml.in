@@ -97,7 +97,7 @@
       <description>
         <p>This release overhauls the UI and adds important new features:</p>
         <ul>
-          <li>Ability to view optical images (photos) in FLIR images</li>
+          <li>Ability to view visual images (photos) in FLIR images</li>
           <li>Support for rendering thermal data to FLIR's embedded palettes</li>
           <li>Correcting for the rotation of a thermogram to show the image right side up</li>
         </ul>

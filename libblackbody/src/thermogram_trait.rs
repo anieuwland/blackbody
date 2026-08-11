@@ -49,13 +49,13 @@ pub trait ThermogramTrait {
         Vec::new()
     }
 
-    /// Whether the file has picture-in-picture geometry and an embedded optical image.
+    /// Whether the file has picture-in-picture geometry and an embedded visual image.
     fn has_pip(&self) -> bool {
         // Override in implementing format if available.
         false
     }
 
-    /// Thermal render composited onto the optical image, if the file has PIP geometry.
+    /// Thermal render composited onto the visual light image, if the file has PiP geometry.
     fn picture_in_picture(
         &self,
         _min_temp: f32,
@@ -168,7 +168,7 @@ pub trait ThermogramTrait {
         [thermal.height(), thermal.width()]
     }
 
-    fn has_optical(&self) -> bool {
+    fn has_visual(&self) -> bool {
         self.visual().is_some()
     }
 
@@ -229,7 +229,7 @@ mod tests {
     #[test]
     fn capability_defaults_are_absent() {
         let t = fake();
-        assert!(!t.has_optical() && !t.has_pip() && !t.has_palette());
+        assert!(!t.has_visual() && !t.has_pip() && !t.has_palette());
         assert!(t.measurements().is_empty() && t.embedded_render_range().is_none());
     }
 }
