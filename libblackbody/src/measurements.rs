@@ -241,7 +241,8 @@ mod tests {
     #[test]
     fn measurement_stats_ellipse() {
         // 5x5 grid with value y*10 + x
-        let values: Vec<f32> = (0..5).flat_map(|y| (0..5).map(move |x| (y * 10 + x) as f32)).collect();
+        let values: Vec<f32> =
+            (0..5).flat_map(|y| (0..5).map(move |x| (y * 10 + x) as f32)).collect();
         let t = Fake(Img::new(values, 5, 5));
 
         // Circle: centre (2, 2), semi-axis endpoints (3, 2) and (2, 1) → radius 1.

@@ -5,8 +5,8 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 
 use gettextrs::gettext;
-use gtk4::prelude::*;
 use gtk4::FileFilter;
+use gtk4::prelude::*;
 use libadwaita as adw;
 use libadwaita::prelude::*;
 
@@ -22,10 +22,8 @@ impl AppState {
         filters.append(&this.ui.filter_tiff);
         filters.append(&this.ui.filter_png);
         filters.append(&this.ui.filter_all_files);
-        let dialog = gtk4::FileDialog::builder()
-            .title(gettext("Open thermogram"))
-            .filters(&filters)
-            .build();
+        let dialog =
+            gtk4::FileDialog::builder().title(gettext("Open thermogram")).filters(&filters).build();
         let that = this.clone();
         dialog.open(Some(&this.ui.window), gio::Cancellable::NONE, move |result| {
             if let Ok(file) = result {
@@ -71,9 +69,13 @@ impl AppState {
 
         let that = this.clone();
         dialog.connect_response(move |dlg, response| {
-            if response != ResponseType::Accept { return }
+            if response != ResponseType::Accept {
+                return;
+            }
             let Some(path) = dlg.file().and_then(|f| f.path()) else { return };
-            let ext = dlg.filter().and_then(|f| f.name())
+            let ext = dlg
+                .filter()
+                .and_then(|f| f.name())
                 .map(|n| if n.contains("PNG") { "png" } else { "tiff" })
                 .unwrap_or("tiff");
             that.export_thermal_to(ensure_extension(path, ext), ext);
@@ -83,9 +85,16 @@ impl AppState {
 
     /// Default file stem for exports: the open file's name, else "thermogram".
     fn export_stem(&self) -> String {
-        self.thermogram.borrow().as_ref()
-            .map(|t| Path::new(t.identifier()).file_stem()
-                .and_then(|s| s.to_str()).unwrap_or("thermogram").to_string())
+        self.thermogram
+            .borrow()
+            .as_ref()
+            .map(|t| {
+                Path::new(t.identifier())
+                    .file_stem()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("thermogram")
+                    .to_string()
+            })
             .unwrap_or_else(|| "thermogram".into())
     }
 
@@ -128,7 +137,9 @@ impl AppState {
 
     /// Default name for saved renders: the open file's name as .png, else "render.png".
     fn render_name(&self) -> String {
-        self.thermogram.borrow().as_ref()
+        self.thermogram
+            .borrow()
+            .as_ref()
             .map(|t| {
                 let mut p = PathBuf::from(t.identifier());
                 p.set_extension("png");

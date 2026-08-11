@@ -29,9 +29,7 @@ const UI: &str = "/eu/nimmerfort/blackbody/resources/eu.nimmerfort.blackbody.ui"
 /// the Meson build installs schemas).
 fn app_settings() -> Option<gio::Settings> {
     let schema = gio::SettingsSchemaSource::default()?.lookup("eu.nimmerfort.blackbody", true)?;
-    schema
-        .has_key("temperature-unit")
-        .then(|| gio::Settings::new("eu.nimmerfort.blackbody"))
+    schema.has_key("temperature-unit").then(|| gio::Settings::new("eu.nimmerfort.blackbody"))
 }
 
 /// BGRA pixels plus width and height, shared with the render thread.
@@ -104,11 +102,11 @@ impl AppState {
 
         // We're inside connect_activate, so GTK is ready — present immediately
         let app = application.as_ref();
-        app.set_accels_for_action("app.new-window",  &["<Control>n"]);
-        app.set_accels_for_action("win.open",        &["<Control>o"]);
+        app.set_accels_for_action("app.new-window", &["<Control>n"]);
+        app.set_accels_for_action("win.open", &["<Control>o"]);
         app.set_accels_for_action("win.open-folder", &["<Control><Shift>o"]);
-        app.set_accels_for_action("win.export",      &["<Control>e"]);
-        app.set_accels_for_action("win.render",      &["<Control>s"]);
+        app.set_accels_for_action("win.export", &["<Control>e"]);
+        app.set_accels_for_action("win.render", &["<Control>s"]);
         app.add_window(&this.ui.window);
         this.ui.window.present();
         this
@@ -209,7 +207,9 @@ impl AppState {
 
     fn load_thermogram(self: &Rc<Self>, thermogram: Thermogram, path: &Path) {
         self.ui.window.set_title(Some(thermogram.identifier()));
-        let [min, max] = &thermogram.embedded_render_range().unwrap_or_else(|| [thermogram.min_temp(), thermogram.max_temp()]);
+        let [min, max] = &thermogram
+            .embedded_render_range()
+            .unwrap_or_else(|| [thermogram.min_temp(), thermogram.max_temp()]);
         self.min_temp.set(*min);
         self.max_temp.set(*max);
         self.populate_info_sidebar(Some(&thermogram));
@@ -229,8 +229,6 @@ impl AppState {
         self.draw_render_threaded();
         self.ui.palette.color_bar.queue_draw();
     }
-
-
 
     /// Enable the controls the loaded file supports and fall back to thermal
     /// mode if the active mode lost its data. Call after the thermogram is
@@ -382,7 +380,9 @@ impl AppState {
 
         let app_clone = app.clone();
         let new_window = SimpleAction::new("new-window", None);
-        new_window.connect_activate(move |_, _| { AppState::new(&app_clone); });
+        new_window.connect_activate(move |_, _| {
+            AppState::new(&app_clone);
+        });
         app.add_action(&new_window);
 
         Self::connect_temperature_unit(this, app);

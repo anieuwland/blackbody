@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use enum_dispatch::enum_dispatch;
 use flyr::camera_metadata::CameraMetadata;
-use image::{save_buffer, ColorType};
+use image::{ColorType, save_buffer};
 use imgref::{Img, ImgVec};
 use rgb::{ComponentBytes, RGB8};
 use tiff::encoder::*;
@@ -90,11 +90,7 @@ pub trait ThermogramTrait {
             };
 
             let to_u8 = |f| (f * 255.0) as u8;
-            RGB8::new(
-                to_u8(palette[idx][0]),
-                to_u8(palette[idx][1]),
-                to_u8(palette[idx][2]),
-            )
+            RGB8::new(to_u8(palette[idx][0]), to_u8(palette[idx][1]), to_u8(palette[idx][2]))
         };
 
         let thermal = self.thermal();
@@ -105,7 +101,8 @@ pub trait ThermogramTrait {
     /// Render the thermogram with the `palettes::TURBO` palette, using the file's embedded
     /// render range if available and the minimum and maximum thermal value otherwise.
     fn render_defaults(&self) -> ImgVec<RGB8> {
-        let range = self.embedded_render_range().unwrap_or_else(|| [self.min_temp(), self.max_temp()]);
+        let range =
+            self.embedded_render_range().unwrap_or_else(|| [self.min_temp(), self.max_temp()]);
         self.render(range[0], range[1], &palettes::TURBO)
     }
 

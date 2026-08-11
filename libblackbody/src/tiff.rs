@@ -1,7 +1,7 @@
-use std::fs::File;
-use std::path::{Path, PathBuf};
 use imgref::{Img, ImgVec};
 use rgb::RGB8;
+use std::fs::File;
+use std::path::{Path, PathBuf};
 use tiff::decoder::DecodingResult;
 
 use crate::thermogram_trait::ThermogramTrait;
@@ -54,12 +54,24 @@ impl TiffThermogram {
 
         match tiff.read_image().ok()? {
             DecodingResult::U8(_) | DecodingResult::I8(_) => None,
-            DecodingResult::U16(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
-            DecodingResult::U32(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
-            DecodingResult::U64(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
-            DecodingResult::I16(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
-            DecodingResult::I32(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
-            DecodingResult::I64(v) => centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect()),
+            DecodingResult::U16(v) => {
+                centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect())
+            }
+            DecodingResult::U32(v) => {
+                centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect())
+            }
+            DecodingResult::U64(v) => {
+                centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect())
+            }
+            DecodingResult::I16(v) => {
+                centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect())
+            }
+            DecodingResult::I32(v) => {
+                centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect())
+            }
+            DecodingResult::I64(v) => {
+                centikelvin_to_celsius(v.into_iter().map(|x| x as f32).collect())
+            }
             DecodingResult::F16(v) => to_imgvec(v.into_iter().map(f32::from).collect()),
             DecodingResult::F32(v) => to_imgvec(v),
             DecodingResult::F64(v) => to_imgvec(v.into_iter().map(|x| x as f32).collect()),

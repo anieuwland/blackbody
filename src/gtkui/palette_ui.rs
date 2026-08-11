@@ -154,7 +154,9 @@ impl AppState {
         this.ui.palette.color_bar.set_has_tooltip(true);
         this.ui.palette.color_bar.connect_query_tooltip(move |widget, _, y, _, tooltip| {
             let h = widget.height();
-            if h == 0 { return false; }
+            if h == 0 {
+                return false;
+            }
             let position = 1.0 - y as f32 / h as f32;
             let temp = that.min_temp.get() + position * (that.max_temp.get() - that.min_temp.get());
             tooltip.set_text(Some(&that.temp_unit.get().format(temp)));
@@ -167,19 +169,25 @@ impl AppState {
 /// Built at runtime so xgettext sees each name as a literal.
 fn palette_groups() -> [(String, Vec<(String, usize)>); 3] {
     [
-        (gettext("Perceptually uniform"), vec![
-            (gettext("Turbo"), 0),
-            (gettext("Cividis"), 1),
-            (gettext("Inferno"), 5),
-            (gettext("Magma"), 8),
-            (gettext("Viridis"), 9),
-        ]),
-        (gettext("Classic"), vec![
-            (gettext("Grayscale"), 3),
-            (gettext("Hot"), 4),
-            (gettext("Rainbow"), 6),
-            (gettext("Copper"), 2),
-        ]),
+        (
+            gettext("Perceptually uniform"),
+            vec![
+                (gettext("Turbo"), 0),
+                (gettext("Cividis"), 1),
+                (gettext("Inferno"), 5),
+                (gettext("Magma"), 8),
+                (gettext("Viridis"), 9),
+            ],
+        ),
+        (
+            gettext("Classic"),
+            vec![
+                (gettext("Grayscale"), 3),
+                (gettext("Hot"), 4),
+                (gettext("Rainbow"), 6),
+                (gettext("Copper"), 2),
+            ],
+        ),
         (gettext("Diverging"), vec![(gettext("Coolwarm"), 7)]),
     ]
 }

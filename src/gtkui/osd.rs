@@ -3,8 +3,8 @@
 
 use std::rc::Rc;
 
-use gtk4::prelude::*;
 use gtk4::EventControllerMotion;
+use gtk4::prelude::*;
 use libadwaita::prelude::*;
 
 use super::app_window::AppState;
@@ -32,7 +32,9 @@ impl AppState {
     }
 
     pub(super) fn show_osd(&self) {
-        if self.current_surface().is_none() { return; }
+        if self.current_surface().is_none() {
+            return;
+        }
         let osd = &self.ui.osd;
         if let Some(id) = osd.hide_source.replace(None) {
             id.remove();

@@ -1,8 +1,8 @@
 #![windows_subsystem = "windows"]
 
 mod config;
-mod gtkui;
 mod domain;
+mod gtkui;
 
 use gettextrs::*;
 use glib::ExitCode;
@@ -11,10 +11,8 @@ use libadwaita::prelude::*;
 
 use crate::gtkui::app_window::AppState;
 
-static GLIB_LOGGER: glib::GlibLogger = glib::GlibLogger::new(
-    glib::GlibLoggerFormat::Plain,
-    glib::GlibLoggerDomain::CrateTarget,
-);
+static GLIB_LOGGER: glib::GlibLogger =
+    glib::GlibLogger::new(glib::GlibLoggerFormat::Plain, glib::GlibLoggerDomain::CrateTarget);
 
 pub fn main() -> ExitCode {
     println!("Launching Blackbody {}", config::VERSION);

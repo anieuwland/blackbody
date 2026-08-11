@@ -4,8 +4,8 @@
 use std::rc::Rc;
 
 use gettextrs::gettext;
-use gtk4::prelude::*;
 use gtk4::ToggleButton;
+use gtk4::prelude::*;
 use libadwaita as adw;
 use libadwaita::prelude::*;
 use libadwaita::{ActionRow, PreferencesGroup};
@@ -71,8 +71,7 @@ impl AppState {
             sidebar.append(&image_group(t));
             sidebar.append(&camera_group(t));
             sidebar.append(&capture_group(&t, self.temp_unit.get()));
-        }
-        else {
+        } else {
             sidebar.append(&no_info_page());
             return;
         }
@@ -97,8 +96,7 @@ impl AppState {
                 group.add(&measurement_row(t, &m, self.temp_unit.get()));
             }
             sidebar.append(&group);
-        }
-        else {
+        } else {
             sidebar.append(&no_measurements_page());
             return;
         }
@@ -150,7 +148,12 @@ fn add_row(group: &PreferencesGroup, label: &str, value: &str) {
 /// File entry — clicking opens the parent directory.
 fn file_group(thermogram: &Thermogram) -> Option<PreferencesGroup> {
     let path = thermogram.path()?;
-    let parent_str = path.parent().and_then(|p| p.file_name()).and_then(|n| n.to_str()).unwrap_or("").to_string();
+    let parent_str = path
+        .parent()
+        .and_then(|p| p.file_name())
+        .and_then(|n| n.to_str())
+        .unwrap_or("")
+        .to_string();
     let dir_uri = gio::File::for_path(path.parent().unwrap_or(path)).uri().to_string();
 
     let open_btn = gtk4::Button::builder()
@@ -159,7 +162,11 @@ fn file_group(thermogram: &Thermogram) -> Option<PreferencesGroup> {
         .css_classes(["flat"])
         .build();
     open_btn.connect_clicked(move |_| {
-        gtk4::UriLauncher::new(&dir_uri).launch(None::<&gtk4::Window>, gio::Cancellable::NONE, |_| {});
+        gtk4::UriLauncher::new(&dir_uri).launch(
+            None::<&gtk4::Window>,
+            gio::Cancellable::NONE,
+            |_| {},
+        );
     });
 
     let group = PreferencesGroup::new();
@@ -185,10 +192,14 @@ fn image_group(thermogram: &Thermogram) -> PreferencesGroup {
         if let Ok(meta) = std::fs::metadata(path) {
             add_row(&group, &gettext("File size"), &format_file_size(meta.len()));
             if let Ok(t) = meta.created() {
-                if let Some(s) = format_system_time(t) { add_row(&group, &gettext("Created"), &s); }
+                if let Some(s) = format_system_time(t) {
+                    add_row(&group, &gettext("Created"), &s);
+                }
             }
             if let Ok(t) = meta.modified() {
-                if let Some(s) = format_system_time(t) { add_row(&group, &gettext("Modified"), &s); }
+                if let Some(s) = format_system_time(t) {
+                    add_row(&group, &gettext("Modified"), &s);
+                }
             }
         }
     }
@@ -198,10 +209,18 @@ fn image_group(thermogram: &Thermogram) -> PreferencesGroup {
 fn camera_group(thermogram: &Thermogram) -> PreferencesGroup {
     let group = PreferencesGroup::new();
     if let Some(meta) = thermogram.camera_metadata() {
-        if let Some(v) = &meta.make { add_row(&group, &gettext("Make"), v); }
-        if let Some(v) = &meta.model { add_row(&group, &gettext("Model"), v); }
-        if let Some(v) = meta.focal_length { add_row(&group, &gettext("Focal length"), &format!("{v:.1} mm")); }
-        if let Some(v) = &meta.date_time { add_row(&group, &gettext("Photographed"), &format_exif_datetime(v)); }
+        if let Some(v) = &meta.make {
+            add_row(&group, &gettext("Make"), v);
+        }
+        if let Some(v) = &meta.model {
+            add_row(&group, &gettext("Model"), v);
+        }
+        if let Some(v) = meta.focal_length {
+            add_row(&group, &gettext("Focal length"), &format!("{v:.1} mm"));
+        }
+        if let Some(v) = &meta.date_time {
+            add_row(&group, &gettext("Photographed"), &format_exif_datetime(v));
+        }
         if let (Some(lat), Some(lon)) = (meta.gps_latitude, meta.gps_longitude) {
             group.add(&location_row(lat, lon));
         }
@@ -221,12 +240,21 @@ fn location_row(lat: f64, lon: f64) -> ActionRow {
         .build();
     pin_btn.connect_clicked(move |_| {
         let geo = format!("geo:{lat},{lon}");
-        let osm = format!("https://www.openstreetmap.org/?mlat={lat}&mlon={lon}#map=16/{lat}/{lon}");
-        gtk4::UriLauncher::new(&geo).launch(None::<&gtk4::Window>, gio::Cancellable::NONE, move |result| {
-            if result.is_err() {
-                gtk4::UriLauncher::new(&osm).launch(None::<&gtk4::Window>, gio::Cancellable::NONE, |_| {});
-            }
-        });
+        let osm =
+            format!("https://www.openstreetmap.org/?mlat={lat}&mlon={lon}#map=16/{lat}/{lon}");
+        gtk4::UriLauncher::new(&geo).launch(
+            None::<&gtk4::Window>,
+            gio::Cancellable::NONE,
+            move |result| {
+                if result.is_err() {
+                    gtk4::UriLauncher::new(&osm).launch(
+                        None::<&gtk4::Window>,
+                        gio::Cancellable::NONE,
+                        |_| {},
+                    );
+                }
+            },
+        );
     });
 
     let row = ActionRow::builder()
@@ -280,7 +308,11 @@ fn describe_measurement(m: &Measurement) -> (String, &str, String) {
             let (xc, yc) = (params[0] as f64, params[1] as f64);
             let ru = (params[2] as f64 - xc).hypot(params[3] as f64 - yc);
             let rv = (params[4] as f64 - xc).hypot(params[5] as f64 - yc);
-            (gettext("Ellipse"), label, format!("({}, {}) r {ru:.0} × {rv:.0} px", params[0], params[1]))
+            (
+                gettext("Ellipse"),
+                label,
+                format!("({}, {}) r {ru:.0} × {rv:.0} px", params[0], params[1]),
+            )
         }
         Measurement::Ellipse { label, .. } => (gettext("Ellipse"), label, String::new()),
         Measurement::Alarm { label, .. } => (gettext("Alarm"), label, String::new()),
@@ -289,9 +321,13 @@ fn describe_measurement(m: &Measurement) -> (String, &str, String) {
 }
 
 fn format_file_size(bytes: u64) -> String {
-    if bytes >= 1_000_000 { format!("{:.1} MB", bytes as f64 / 1_000_000.0) }
-    else if bytes >= 1_000 { format!("{:.0} kB", bytes as f64 / 1_000.0) }
-    else { format!("{bytes} B") }
+    if bytes >= 1_000_000 {
+        format!("{:.1} MB", bytes as f64 / 1_000_000.0)
+    } else if bytes >= 1_000 {
+        format!("{:.0} kB", bytes as f64 / 1_000.0)
+    } else {
+        format!("{bytes} B")
+    }
 }
 
 fn format_system_time(t: std::time::SystemTime) -> Option<String> {

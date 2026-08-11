@@ -9,8 +9,8 @@ use std::sync::atomic::Ordering;
 
 use gettextrs::gettext;
 use gio::SimpleAction;
-use glib::object::SendWeakRef;
 use glib::MainContext;
+use glib::object::SendWeakRef;
 use gtk4::prelude::*;
 use gtk4::{EventControllerMotion, EventControllerScroll, EventControllerScrollFlags, Tooltip};
 use imgref::ImgVec;
@@ -102,9 +102,10 @@ impl AppState {
     fn connect_pixel_tooltip(this: &Rc<Self>) {
         let that = this.clone();
         this.ui.canvas.image.set_has_tooltip(true);
-        this.ui.canvas.image.connect_query_tooltip(move |_, x, y, _, tooltip| {
-            that.query_tooltip(x, y, tooltip)
-        });
+        this.ui
+            .canvas
+            .image
+            .connect_query_tooltip(move |_, x, y, _, tooltip| that.query_tooltip(x, y, tooltip));
     }
 
     fn query_tooltip(&self, x: i32, y: i32, tooltip: &Tooltip) -> bool {
@@ -266,8 +267,7 @@ impl AppState {
     /// Whether the image overflows the viewport in either direction.
     fn can_pan(&self) -> bool {
         let sw = &self.ui.canvas.scrolled_window;
-        let overflows =
-            |adj: gtk4::Adjustment| adj.upper() - adj.lower() > adj.page_size() + 0.5;
+        let overflows = |adj: gtk4::Adjustment| adj.upper() - adj.lower() > adj.page_size() + 0.5;
         overflows(sw.hadjustment()) || overflows(sw.vadjustment())
     }
 
@@ -287,11 +287,13 @@ impl AppState {
         if !self.zoom_fit.get() {
             return self.zoom_factor.get();
         }
-        self.current_surface().map(|surface| {
-            let vw = self.ui.canvas.scrolled_window.width() as f64;
-            let vh = self.ui.canvas.scrolled_window.height() as f64;
-            (vw / surface.width() as f64).min(vh / surface.height() as f64)
-        }).unwrap_or(1.0)
+        self.current_surface()
+            .map(|surface| {
+                let vw = self.ui.canvas.scrolled_window.width() as f64;
+                let vh = self.ui.canvas.scrolled_window.height() as f64;
+                (vw / surface.width() as f64).min(vh / surface.height() as f64)
+            })
+            .unwrap_or(1.0)
     }
 
     /// Adjust the scroll position so the image point under the cursor stays

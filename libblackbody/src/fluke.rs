@@ -1,6 +1,6 @@
 use imgref::{Img, ImgVec};
 use rgb::RGB8;
-use serendip::{Thermogram as Serendip};
+use serendip::Thermogram as Serendip;
 use std::path::{Path, PathBuf};
 
 use crate::{Measurement, ThermogramTrait};

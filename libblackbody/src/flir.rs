@@ -41,7 +41,9 @@ impl FlirThermogram {
 
         let (expected, length) = (width * height, celsius.len());
         if expected != length {
-            warn!("Thermal data did not contain expected amount of pixels: expected {expected}, got {length}");
+            warn!(
+                "Thermal data did not contain expected amount of pixels: expected {expected}, got {length}"
+            );
             return None;
         }
         let thermal = ImgVec::new(celsius, width, height);
@@ -62,7 +64,9 @@ impl ThermogramTrait for FlirThermogram {
 
         let (expected, length) = (width * height * 3, bytes.len());
         if expected != length {
-            warn!("Visual light image did not contain expected amount of bytes: expected {expected}, got {length}");
+            warn!(
+                "Visual light image did not contain expected amount of bytes: expected {expected}, got {length}"
+            );
             return None;
         }
 
@@ -113,7 +117,8 @@ impl ThermogramTrait for FlirThermogram {
     ) -> Option<ImgVec<RGB8>> {
         let to_u8 = |f: f32| (f * 255.0) as u8;
         let colors = palette.iter().map(|c| [to_u8(c[0]), to_u8(c[1]), to_u8(c[2])]).collect();
-        let normalization = flyr::units::Normalization::Explicit { min: min_temp + 273.15, max: max_temp + 273.15 };
+        let normalization =
+            flyr::units::Normalization::Explicit { min: min_temp + 273.15, max: max_temp + 273.15 };
         let rgba = self
             .thermogram
             .picture_in_picture(&flyr::units::Palette::Custom(colors), &normalization)
@@ -129,7 +134,9 @@ impl ThermogramTrait for FlirThermogram {
         };
         let (expected, length) = (w * h * 4, rgba.len());
         if expected != length {
-            warn!("PiP composite did not contain expected amount of bytes: expected {expected}, got {length}");
+            warn!(
+                "PiP composite did not contain expected amount of bytes: expected {expected}, got {length}"
+            );
             return None;
         }
 
