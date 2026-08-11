@@ -1121,6 +1121,7 @@ dependencies = [
  "image",
  "imgref",
  "log",
+ "ndarray",
  "rgb",
  "serendip",
  "tiff",

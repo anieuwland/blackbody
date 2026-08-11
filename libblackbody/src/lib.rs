@@ -36,7 +36,9 @@
 //! See [`ThermogramTrait`] for the methods available on a thermogram: extracting thermal data,
 //! the embedded visual photo, camera metadata, measurements and their statistics, rendering
 //! with a palette, and exporting. A number of color palettes to render with are provided in
-//! the [`palettes`] module.
+//! the [`palettes`] module. Optionally, enable the (default-off) `ndarray` feature for
+//! [ndarray](https://docs.rs/ndarray) conversions via the `ThermogramNdarrayExt` extension
+//! trait.
 //!
 //! # Issue tracking
 //! Issue tracking happens in the [Blackbody repository](https://github.com/anieuwland/blackbody/issues).
@@ -45,17 +47,21 @@ pub mod error;
 pub mod fake;
 pub mod flir;
 pub mod fluke;
+pub mod measurements;
+#[cfg(feature = "ndarray")]
+pub mod ndarray_ext;
 pub mod palettes;
 pub mod png;
 pub mod thermogram;
 pub mod thermogram_trait;
 pub mod tiff;
-pub mod measurements;
 
 pub use crate::error::Error;
 pub use crate::flir::FlirThermogram;
 pub use crate::fluke::FlukeThermogram;
 pub use crate::measurements::Measurement;
+#[cfg(feature = "ndarray")]
+pub use crate::ndarray_ext::ThermogramNdarrayExt;
 pub use crate::png::PngThermogram;
 pub use crate::thermogram::Thermogram;
 pub use crate::thermogram_trait::ThermogramTrait;

@@ -65,6 +65,11 @@ pub trait ThermogramTrait {
 A number of color palettes to render with are provided in the `palettes`
 module.
 
+## Optional features
+- `ndarray` (off by default) — adds the `ThermogramNdarrayExt` extension trait
+  with `thermal_ndarray()`, `visual_ndarray()` and `render_ndarray(..)` methods
+  returning [`ndarray`](https://docs.rs/ndarray) arrays.
+
 # Issue tracking
 Issue tracking happens in the [Blackbody repository](https://github.com/anieuwland/blackbody).
 
