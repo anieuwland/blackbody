@@ -1,18 +1,18 @@
 use image::DynamicImage;
-use imgref::{Img, ImgVec};
+use imgref::ImgVec;
 use rgb::RGB8;
 use std::path::{Path, PathBuf};
+use uom::si::thermodynamic_temperature::centikelvin;
 
-use crate::thermogram_trait::ThermogramTrait;
+use crate::{ThermVec, thermal::into_therm_vec, thermogram_trait::ThermogramTrait};
 
 /// 16-bit grayscale PNG thermogram.
 ///
-/// Values are interpreted as centikelvin (same convention as TIFF U16):
-/// `celsius = (raw_u16 - 27315) / 100`
+/// Values are interpreted as centikelvin (same convention as TIFF U16).
 #[derive(Clone, Debug)]
 pub struct PngThermogram {
     pub file_path: PathBuf,
-    thermal: ImgVec<f32>,
+    thermal: ThermVec,
 }
 
 impl PngThermogram {
@@ -22,16 +22,18 @@ impl PngThermogram {
             DynamicImage::ImageLuma16(b) => b,
             _ => return None,
         };
-        let (w, h) = buf.dimensions();
-        let values: Vec<f32> =
-            buf.into_raw().into_iter().map(|v| (v as f32 - 27315.0) / 100.0).collect();
-        let thermal = Img::new(values, w as usize, h as usize);
+        let (width, height) = buf.dimensions();
+        let thermal = into_therm_vec::<centikelvin>(
+            buf.iter().map(|v| f32::from(*v)),
+            width as usize,
+            height as usize,
+        );
         Some(Self { thermal, file_path: file_path.to_path_buf() })
     }
 }
 
 impl ThermogramTrait for PngThermogram {
-    fn thermal(&self) -> &ImgVec<f32> {
+    fn thermal(&self) -> &ThermVec {
         &self.thermal
     }
     fn visual(&self) -> Option<ImgVec<RGB8>> {
@@ -45,5 +47,31 @@ impl ThermogramTrait for PngThermogram {
     }
     fn palette(&self) -> Option<Vec<[f32; 3]>> {
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use uom::si::thermodynamic_temperature::kelvin;
+
+    use super::*;
+    use crate::{fake::Fake, thermal::into_therm_vec};
+
+    /// Exporting to PNG (centikelvin u16) and reading it back must preserve temperatures
+    /// exactly when they fall on centikelvin steps.
+    #[test]
+    fn export_import_round_trip_preserves_kelvin() {
+        let temps = vec![273.15, 300.0, 0.0, 655.35];
+        let fake = Fake(into_therm_vec::<kelvin>(temps.clone(), 2, 2));
+
+        let path = std::env::temp_dir().join("blackbody_png_round_trip.png");
+        fake.export_thermal_png(&path).expect("export");
+        let png = PngThermogram::from_file(&path).expect("reimport");
+        let _ = std::fs::remove_file(&path);
+
+        assert_eq!((png.thermal().width(), png.thermal().height()), (2, 2));
+        for (orig, read) in temps.iter().zip(png.thermal().pixels()) {
+            assert_eq!(*orig, read.get::<kelvin>(), "{orig} K badly round-tripped");
+        }
     }
 }

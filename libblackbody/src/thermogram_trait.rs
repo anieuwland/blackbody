@@ -8,8 +8,11 @@ use image::{ColorType, save_buffer};
 use imgref::{Img, ImgVec};
 use rgb::{ComponentBytes, RGB8};
 use tiff::encoder::*;
+use uom::si::f32::ThermodynamicTemperature;
+use uom::si::thermodynamic_temperature::{centikelvin, kelvin};
 
 use crate::palettes;
+use crate::thermal::ThermVec;
 use crate::{
     Error, FlirThermogram, FlukeThermogram, Measurement, PngThermogram, Thermogram, TiffThermogram,
 };
@@ -17,8 +20,8 @@ use crate::{
 /// All supported thermogram formats implement this trait.
 #[enum_dispatch]
 pub trait ThermogramTrait {
-    /// Returns a reference to the thermal data in celsius, as a width × height image.
-    fn thermal(&self) -> &ImgVec<f32>;
+    /// Returns a reference to the thermal data in kelvin, as a width × height image.
+    fn thermal(&self) -> &ThermVec;
 
     /// Returns the raw RGB values of the thermogram's corresponding
     /// visual light photo, if present. Otherwise `None`.
@@ -58,8 +61,8 @@ pub trait ThermogramTrait {
     /// Thermal render composited onto the visual light image, if the file has PiP geometry.
     fn picture_in_picture(
         &self,
-        _min_temp: f32,
-        _max_temp: f32,
+        _min_temp: ThermodynamicTemperature,
+        _max_temp: ThermodynamicTemperature,
         _palette: &[[f32; 3]],
     ) -> Option<ImgVec<RGB8>> {
         None
@@ -80,9 +83,16 @@ pub trait ThermogramTrait {
     ///
     /// # Returns
     /// An RGB image with channel values between 0 and 255.
-    fn render(&self, min_temp: f32, max_temp: f32, palette: &[[f32; 3]]) -> ImgVec<RGB8> {
+    fn render(
+        &self,
+        min_temp: ThermodynamicTemperature,
+        max_temp: ThermodynamicTemperature,
+        palette: &[[f32; 3]],
+    ) -> ImgVec<RGB8> {
+        let (min_temp, max_temp) = (min_temp.get::<kelvin>(), max_temp.get::<kelvin>());
         let num_shades = palette.len() - 1;
-        let map_color = |v: f32| {
+        let map_color = |v: ThermodynamicTemperature| {
+            let v = v.get::<kelvin>();
             let idx = match (min_temp.partial_cmp(&v), max_temp.partial_cmp(&v)) {
                 (Some(Ordering::Greater), _) => 0,
                 (_, Some(Ordering::Less)) => num_shades,
@@ -107,29 +117,35 @@ pub trait ThermogramTrait {
     }
 
     /// Export thermal data to a 16-bit grayscale PNG in centikelvin.
+    ///
+    /// # Arguments
+    /// `path` - Where to save the thermogram export to. Regardless of the file extension, a png
+    ///   file is created.
     fn export_thermal_png(&self, path: &PathBuf) -> Result<(), Error> {
-        let w = self.thermal_shape()[1] as u32;
-        let h = self.thermal_shape()[0] as u32;
-        let pixels: Vec<u16> = self
-            .thermal()
+        let thermal = self.thermal();
+        let width = thermal.width() as u32;
+        let height = thermal.height() as u32;
+        // Round to the nearest centikelvin, otherwise the values truncate on export
+        let pixels: Vec<u16> = thermal
             .pixels()
-            .map(|c| (c * 100.0 + 27315.0).clamp(0.0, 65535.0) as u16)
+            .map(|c| c.get::<centikelvin>().round().clamp(0.0, 65535.0) as u16)
             .collect();
-        image::ImageBuffer::<image::Luma<u16>, _>::from_raw(w, h, pixels)
+        image::ImageBuffer::<image::Luma<u16>, _>::from_raw(width, height, pixels)
             .ok_or_else(|| Error::Encode("pixel buffer does not match dimensions".into()))?
             .save(path)
             .map_err(|e| Error::Encode(e.to_string()))
     }
 
-    /// Export thermal data to a 32-bit float tiff file.
+    /// Export thermal data to a 32-bit float tiff file in kelvin.
     ///
     /// # Arguments
     /// `path` - Where to save the thermogram export to. Regardless of the file extension, a tiff
     ///   file is created.
     fn export_thermal(&self, path: &PathBuf) -> Result<(), Error> {
-        let thermal = self.thermal().pixels().collect::<Vec<f32>>();
+        let thermal = self.thermal();
         let width = self.thermal_shape()[1] as u32;
         let height = self.thermal_shape()[0] as u32;
+        let thermal = thermal.pixels().map(|t| t.get::<kelvin>()).collect::<Vec<f32>>();
 
         let mut file = File::create(path)?;
         let mut tiff = TiffEncoder::new(&mut file).map_err(|e| Error::Encode(e.to_string()))?;
@@ -147,8 +163,8 @@ pub trait ThermogramTrait {
     fn save_render(
         &self,
         path: PathBuf,
-        min_temp: f32,
-        max_temp: f32,
+        min_temp: ThermodynamicTemperature,
+        max_temp: ThermodynamicTemperature,
         palette: &[[f32; 3]],
     ) -> Result<(), Error> {
         let render = self.render(min_temp, max_temp, palette);
@@ -173,49 +189,60 @@ pub trait ThermogramTrait {
         self.palette().is_some()
     }
 
-    fn embedded_render_range(&self) -> Option<[f32; 2]> {
+    fn embedded_render_range(&self) -> Option<[ThermodynamicTemperature; 2]> {
         None
     }
 
-    /// Returns the lowest temperature in the thermogram, or `f32::MAX` if there is no such value.
-    fn min_temp(&self) -> f32 {
-        self.thermal().pixels().fold(f32::MAX, |acc, elem| acc.min(elem))
+    /// Returns the lowest temperature in the thermogram, or `f32::MAX` kelvin if there is no
+    /// such value.
+    fn min_temp(&self) -> ThermodynamicTemperature {
+        let max = ThermodynamicTemperature::new::<kelvin>(f32::MAX);
+        self.thermal().pixels().fold(max, |acc, elem| acc.min(elem))
     }
 
-    /// Returns the highest temperature in the thermogram, or `f32::MIN` if there is no such value.
-    fn max_temp(&self) -> f32 {
-        self.thermal().pixels().fold(f32::MIN, |acc, elem| acc.max(elem))
+    /// Returns the highest temperature in the thermogram, or `f32::MIN` kelvin if there is no
+    /// such value.
+    fn max_temp(&self) -> ThermodynamicTemperature {
+        let min = ThermodynamicTemperature::new::<kelvin>(f32::MIN);
+        self.thermal().pixels().fold(min, |acc, elem| acc.max(elem))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use imgref::Img;
     use rgb::RGB8;
+    use uom::si::f32::ThermodynamicTemperature;
+    use uom::si::thermodynamic_temperature::kelvin;
 
     use super::ThermogramTrait;
     use crate::fake::Fake;
+    use crate::thermal::into_therm_vec;
 
-    /// 2×2 image; pixel (x, y) values: (0,0)=0, (1,0)=10, (0,1)=20, (1,1)=30.
+    /// 2×2 image; pixel (x, y) values in kelvin: (0,0)=0, (1,0)=10, (0,1)=20, (1,1)=30.
     fn fake() -> Fake {
-        Fake(Img::new(vec![0.0, 10.0, 20.0, 30.0], 2, 2))
+        Fake(into_therm_vec::<kelvin>(vec![0.0, 10.0, 20.0, 30.0], 2, 2))
     }
 
     #[test]
     fn min_max_temp() {
-        assert_eq!((fake().min_temp(), fake().max_temp()), (0.0, 30.0));
+        assert_eq!(
+            (fake().min_temp().get::<kelvin>(), fake().max_temp().get::<kelvin>()),
+            (0.0, 30.0)
+        );
     }
 
     #[test]
     fn thermal_shape_is_height_width() {
-        let t = Fake(Img::new(vec![0.0; 6], 3, 2));
+        let t = Fake(into_therm_vec::<kelvin>(vec![0.0; 6], 3, 2));
         assert_eq!(t.thermal_shape(), [2, 3]);
     }
 
     #[test]
     fn render_maps_range_onto_palette_and_clips() {
         let palette = [[0.0, 0.0, 0.0], [0.5, 0.5, 0.5], [1.0, 1.0, 1.0]];
-        let render = fake().render(10.0, 20.0, &palette);
+        let min = ThermodynamicTemperature::new::<kelvin>(10.0);
+        let max = ThermodynamicTemperature::new::<kelvin>(20.0);
+        let render = fake().render(min, max, &palette);
         assert_eq!([render.width(), render.height()], [2, 2]);
         assert_eq!(render[(0usize, 0usize)], RGB8::new(0, 0, 0)); // 0 clips below min
         assert_eq!(render[(1usize, 0usize)], RGB8::new(0, 0, 0)); // 10 = min → first color

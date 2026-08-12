@@ -4,8 +4,9 @@ use imgref::{Img, ImgVec};
 use log::warn;
 use rgb::{FromSlice, RGB8};
 use std::path::{Path, PathBuf};
+use uom::si::{f32::ThermodynamicTemperature, thermodynamic_temperature::kelvin};
 
-use crate::{Measurement, ThermogramTrait};
+use crate::{Measurement, ThermVec, ThermogramTrait, thermal::into_therm_vec};
 
 /// This is the struct and `ThermogramTrait` implementation for FLIR thermograms, using
 /// [flyr](https://crates.io/crates/flyr).
@@ -18,7 +19,7 @@ use crate::{Measurement, ThermogramTrait};
 pub struct FlirThermogram {
     pub thermogram: Flyr,
     pub file_path: PathBuf,
-    thermal: ImgVec<f32>,
+    thermal: ThermVec,
 }
 
 impl FlirThermogram {
@@ -28,32 +29,31 @@ impl FlirThermogram {
     /// * `file_path` - The path to the FLIR file to read.
     ///
     /// # Returns
-    /// In case of success, `Some<FlirThermogram>` is returned, otherwise `None`. Values are in
-    /// celsius, as specified by the `ThermogramTrait` contract.
+    /// In case of success, `Some<FlirThermogram>` is returned, otherwise `None`.
     pub fn from_file(file_path: &Path) -> Option<FlirThermogram> {
         FlirThermogram::read_thermal(file_path)
     }
 
     fn read_thermal(file_path: &Path) -> Option<FlirThermogram> {
         let thermogram = Flyr::new_from_path(file_path).ok()?;
-        let celsius = thermogram.celsius();
+        let thermal = thermogram.kelvin();
         let (width, height) = (thermogram.width(), thermogram.height());
 
-        let (expected, length) = (width * height, celsius.len());
+        let (expected, length) = (width * height, thermal.len());
         if expected != length {
             warn!(
                 "Thermal data did not contain expected amount of pixels: expected {expected}, got {length}"
             );
             return None;
         }
-        let thermal = ImgVec::new(celsius, width, height);
+        let thermal = into_therm_vec::<kelvin>(thermal, width, height);
 
         Some(FlirThermogram { thermogram, file_path: file_path.to_path_buf(), thermal })
     }
 }
 
 impl ThermogramTrait for FlirThermogram {
-    fn thermal(&self) -> &ImgVec<f32> {
+    fn thermal(&self) -> &ThermVec {
         &self.thermal
     }
 
@@ -108,17 +108,19 @@ impl ThermogramTrait for FlirThermogram {
     }
 
     /// Composite the thermal render onto the visual light image using the embedded PiP geometry.
-    /// Temperatures in celsius, palette colors in 0.0–1.0 RGB, as elsewhere in this crate.
+    /// Palette colors in 0.0–1.0 RGB.
     fn picture_in_picture(
         &self,
-        min_temp: f32,
-        max_temp: f32,
+        min_temp: ThermodynamicTemperature,
+        max_temp: ThermodynamicTemperature,
         palette: &[[f32; 3]],
     ) -> Option<ImgVec<RGB8>> {
         let to_u8 = |f: f32| (f * 255.0) as u8;
         let colors = palette.iter().map(|c| [to_u8(c[0]), to_u8(c[1]), to_u8(c[2])]).collect();
-        let normalization =
-            flyr::units::Normalization::Explicit { min: min_temp + 273.15, max: max_temp + 273.15 };
+        let normalization = flyr::units::Normalization::Explicit {
+            min: min_temp.get::<kelvin>(),
+            max: max_temp.get::<kelvin>(),
+        };
         let rgba = self
             .thermogram
             .picture_in_picture(&flyr::units::Palette::Custom(colors), &normalization)
@@ -145,8 +147,12 @@ impl ThermogramTrait for FlirThermogram {
         Some(Img::new(pixels, w, h))
     }
 
-    fn embedded_render_range(&self) -> Option<[f32; 2]> {
-        Some(self.thermogram.embedded_range(flyr::units::Temperature::Celsius))
+    fn embedded_render_range(&self) -> Option<[ThermodynamicTemperature; 2]> {
+        let range = self.thermogram.embedded_range(flyr::units::Temperature::Kelvin);
+        Some([
+            ThermodynamicTemperature::new::<kelvin>(range[0]),
+            ThermodynamicTemperature::new::<kelvin>(range[1]),
+        ])
     }
 }
 
@@ -164,6 +170,8 @@ fn ycc_to_rgb(y: u8, cb: u8, cr: u8) -> [f32; 3] {
 
 #[cfg(test)]
 mod tests {
+    use uom::si::{f32::TemperatureInterval, temperature_interval};
+
     use super::*;
 
     #[test]
@@ -176,5 +184,23 @@ mod tests {
             .expect("pip composite");
         // Visual is 640x480 vs 120x90 thermal; RGB channels last.
         assert_eq!([img.width(), img.height()], [640, 480]);
+    }
+
+    #[test]
+    fn pip_normalization_range_is_kelvin() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_e5_2-pip.jpg");
+        let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
+        // If min/max were passed to flyr in the wrong unit (regression: celsius instead of
+        // kelvin), the range lands entirely below the data and every thermal pixel clamps to
+        // the same palette color — making a correct range indistinguishable from one shifted
+        // down by 273.15. A correct implementation renders these two ranges differently.
+        let shift = TemperatureInterval::new::<temperature_interval::kelvin>(273.15);
+        let good = t.picture_in_picture(t.min_temp(), t.max_temp(), &crate::palettes::TURBO);
+        let shifted = t.picture_in_picture(
+            t.min_temp() - shift,
+            t.max_temp() - shift,
+            &crate::palettes::TURBO,
+        );
+        assert_ne!(good.unwrap().buf(), shifted.unwrap().buf());
     }
 }

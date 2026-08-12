@@ -52,6 +52,7 @@ pub mod measurements;
 pub mod ndarray_ext;
 pub mod palettes;
 pub mod png;
+pub mod thermal;
 pub mod thermogram;
 pub mod thermogram_trait;
 pub mod tiff;
@@ -63,6 +64,7 @@ pub use crate::measurements::Measurement;
 #[cfg(feature = "ndarray")]
 pub use crate::ndarray_ext::ThermogramNdarrayExt;
 pub use crate::png::PngThermogram;
+pub use crate::thermal::ThermVec;
 pub use crate::thermogram::Thermogram;
 pub use crate::thermogram_trait::ThermogramTrait;
 pub use crate::tiff::TiffThermogram;

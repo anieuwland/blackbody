@@ -1,6 +1,9 @@
 use flyr::measurement_info::Measurement as Flir;
-use imgref::ImgVec;
 use serendip::markers::Marker as Fluke;
+use uom::si::f32::ThermodynamicTemperature;
+use uom::si::thermodynamic_temperature::kelvin;
+
+use crate::thermal::ThermVec;
 
 /// Measurement shapes supported by libblackbody.
 ///
@@ -94,11 +97,9 @@ impl From<&Flir> for Measurement {
 impl From<&Fluke> for Measurement {
     fn from(m: &Fluke) -> Self {
         match m {
-            Fluke::Point { coords, metadata } => Measurement::Spot {
-                label: metadata.label2.clone(),
-                x: coords.x.into(),
-                y: coords.y.into(),
-            },
+            Fluke::Point { coords, metadata } => {
+                Measurement::Spot { label: metadata.label2.clone(), x: coords.x, y: coords.y }
+            }
             Fluke::Box { start, end, metadata } => Measurement::Area {
                 label: metadata.label2.clone(),
                 x: start.x.min(end.x),
@@ -110,13 +111,13 @@ impl From<&Fluke> for Measurement {
     }
 }
 
-/// Temperature statistics over a measurement tool's pixels, in celsius.
+/// Temperature statistics over a measurement tool's pixels.
 /// For single-pixel tools (spots, endpoints) min, max and avg are equal.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct TempStats {
-    pub min: f32,
-    pub max: f32,
-    pub avg: f32,
+    pub min: ThermodynamicTemperature,
+    pub max: ThermodynamicTemperature,
+    pub avg: ThermodynamicTemperature,
 }
 
 impl Measurement {
@@ -125,14 +126,14 @@ impl Measurement {
     ///
     /// Measurement coordinates come from the file and are clamped to the thermal
     /// dimensions, so corrupt records cannot index out of bounds.
-    pub fn measurement_stats(&self, thermal: &ImgVec<f32>) -> Option<TempStats> {
+    pub fn measurement_stats(&self, thermal: &ThermVec) -> Option<TempStats> {
         let (w, h) = (thermal.width(), thermal.height());
         if h == 0 || w == 0 {
             return None;
         }
         let temp_at = move |x: usize, y: usize| thermal[(x.min(w - 1), y.min(h - 1))];
 
-        let temps: Vec<f32> = match self {
+        let temps: Vec<ThermodynamicTemperature> = match self {
             Measurement::Spot { x, y, .. } | Measurement::Endpoint { x, y, .. } => {
                 vec![temp_at(*x as usize, *y as usize)]
             }
@@ -186,9 +187,10 @@ impl Measurement {
             return None;
         }
         let n = temps.len() as f32;
-        let min = temps.iter().cloned().fold(f32::MAX, f32::min);
-        let max = temps.iter().cloned().fold(f32::MIN, f32::max);
-        let avg = temps.iter().sum::<f32>() / n;
+        let min = temps.iter().copied().reduce(|a, b| a.min(b))?;
+        let max = temps.iter().copied().reduce(|a, b| a.max(b))?;
+        let avg = temps.iter().map(|t| t.get::<kelvin>()).sum::<f32>() / n;
+        let avg = ThermodynamicTemperature::new::<kelvin>(avg);
         Some(TempStats { min, max, avg })
     }
 }
@@ -207,32 +209,38 @@ fn line_points(x1: u32, y1: u32, x2: u32, y2: u32) -> impl Iterator<Item = (usiz
 mod tests {
     use std::path::Path;
 
-    use imgref::Img;
+    use uom::si::thermodynamic_temperature::{degree_celsius, kelvin};
 
+    use super::TempStats;
+    use crate::thermal::into_therm_vec;
     use crate::{FlirThermogram, Measurement, ThermogramTrait, fake::Fake};
+
+    fn stats_in_kelvin(s: TempStats) -> (f32, f32, f32) {
+        (s.min.get::<kelvin>(), s.max.get::<kelvin>(), s.avg.get::<kelvin>())
+    }
 
     #[test]
     fn measurement_stats_spot_area_line() {
         // 2x3 grid: row 0 = [0, 1, 2], row 1 = [10, 11, 12]
-        let t = Fake(Img::new(vec![0.0, 1.0, 2.0, 10.0, 11.0, 12.0], 3, 2));
+        let t = Fake(into_therm_vec::<kelvin>(vec![0.0, 1.0, 2.0, 10.0, 11.0, 12.0], 3, 2));
 
         let spot = Measurement::Spot { label: "".into(), x: 2, y: 1 };
         let s = spot.measurement_stats(t.thermal()).unwrap();
-        assert_eq!((s.min, s.max, s.avg), (12.0, 12.0, 12.0));
+        assert_eq!(stats_in_kelvin(s), (12.0, 12.0, 12.0));
 
         // Area params are x, y, width, height: a 2×1 box at (1, 0)
         let area = Measurement::Area { label: "".into(), x: 1, y: 0, width: 2, height: 1 };
         let a = area.measurement_stats(t.thermal()).unwrap();
-        assert_eq!((a.min, a.max, a.avg), (1.0, 2.0, 1.5));
+        assert_eq!(stats_in_kelvin(a), (1.0, 2.0, 1.5));
 
         let line = Measurement::Line { label: "".into(), x1: 0, y1: 0, x2: 2, y2: 0 };
         let l = line.measurement_stats(t.thermal()).unwrap();
-        assert_eq!((l.min, l.max, l.avg), (0.0, 2.0, 1.0));
+        assert_eq!(stats_in_kelvin(l), (0.0, 2.0, 1.0));
 
         // Out-of-bounds coordinates clamp instead of panicking
         let spot = Measurement::Spot { label: "".into(), x: 99, y: 99 };
         let oob = spot.measurement_stats(t.thermal()).unwrap();
-        assert_eq!(oob.avg, 12.0);
+        assert_eq!(oob.avg.get::<kelvin>(), 12.0);
 
         let ellipse = Measurement::Ellipse { label: "".into(), params: vec![] };
         assert!(ellipse.measurement_stats(t.thermal()).is_none());
@@ -243,13 +251,13 @@ mod tests {
         // 5x5 grid with value y*10 + x
         let values: Vec<f32> =
             (0..5).flat_map(|y| (0..5).map(move |x| (y * 10 + x) as f32)).collect();
-        let t = Fake(Img::new(values, 5, 5));
+        let t = Fake(into_therm_vec::<kelvin>(values, 5, 5));
 
         // Circle: centre (2, 2), semi-axis endpoints (3, 2) and (2, 1) → radius 1.
         // Inside: (2,2), (1,2), (3,2), (2,1), (2,3) → 22, 21, 23, 12, 32.
         let circle = Measurement::Ellipse { label: "".into(), params: vec![2, 2, 3, 2, 2, 1] };
         let c = circle.measurement_stats(t.thermal()).unwrap();
-        assert_eq!((c.min, c.max, c.avg), (12.0, 32.0, 22.0));
+        assert_eq!(stats_in_kelvin(c), (12.0, 32.0, 22.0));
 
         // Degenerate axis → no stats
         let flat = Measurement::Ellipse { label: "".into(), params: vec![2, 2, 3, 2, 2, 2] };
@@ -271,10 +279,15 @@ mod tests {
             .find(|m| matches!(m, Measurement::Area { .. }))
             .expect("sc660_1 should contain an area measurement");
         let s = area.measurement_stats(t.thermal()).expect("area stats");
+        let (min, max, avg) = (
+            s.min.get::<degree_celsius>(),
+            s.max.get::<degree_celsius>(),
+            s.avg.get::<degree_celsius>(),
+        );
         // Camera overlay: Max 34.8, Min 22.7, Avg 28.1
-        assert!((s.avg - 28.1).abs() < 0.1, "avg {} != 28.1", s.avg);
-        assert!((s.min - 22.7).abs() < 0.5, "min {} != 22.7", s.min);
-        assert!((s.max - 34.8).abs() < 0.7, "max {} != 34.8", s.max);
+        assert!((avg - 28.1).abs() < 0.1, "avg {avg} != 28.1");
+        assert!((min - 22.7).abs() < 0.5, "min {min} != 22.7");
+        assert!((max - 34.8).abs() < 0.7, "max {max} != 34.8");
     }
 
     #[test]
@@ -287,7 +300,8 @@ mod tests {
             .find(|m| matches!(m, Measurement::Ellipse { .. }))
             .expect("b400_2 should contain an ellipse measurement");
         let s = ellipse.measurement_stats(t.thermal()).expect("ellipse stats");
+        let max = s.max.get::<degree_celsius>();
         // Camera overlay: El1 Max -0.1
-        assert!((s.max - -0.1).abs() < 0.2, "max {} != -0.1", s.max);
+        assert!((max - -0.1).abs() < 0.2, "max {max} != -0.1");
     }
 }

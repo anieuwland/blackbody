@@ -92,6 +92,10 @@ impl Thermogram {
 
 #[cfg(test)]
 mod tests {
+    use uom::si::thermodynamic_temperature::degree_celsius;
+
+    use crate::thermal::into_temp;
+
     use super::*;
 
     #[test]
@@ -132,7 +136,14 @@ mod tests {
         assert!(png.camera_metadata().is_none());
         assert!(png.measurements().is_empty());
         assert!(!png.has_pip());
-        assert!(png.picture_in_picture(0.0, 100.0, &palettes::TURBO).is_none());
+        assert!(
+            png.picture_in_picture(
+                into_temp::<degree_celsius>(0.0),
+                into_temp::<degree_celsius>(100.0),
+                &palettes::TURBO
+            )
+            .is_none()
+        );
     }
 
     #[test]

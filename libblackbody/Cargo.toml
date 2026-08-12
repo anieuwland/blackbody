@@ -17,6 +17,7 @@ ndarray = { version = "0.17", optional = true }
 rgb = "0.8"
 serendip = { path = "../../serendip", version = "0.3.0" }
 tiff = "0.11"
+uom = "0.38"
 
 [dependencies.image]
 version = "0.25"

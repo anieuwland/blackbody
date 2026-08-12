@@ -1,9 +1,10 @@
-use imgref::{Img, ImgVec};
+use imgref::ImgVec;
 use rgb::RGB8;
 use serendip::Thermogram as Serendip;
 use std::path::{Path, PathBuf};
+use uom::si::{f32::ThermodynamicTemperature, thermodynamic_temperature::kelvin};
 
-use crate::{Measurement, ThermogramTrait};
+use crate::{Measurement, ThermVec, ThermogramTrait, thermal::into_therm_vec};
 
 /// This is the struct and `ThermogramTrait` implementation for Fluke thermograms, using
 /// [serendip](https://crates.io/crates/serendip).
@@ -11,7 +12,7 @@ use crate::{Measurement, ThermogramTrait};
 pub struct FlukeThermogram {
     pub thermogram: Serendip,
     pub file_path: PathBuf,
-    thermal: ImgVec<f32>,
+    thermal: ThermVec,
 }
 
 impl FlukeThermogram {
@@ -21,26 +22,22 @@ impl FlukeThermogram {
     /// * `file_path` - The path to the file to read.
     ///
     /// # Returns
-    /// In case of success, `Some<FlukeThermogram>` is returned, otherwise `None`. Values are in
-    /// celsius, as specified by the `ThermogramTrait` contract.
+    /// In case of success, `Some<FlukeThermogram>` is returned, otherwise `None`.
     pub fn from_file(file_path: &Path) -> Option<FlukeThermogram> {
         FlukeThermogram::read_thermal(file_path)
     }
 
     fn read_thermal(file_path: &Path) -> Option<FlukeThermogram> {
         let thermogram = Serendip::new_from_path(file_path).ok()?;
-        let kelvin = thermogram.kelvin()?;
-
-        // FIXME Standardize on kelvin in libblackbody (Ugly transform to celsius)
-        let (buf, w, h) = kelvin.into_contiguous_buf();
-        let thermal = Img::new(buf.into_iter().map(|k| k - 273.15).collect(), w, h);
+        let thermal = thermogram.kelvin()?;
+        let thermal = into_therm_vec::<kelvin>(thermal.pixels(), thermal.width(), thermal.height());
 
         Some(FlukeThermogram { thermogram, file_path: file_path.to_path_buf(), thermal })
     }
 }
 
 impl ThermogramTrait for FlukeThermogram {
-    fn thermal(&self) -> &ImgVec<f32> {
+    fn thermal(&self) -> &ThermVec {
         &self.thermal
     }
 
@@ -70,9 +67,12 @@ impl ThermogramTrait for FlukeThermogram {
         })
     }
 
-    fn embedded_render_range(&self) -> Option<[f32; 2]> {
+    fn embedded_render_range(&self) -> Option<[ThermodynamicTemperature; 2]> {
         let scale = self.thermogram.embedded_render_range()?;
-        Some([scale.min, scale.max])
+        Some([
+            ThermodynamicTemperature::new::<kelvin>(scale[0]),
+            ThermodynamicTemperature::new::<kelvin>(scale[1]),
+        ])
     }
 
     fn measurements(&self) -> Vec<Measurement> {
