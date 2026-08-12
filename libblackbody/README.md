@@ -1,9 +1,9 @@
 # libblackbody
-This the library [libblackbody](https://crates.io/crates/libblackbody)
-which intends to be a general purpose thermogram file reading library. Currently
-it supports FLIR jpegs, Fluke `.is2` files, TIFF files and 16-bit grayscale
+This is the library [libblackbody](https://crates.io/crates/libblackbody)
+which is a general purpose thermogram reading library. Currently
+supported are FLIR jpegs / FFFs, Fluke `.is2` files, TIFF files and 16-bit grayscale
 PNGs. It is used by [Blackbody](https://github.com/anieuwland/blackbody),
-a thermogram viewer.
+a thermogram inspector.
 
 [`flyr`](https://docs.rs/flyr/) and [`serendip`](https://crates.io/crates/serendip) 
 allow decoding FLIR and Fluke files, respectively. TIFF and PNG files are
@@ -41,22 +41,22 @@ an `Option` or an empty collection.
 
 ```rust
 pub trait ThermogramTrait {
-    fn thermal(&self) -> &Array<f32, Ix2>;
-    fn visual(&self) -> Option<Array<u8, Ix3>>;
+    fn thermal(&self) -> &ThermVec;
+    fn visual(&self) -> Option<ImgVec<RGB8>>;
     fn identifier(&self) -> &str;
     fn path(&self) -> Option<&PathBuf>;
     fn thermal_shape(&self) -> [usize; 2];
-    fn min_temp(&self) -> f32;
-    fn max_temp(&self) -> f32;
+    fn min_temp(&self) -> ThermodynamicTemperature;
+    fn max_temp(&self) -> ThermodynamicTemperature;
     fn palette(&self) -> Option<Vec<[f32; 3]>>;
     fn camera_metadata(&self) -> Option<&CameraMetadata>;
     fn measurements(&self) -> Vec<Measurement>;
     fn measurement_stats(&self, measurement: &Measurement) -> Option<TempStats>;
-    fn render(&self, min_temp: f32, max_temp: f32, palette: &[[f32; 3]]) -> Array<u8, Ix3>;
-    fn render_defaults(&self) -> Array<u8, Ix3>;
+    fn render(&self, min_temp: ThermodynamicTemperature, max_temp: ThermodynamicTemperature, palette: &[[f32; 3]]) -> ImgVec<RGB8>;
+    fn render_defaults(&self) -> Array<ImgVec<RGB8>>;
     fn has_pip(&self) -> bool;
-    fn picture_in_picture(&self, min_temp: f32, max_temp: f32, palette: &[[f32; 3]]) -> Option<Array<u8, Ix3>>;
-    fn save_render(&self, path: PathBuf, min_temp: f32, max_temp: f32, palette: &[[f32; 3]]) -> Result<(), Error>;
+    fn picture_in_picture(&self, min_temp: ThermodynamicTemperature, max_temp: ThermodynamicTemperature, palette: &[[f32; 3]]) -> Option<ImgVec<RGB8>>;
+    fn save_render(&self, path: PathBuf, min_temp: ThermodynamicTemperature, max_temp: ThermodynamicTemperature, palette: &[[f32; 3]]) -> Result<(), Error>;
     fn export_thermal(&self, path: &PathBuf) -> Result<(), Error>;
     fn export_thermal_png(&self, path: &PathBuf) -> Result<(), Error>;
 }
