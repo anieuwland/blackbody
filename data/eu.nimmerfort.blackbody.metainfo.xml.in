@@ -31,31 +31,30 @@
   </recommends>
 
   <description>
-    <p>Blackbody is a viewer for FLIR thermograms and other thermal images. Explore temperatures under the cursor, render to different palettes and ranges, overlay the visible-light photo, and inspect embedded measurements and camera metadata.</p>
+    <p>Blackbody is a viewer for FLIR and Fluke thermograms and other thermal images. Explore temperatures under the cursor, render to different palettes and ranges, overlay the visible-light photo, and inspect embedded measurements and camera metadata.</p>
+    <p>Blackbody reads thermograms from many FLIR cameras, including the visible-light photo, and also opens Fluke thermograms from cameras such as the Ti400, Ti401p, TiS75+, and Ti25. Plain thermal data can be imported and exported as single-band TIFFs or 16-bit PNGs.</p>
     <p>Features:</p>
     <ul>
-      <li>Loading FLIR thermograms from many cameras, both thermal and photo data</li>
-      <li>Loading single-band TIFFs and 16-bit centikelvin PNGs</li>
-      <li>Investigating temperatures with the mouse</li>
-      <li>Viewing embedded measurements: spots, lines, and areas</li>
-      <li>Overlay view, also known as Picture-in-Picture or MSX, combining thermal and visible images</li>
-      <li>Temperatures in celsius, fahrenheit, or kelvin</li>
+      <li>Inspect the temperature under the cursor, in celsius, fahrenheit, or kelvin</li>
+      <li>View embedded measurements: spots, lines, and areas</li>
+      <li>Overlay view (Picture-in-Picture or MSX) combining thermal and visible images</li>
+      <li>Render to the camera's embedded palette or many built-in ones, including inferno and turbo</li>
+      <li>Adjust the temperature range to make details stand out</li>
       <li>Metadata panel with camera info and GPS location, openable in a map</li>
-      <li>Exporting renders to PNG and thermal data to TIFF or 16-bit centikelvin PNG</li>
-      <li>Rendering to embedded color palettes, if present</li>
-      <li>Rendering to many different color palettes, including inferno and turbo</li>
-      <li>Specifying the thermal range to render</li>
-      <li>Zooming in and out</li>
+      <li>Export renders to PNG and thermal data to TIFF or 16-bit PNG</li>
+      <li>Zoom, pan, and browse through a folder of thermograms</li>
       <li>Translated to multiple languages</li>
-      <li>Most FLIR cameras known to work</li>
     </ul>
   </description>
 
   <releases>
-    <release version="2.2.0" date="2026-07-26" urgency="low" type="stable">
+    <release version="2.2.0" date="2026-08-13" urgency="low" type="stable">
       <description>
-        <p>A small release integrating Blackbody better with the rest of your system:</p>
+        <p>Blackbody now opens Fluke thermograms! This release adds support for is2 files, both older binary and newer zip-style, from cameras such as the Ti400, Ti401p, TiS75+, and Ti25 — including the visible-light photo, embedded measurements, capture parameters, and the camera's palette. Other improvements:</p>
         <ul>
+          <li>FLIR (and Fluke!) thermograms open in the render range embedded by the camera</li>
+          <li>A more natural double-ended temperature range slider</li>
+          <li>The info panel is available for all file formats, and panels recover gracefully when a file fails to load</li>
           <li>Blackbody can now open files from a file manager's "Open with" menu for JPEG, PNG, and TIFF files, including from within the Flatpak sandbox</li>
           <li>Improved keywords and categories make Blackbody easier to find</li>
         </ul>
@@ -148,24 +147,32 @@
 
   <screenshots>
     <screenshot type="default">
-        <caption>A thermogram of a bird in °Celsius, in Blackbody's default view using the embedded palette</caption>
+        <caption>Inspect thermograms rendered with the palette embedded by the camera</caption>
         <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-01.png</image>
     </screenshot>
     <screenshot>
-        <caption>Blackbody's info pane of a high quality FLIR SC660 camera, in °Fahrenheit</caption>
+        <caption>View measurements drawn directly on the render and in a side-pane</caption>
+        <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-05.png</image>
+    </screenshot>
+    <screenshot>
+        <caption>The info panel shows camera details and metadata for every thermogram</caption>
         <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-02.png</image>
     </screenshot>
     <screenshot>
-        <caption>Spot measurements on a thermogram in °Fahrenheit with a custom palette</caption>
+        <caption>Spot measurements on a thermogram in fahrenheit with a custom palette</caption>
         <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-03.png</image>
     </screenshot>
     <screenshot>
-        <caption>A thermogram in Kelvin laid over the visible spectrum photo, using a custom palette</caption>
+        <caption>Overlay view blends the thermal image with the visible-light photo</caption>
         <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-04.png</image>
     </screenshot>
     <screenshot>
-        <caption>Zoomed in on a cat's head with a custom palette and temperature range</caption>
-        <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-05.png</image>
+        <caption>Zoom in and narrow the temperature range to make the details stand out</caption>
+        <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-06.png</image>
+    </screenshot>
+    <screenshot>
+        <caption>Cold air leaking in under a door, captured with a Fluke is2</caption>
+        <image type="source" width="1036" height="774">https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-07.png</image>
     </screenshot>
   </screenshots>
 </component>

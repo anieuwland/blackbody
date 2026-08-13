@@ -1,14 +1,16 @@
 CHANGELOG
 ---------
 
-# 3.0.0
-
-* Fluke support (Ti400, Ti401p, Tis75)
-* Use embedded render range for FLIR thermograms
-
-# 2.2.0 (2026-07-26)
-A small release integrating Blackbody better with the rest of your system:
-
+# 2.2.0 (2026-08-13)
+* Fluke thermogram support: opens is2 files, both older binary and newer
+  zip-style, from cameras such as the Ti400, Ti401p, TiS75+, and Ti25
+* Fluke thermograms include the visible-light photo, embedded measurements,
+  capture parameters, and the camera's embedded palette when present
+* FLIR thermograms now open in the render range embedded by the camera
+* A more natural double-ended temperature range slider
+* The info panel is available for all file formats, not just FLIR
+* The info and measurements panels survive a failed load instead of
+  showing stale data
 * Blackbody can now open files from a file manager's "Open with" menu for
   JPEG, PNG, and TIFF files, including from within the Flatpak sandbox
 * Improved keywords and categories make Blackbody easier to find

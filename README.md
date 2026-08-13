@@ -1,22 +1,29 @@
 # Blackbody
 
-Inspect thermograms with Blackbody, a thermogram viewer for Windows and Linux, building on the library libblackbody. For an animated example, visit [here](PREVIEW.md) (loads a 7.5MB image). 
+Blackbody is a viewer for FLIR and Fluke thermograms and other thermal images, for Linux and Windows. Explore temperatures under the cursor, render to different palettes and ranges, overlay the visible-light photo, and inspect embedded measurements and camera metadata.
 
-![Screenshot of the application](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-01.png)
+Blackbody reads thermograms from many FLIR cameras, including the visible-light photo, and also opens Fluke thermograms from cameras such as the Ti400, Ti401p, TiS75+, and Ti25. Plain thermal data can be imported and exported as single-band TIFFs or 16-bit PNGs.
+
+![Screenshot of the application](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-01.png)
+
+🐧 [linux](https://flathub.org/en/apps/eu.nimmerfort.blackbody) --- 🪟 [windows](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody-2.1.1-windows.zip) --- 📦 [source](https://github.com/anieuwland/blackbody)
 
 ## Features
 
-* Opens many FLIR thermograms, especially recent ones
-* Other supported formats: Some Fluke, PNG, TIFF
-* Licensed under the EUPL, it is free software, both in price and in user rights
-* Works on Linux and Windows
-* Renders to several different color palettes (grayscale, [turbo](https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html), inferno, and more)
-* Dynamically set minimum and maximum values for rendering
-* Zoom in and out
-* Written in Rust and therefore fast
+* Inspect the temperature under the cursor, in celsius, fahrenheit, or kelvin
+* View embedded measurements: spots, lines, and areas
+* Overlay view (Picture-in-Picture or MSX) combining thermal and visible images
+* Render to the camera's embedded palette or many built-in ones, including [turbo](https://ai.googleblog.com/2019/08/turbo-improved-rainbow-colormap-for.html) and inferno
+* Adjust the temperature range to make details stand out
+* Metadata panel with camera info and GPS location, openable in a map
+* Export renders to PNG and thermal data to TIFF or 16-bit PNG
+* Zoom, pan, and browse through a folder of thermograms
+* Translated to multiple languages
+* Free and open source software, licensed under the EUPL
+* Written in Rust to make it portable, reliable and fast
 
 ## Get it
-Blackbody is available on [Flathub](https://flathub.org/apps/details/eu.nimmerfort.blackbody). 
+Blackbody is available for Linux on [Flathub](https://flathub.org/apps/details/eu.nimmerfort.blackbody). 
 It can be installed using your software center, the linked page or the following 
 commands:
 
@@ -27,42 +34,44 @@ flatpak run eu.nimmerfort.blackbody
 ``` 
 
 The [downloads](https://bitbucket.org/nimmerwoner/blackbody/downloads/) page
-lists download options for Linux and Windows. The Linux version is available as
-a flatpak. After installing, Blackbody then appears in your overview. The
-Windows is provided as zip. You will have to unzip it and place the containing
-directory where you want to install it manually. Run the application by double
-clicking `blackbody.exe`.
+lists download links for Windows. It is a zip that can simply be extracted and
+with an exe inside that can be ran.
 
-## Compile for Linux
+## Supported file formats
+
+| File format    | Temperatures | Visual data | Measurements | Embedded settings | PiP / MSX  |
+|----------------|-------------:|------------:|-------------:|------------------:|-----------:|
+| FLIR JPEG, FFF |         ✅   |          ✅ |          ✅  |          ✅       |        ✅  |
+| Fluke is2      | ✅           | ✅          | ✅           | ✅                |         📋 |
+| PNG, TIFF      | ✅           |             |              |                   |            |
+
+### libblackbody
+
+Blackbody is the interactive UI, but there is a spin-off project 
+[libblackbody](https://github.com/anieuwland/blackbody/tree/main/libblackbody) 
+that aims to be *the* reusable, general purpose interface for thermograms, 
+supporting all file formats.
+
+## Building it
+
+### Compile for Linux
 
 Either use GNOME Builder (easier) or do it manually. Using Builder it is a
 matter of pressing the compile&run button. Doing it manually involves
 `cargo build --release`, copying the compiled gresource to the same directory as
 the binary, and then `cargo run --release`.
 
-## Compile for Windows
-Compiling for Windows is more involved, but does work.
-
-1. Install the necessary mingw packages
-2. Run the build command with cross-compilation flags set. On Fedora: `PKG_CONFIG_ALLOW_CROSS=1 MINGW_PREFIX=/usr/x86_64-w64-mingw32/sys-root/mingw PKG_CONFIG_PATH=$MINGW_PREFIX/lib/pkgconfig cargo build --target=x86_64-pc-windows-gnu --release`
-3. Copy DLLs, icons, glib schemas and the gresource to the same directory with the binary.
-    1. `mkdir blackbody-windows`
-    2. `cp target/x86_64-pc-windows-gnu/release/*.exe blackbody-windows/`
-    3. `cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/*.dll blackbody-windows/`
-    4. `cp /usr/x86_64-w64-mingw32/sys-root/mingw/bin/gdbus.exe blackbody-windows/`
-    4. `mkdir -p blackbody-windows/share/glib-2.0/schemas`
-    5. `cp /usr/x86_64-w64-mingw32/sys-root/mingw/share/glib-2.0/schemas/gschemas.compiled blackbody-windows/share/glib-2.0/schemas/gschemas.compiled`
-    5. `cp -r /usr/x86_64-w64-mingw32/sys-root/mingw/share/icons blackbody-windows/share/icons`
-    6. Compile the gresource bundle and copy it to `blackbody-windows`
-4. Run with Wine or zip up the release dir and ru non Windows! When using wine `XDG_DATA_DIRS` is correctly set however: `XDG_DATA_DIRS=blackbody-windows/share wine blackbody.exe`. In Windows it doesn't seem to matter.
-
-Reference: [Cross-compiling Rust Linux -> Windows](https://gtk-rs.org/docs-src/tutorial/cross)
+### Compile for Windows
+Compiling for Windows is more involved, but does work. Refer to 
+`bitbucket-pipelines.yml` for the necessary steps.
 
 ## Comparable to
 
-* [ThermView](https://github.com/v0l/thermview)
+* Joe-C's [Thermovision](https://github.com/JoeC-de/ThermoVision_JoeC/tree/master) ([website](https://joe-c.de/software/thermovision)) - A C# general purpose thermogram studio supporting many different files formats, but unmaintained
+* [Thermogram](https://github.com/s-du/Thermogram) - A Python DJI thermogram studio
+* [ThermView](https://github.com/v0l/thermview) - Pre-alpha stage web based thermogram viewer
 
 ## Source code
 
+* **[Github](https://github.com/anieuwland/blackbody)** - Blackbody's home
 * **[bitbucket](https://bitbucket.org/nimmerwoner/blackbody/)** - Original where the build pipeline still lives.
-* **[Github]()
