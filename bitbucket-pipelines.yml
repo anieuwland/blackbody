@@ -53,8 +53,8 @@ pipelines:
               - export WIN_PACKAGE=windows/dist/blackbody-$VERSION-windows.zip
               - export SRC_PACKAGE=source/dist/blackbody-$VERSION-source.tar.bz2
               - ls $WIN_PACKAGE $SRC_PACKAGE
-              - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$WIN_PACKAGE" --fail-with-body
-              - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$SRC_PACKAGE" --fail-with-body
+              - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$WIN_PACKAGE"
+              - curl -X POST --user "$BLACKBODY_CI_BB_UN:$BLACKBODY_CI_BB_PW" "https://api.bitbucket.org/2.0/repositories/$BITBUCKET_REPO_OWNER/$BITBUCKET_REPO_SLUG/downloads" --form files=@"$SRC_PACKAGE"
         - step:
             name: Publishing to Flathub
             image: atlassian/default-image:5
