@@ -10,7 +10,7 @@ exclude = ["thermograms/"]
 
 [dependencies]
 enum_dispatch = "0.3"
-flyr = { path = "../../flyr-rs", version = "0.7.1" }
+flyr = { path = "../../flyr-rs", version = "0.8.0" }
 imgref = "1"
 log = "0.4"
 ndarray = { version = "0.17", optional = true }
