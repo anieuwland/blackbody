@@ -52,6 +52,26 @@ Blackbody is the interactive UI, but there is a spin-off project
 that aims to be *the* reusable, general purpose interface for thermograms, 
 supporting all file formats.
 
+## Screenshots
+
+![View measurements drawn directly on the render and in a side-pane](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-05.png)
+*View measurements drawn directly on the render and in a side-pane*
+
+![The info panel shows camera details and metadata for every thermogram](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-02.png)
+*The info panel shows camera details and metadata for every thermogram*
+
+![Spot measurements on a thermogram in fahrenheit with a custom palette](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-03.png)
+*Spot measurements on a thermogram in fahrenheit with a custom palette*
+
+![Overlay view blends the thermal image with the visible-light photo](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-04.png)
+*Overlay view blends the thermal image with the visible-light photo*
+
+![Zoom in and narrow the temperature range to make the details stand out](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-06.png)
+*Zoom in and narrow the temperature range to make the details stand out*
+
+![Cold air leaking in under a door, captured with a Fluke is2](https://bitbucket.org/nimmerwoner/blackbody/downloads/blackbody2-07.png)
+*Cold air leaking in under a door, captured with a Fluke is2*
+
 ## Building it
 
 ### Compile for Linux
