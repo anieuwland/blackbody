@@ -1,5 +1,5 @@
-use imgref::ImgVec;
-use rgb::RGB8;
+use imgref::{Img, ImgVec};
+use rgb::{ComponentBytes, FromSlice, RGB8};
 use serendip::Thermogram as Serendip;
 use std::path::{Path, PathBuf};
 use uom::si::{f32::ThermodynamicTemperature, thermodynamic_temperature::kelvin};
@@ -77,5 +77,88 @@ impl ThermogramTrait for FlukeThermogram {
 
     fn measurements(&self) -> Vec<Measurement> {
         self.thermogram.markers().iter().map(Into::into).collect()
+    }
+
+    fn has_pip(&self) -> bool {
+        let has_frame = match &self.thermogram {
+            Serendip::Zip(t) => t.visual_bytes().is_some(),
+            Serendip::Blob(_) => false,
+        };
+        self.thermogram.ir_footprint().is_some() && has_frame
+    }
+
+    /// Composite the thermal render onto the visual light frame using the file's
+    /// embedded IR footprint geometry. Palette colors in 0.0–1.0 RGB.
+    fn picture_in_picture(
+        &self,
+        min_temp: ThermodynamicTemperature,
+        max_temp: ThermodynamicTemperature,
+        palette: &[[f32; 3]],
+    ) -> Option<ImgVec<RGB8>> {
+        let footprint = self.thermogram.ir_footprint()?;
+        let frame = self.thermogram.visual()?;
+
+        let thermal = self.render(min_temp, max_temp, palette);
+        let thermal = image::RgbImage::from_raw(
+            thermal.width() as u32,
+            thermal.height() as u32,
+            thermal.buf().as_bytes().to_vec(),
+        )?;
+        let scaled = image::imageops::resize(
+            &thermal,
+            footprint.width,
+            footprint.height,
+            image::imageops::FilterType::Triangle,
+        );
+
+        let mut base = image::RgbImage::from_raw(
+            frame.width() as u32,
+            frame.height() as u32,
+            frame.buf().as_bytes().to_vec(),
+        )?;
+        image::imageops::overlay(&mut base, &scaled, footprint.x.into(), footprint.y.into());
+
+        let (width, height) = (base.width() as usize, base.height() as usize);
+        Some(Img::new(base.into_raw().as_rgb().to_vec(), width, height))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ti400_sample() -> FlukeThermogram {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/fluke_ti400_1.is2");
+        FlukeThermogram::from_file(Path::new(path)).expect("test thermogram")
+    }
+
+    /// The composite has the full visual frame's shape (1280×960 on the
+    /// Ti400), not the thermal data's (320×240) or the display crop's
+    /// (640×480, which `visual()` returns).
+    #[test]
+    fn pip_composite_has_visual_frame_shape() {
+        let t = ti400_sample();
+        assert!(t.has_pip());
+        let img = t
+            .picture_in_picture(t.min_temp(), t.max_temp(), &crate::palettes::TURBO)
+            .expect("pip composite");
+        assert_eq!([img.width(), img.height()], [1280, 960]);
+    }
+
+    /// The thermal render must actually land inside the footprint: pixels
+    /// there differ from the plain visual frame, pixels outside it don't.
+    #[test]
+    fn pip_overlays_thermal_inside_footprint_only() {
+        let t = ti400_sample();
+        let img = t
+            .picture_in_picture(t.min_temp(), t.max_temp(), &crate::palettes::TURBO)
+            .expect("pip composite");
+        let frame = t.thermogram.visual().expect("visual frame");
+
+        // Footprint on this sample: x 399, y 252, 462 × 346 (see serendip)
+        let inside = (399usize + 231, 252usize + 173);
+        let outside = (10usize, 10usize);
+        assert_ne!(img[inside], frame[inside]);
+        assert_eq!(img[outside], frame[outside]);
     }
 }

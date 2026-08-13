@@ -1608,9 +1608,7 @@ dependencies = [
 
 [[package]]
 name = "serendip"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ea2a746c981671c62c3aed185581b2caaa15b0aea57fa68c0332dfc5afbbe969"
+version = "0.4.0"
 dependencies = [
  "env_logger",
  "imgref",

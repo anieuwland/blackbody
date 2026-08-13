@@ -4,3 +4,4 @@ target
 *.mo
 *.ui~
 src/config.rs
+libblackbody/thermograms
