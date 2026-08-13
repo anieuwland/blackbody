@@ -40,6 +40,13 @@
 //! [ndarray](https://docs.rs/ndarray) conversions via the `ThermogramNdarrayExt` extension
 //! trait.
 //!
+//! # Units and conventions
+//! Temperatures are typed [uom](https://docs.rs/uom) `ThermodynamicTemperature` values rather
+//! than bare floats, so they can be read in any unit without ambiguity. Integer TIFF and 16-bit
+//! grayscale PNG values are interpreted as centikelvin, float TIFF values as kelvin.
+//! `export_thermal` writes a 32-bit float TIFF in kelvin; `export_thermal_png` writes a 16-bit
+//! grayscale PNG in centikelvin.
+//!
 //! # Issue tracking
 //! Issue tracking happens in the [Blackbody repository](https://github.com/anieuwland/blackbody/issues).
 

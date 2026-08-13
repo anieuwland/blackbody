@@ -1,10 +1,18 @@
-# 0.6.0
-* Fluke is2 support via the `serendip` crate
-* Decode PNGs as thermograms
-* Access camera metadata
-* Access measurements/markers
-* Palette support for Fluke thermograms
-* `render_defaults` uses the embedded render range for FLIR files, if present
+# 0.6.0 (2026-08-13)
+
+Breaking changes:
+* Temperatures are typed `uom::ThermodynamicTemperature` values instead of bare f32s
+* `optical()` is renamed to `visual()`
+* Image data is exposed as `imgref::Img` buffers
+
+New:
+* Fluke is2 support via the `serendip` crate, both older binary and newer zip-style files
+* Decode 16-bit grayscale PNGs as thermograms (centikelvin)
+* Export thermal data to 16-bit centikelvin PNG with `export_thermal_png`
+* Access camera metadata and embedded measurements/markers, with per-measurement statistics
+* Fluke thermograms use their embedded palette, if present
+* `render_defaults` uses the embedded render range for FLIR and Fluke files, if present
+* Optional `ndarray` feature for ndarray conversions
 
 # 0.5.0 and earlier
 * Added support for reading thermal FLIR data
