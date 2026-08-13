@@ -1,5 +1,10 @@
-//! Display units for temperatures. All thermal data stays in Celsius
-//! internally; conversion happens only when formatting for the screen.
+//! Display units for temperatures. Thermal data is carried as
+//! `uom::si::f32::ThermodynamicTemperature` throughout the app; conversion to
+//! a bare number happens only when formatting for the screen or parsing user
+//! input.
+
+use uom::si::f32::ThermodynamicTemperature;
+use uom::si::thermodynamic_temperature::{degree_celsius, degree_fahrenheit, kelvin};
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum TempUnit {
@@ -20,20 +25,21 @@ impl TempUnit {
         }
     }
 
-    pub fn convert(self, celsius: f32) -> f32 {
+    /// The temperature's numeric value in this display unit.
+    pub fn convert(self, temp: ThermodynamicTemperature) -> f32 {
         match self {
-            TempUnit::Celsius => celsius,
-            TempUnit::Fahrenheit => celsius * 9.0 / 5.0 + 32.0,
-            TempUnit::Kelvin => celsius + 273.15,
+            TempUnit::Celsius => temp.get::<degree_celsius>(),
+            TempUnit::Fahrenheit => temp.get::<degree_fahrenheit>(),
+            TempUnit::Kelvin => temp.get::<kelvin>(),
         }
     }
 
-    /// Inverse of `convert`: a value entered in this display unit, in celsius.
-    pub fn to_celsius(self, value: f32) -> f32 {
+    /// Inverse of `convert`: a value entered in this display unit.
+    pub fn to_temperature(self, value: f32) -> ThermodynamicTemperature {
         match self {
-            TempUnit::Celsius => value,
-            TempUnit::Fahrenheit => (value - 32.0) * 5.0 / 9.0,
-            TempUnit::Kelvin => value - 273.15,
+            TempUnit::Celsius => ThermodynamicTemperature::new::<degree_celsius>(value),
+            TempUnit::Fahrenheit => ThermodynamicTemperature::new::<degree_fahrenheit>(value),
+            TempUnit::Kelvin => ThermodynamicTemperature::new::<kelvin>(value),
         }
     }
 
@@ -46,21 +52,32 @@ impl TempUnit {
     }
 
     /// "23.5 °C" / "74.3 °F" / "296.6 K"
-    pub fn format(self, celsius: f32) -> String {
-        format!("{:.1} {}", self.convert(celsius), self.suffix())
+    pub fn format(self, temp: ThermodynamicTemperature) -> String {
+        format!("{:.1} {}", self.convert(temp), self.suffix())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::TempUnit;
+    use uom::si::f32::ThermodynamicTemperature;
+    use uom::si::thermodynamic_temperature::degree_celsius;
 
     #[test]
     fn conversions() {
-        assert_eq!(TempUnit::Celsius.format(20.0), "20.0 °C");
-        assert_eq!(TempUnit::Fahrenheit.format(20.0), "68.0 °F");
-        assert_eq!(TempUnit::Kelvin.format(20.0), "293.1 K");
+        let t = ThermodynamicTemperature::new::<degree_celsius>(20.0);
+        assert_eq!(TempUnit::Celsius.format(t), "20.0 °C");
+        assert_eq!(TempUnit::Fahrenheit.format(t), "68.0 °F");
+        assert_eq!(TempUnit::Kelvin.format(t), "293.1 K");
         assert_eq!(TempUnit::from_key("fahrenheit"), TempUnit::Fahrenheit);
         assert_eq!(TempUnit::from_key("nonsense"), TempUnit::Celsius);
+    }
+
+    #[test]
+    fn to_temperature_roundtrips() {
+        for unit in [TempUnit::Celsius, TempUnit::Fahrenheit, TempUnit::Kelvin] {
+            let t = unit.to_temperature(21.5);
+            assert!((unit.convert(t) - 21.5).abs() < 1e-3);
+        }
     }
 }

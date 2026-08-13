@@ -9,15 +9,24 @@ use std::rc::Rc;
 
 use gtk4::prelude::*;
 use gtk4::{EditableLabel, Label, Orientation};
+use uom::si::f32::{TemperatureInterval, ThermodynamicTemperature};
+use uom::si::temperature_interval;
+use uom::si::thermodynamic_temperature::kelvin;
 
 use super::double_scale::{DoubleScale, Handle};
 use crate::domain::units::TempUnit;
 
-/// Extra draggable room beyond the thermogram's own range, in celsius.
-/// The user can widen it further by editing the extreme labels.
-const RANGE_MARGIN: f32 = 20.0;
+/// Extra draggable room beyond the thermogram's own range. An interval, not
+/// a temperature: it widens the track on both ends. The user can widen it
+/// further by editing the extreme labels.
+fn range_margin() -> TemperatureInterval {
+    TemperatureInterval::new::<temperature_interval::kelvin>(20.0)
+}
 /// Gap between the bubble's bottom edge and the top of the slider, in pixels.
 const BUBBLE_GAP: f64 = 8.0;
+
+/// Callback invoked when either handle moves, with the new (min, max).
+type ChangedCallback = Box<dyn Fn(ThermodynamicTemperature, ThermodynamicTemperature)>;
 
 pub(super) struct RangeSlider {
     root: gtk4::Box,
@@ -29,7 +38,17 @@ pub(super) struct RangeSlider {
     /// to show a bubble above the trough). Set via `attach_bubble`.
     bubble_host: RefCell<Option<gtk4::Overlay>>,
     unit: Cell<TempUnit>,
-    on_changed: RefCell<Option<Box<dyn Fn(f32, f32)>>>,
+    on_changed: RefCell<Option<ChangedCallback>>,
+}
+
+/// The `DoubleScale` carries plain `f64`s; fix their meaning as kelvin at
+/// this boundary so no other code needs to know.
+fn to_scale(t: ThermodynamicTemperature) -> f64 {
+    t.get::<kelvin>() as f64
+}
+
+fn from_scale(v: f64) -> ThermodynamicTemperature {
+    ThermodynamicTemperature::new::<kelvin>(v as f32)
 }
 
 impl RangeSlider {
@@ -99,40 +118,43 @@ impl RangeSlider {
         *self.bubble_host.borrow_mut() = Some(host.clone());
     }
 
-    pub(super) fn connect_changed(&self, f: impl Fn(f32, f32) + 'static) {
+    pub(super) fn connect_changed(
+        &self,
+        f: impl Fn(ThermodynamicTemperature, ThermodynamicTemperature) + 'static,
+    ) {
         *self.on_changed.borrow_mut() = Some(Box::new(f));
     }
 
     /// Reset the track to the thermogram's range plus a margin on both ends
     /// and put the handles at the range's min and max. Does not notify.
-    pub(super) fn configure(&self, min: f32, max: f32) {
-        self.scale.set_bounds((min - RANGE_MARGIN) as f64, (max + RANGE_MARGIN) as f64);
-        self.scale.set_values(min as f64, max as f64);
+    pub(super) fn configure(&self, min: ThermodynamicTemperature, max: ThermodynamicTemperature) {
+        self.scale.set_bounds(to_scale(min - range_margin()), to_scale(max + range_margin()));
+        self.scale.set_values(to_scale(min), to_scale(max));
         self.refresh_bound_labels();
     }
 
     /// Change the display unit and reformat the extreme labels. Temperatures
-    /// stay in celsius internally.
+    /// stay typed internally.
     pub(super) fn set_unit(&self, unit: TempUnit) {
         self.unit.set(unit);
         self.refresh_bound_labels();
     }
 
-    /// Track extremes in celsius.
-    fn bounds(&self) -> (f64, f64) {
-        (self.scale.lower(), self.scale.upper())
+    /// Track extremes.
+    fn bounds(&self) -> (ThermodynamicTemperature, ThermodynamicTemperature) {
+        (from_scale(self.scale.lower()), from_scale(self.scale.upper()))
     }
 
     fn refresh_bound_labels(&self) {
         let (lo, hi) = self.bounds();
         let unit = self.unit.get();
-        self.min_edit.set_text(&unit.format(lo as f32));
-        self.max_edit.set_text(&unit.format(hi as f32));
+        self.min_edit.set_text(&unit.format(lo));
+        self.max_edit.set_text(&unit.format(hi));
     }
 
     fn emit_changed(&self) {
         if let Some(cb) = self.on_changed.borrow().as_ref() {
-            cb(self.scale.min_value() as f32, self.scale.max_value() as f32);
+            cb(from_scale(self.scale.min_value()), from_scale(self.scale.max_value()));
         }
     }
 
@@ -165,7 +187,7 @@ impl RangeSlider {
             Handle::Min => self.scale.min_value(),
             Handle::Max => self.scale.max_value(),
         };
-        self.bubble.set_text(&self.unit.get().format(value as f32));
+        self.bubble.set_text(&self.unit.get().format(from_scale(value)));
         let (_, natural) = self.bubble.preferred_size();
         let width = natural.width() as f64;
         let left =
@@ -193,9 +215,9 @@ impl RangeSlider {
     /// new extreme are clamped by the scale; that changes the rendered
     /// range, so it notifies.
     fn commit_bound(&self, handle: Handle, text: &str) {
-        let (lo, hi) = self.bounds();
+        let (lo, hi) = (self.scale.lower(), self.scale.upper());
         if let Some(value) = parse_temp(text, self.unit.get()) {
-            let value = value as f64;
+            let value = to_scale(value);
             let before = (self.scale.min_value(), self.scale.max_value());
             match handle {
                 Handle::Min if value < hi => self.scale.set_bounds(value, hi),
@@ -211,10 +233,10 @@ impl RangeSlider {
 }
 
 /// Parse user input like "12.5", "-40", "20,5 °C" or "296 K" in the given
-/// display unit; returns celsius.
-fn parse_temp(text: &str, unit: TempUnit) -> Option<f32> {
+/// display unit.
+fn parse_temp(text: &str, unit: TempUnit) -> Option<ThermodynamicTemperature> {
     let text = text.trim().trim_end_matches(|c: char| c.is_alphabetic() || c == '°').trim();
-    text.replace(',', ".").parse::<f32>().ok().map(|v| unit.to_celsius(v))
+    text.replace(',', ".").parse::<f32>().ok().map(|v| unit.to_temperature(v))
 }
 
 /// The drag bubble's look, plus a keyboard focus ring around a handle: the
@@ -251,17 +273,26 @@ fn install_css() {
 
 #[cfg(test)]
 mod tests {
+    use uom::si::thermodynamic_temperature::degree_celsius;
+
     use crate::domain::units::TempUnit;
 
     use super::parse_temp;
 
+    /// Compare in celsius with a small tolerance: unit conversions (e.g.
+    /// fahrenheit) are not exact in f32.
+    fn assert_celsius(text: &str, unit: TempUnit, expected: f32) {
+        let parsed = parse_temp(text, unit).expect(text).get::<degree_celsius>();
+        assert!((parsed - expected).abs() < 1e-3, "{text}: {parsed} != {expected}");
+    }
+
     #[test]
     fn parses_plain_and_suffixed_input() {
-        assert_eq!(parse_temp("12.5", TempUnit::Celsius), Some(12.5));
-        assert_eq!(parse_temp(" -40 ", TempUnit::Celsius), Some(-40.0));
-        assert_eq!(parse_temp("20,5 °C", TempUnit::Celsius), Some(20.5));
-        assert_eq!(parse_temp("273.15 K", TempUnit::Kelvin), Some(0.0));
-        assert_eq!(parse_temp("32 °F", TempUnit::Fahrenheit), Some(0.0));
+        assert_celsius("12.5", TempUnit::Celsius, 12.5);
+        assert_celsius(" -40 ", TempUnit::Celsius, -40.0);
+        assert_celsius("20,5 °C", TempUnit::Celsius, 20.5);
+        assert_celsius("273.15 K", TempUnit::Kelvin, 0.0);
+        assert_celsius("32 °F", TempUnit::Fahrenheit, 0.0);
         assert_eq!(parse_temp("garbage", TempUnit::Celsius), None);
         assert_eq!(parse_temp("", TempUnit::Celsius), None);
     }

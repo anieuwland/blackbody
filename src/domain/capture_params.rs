@@ -1,5 +1,7 @@
 use gettextrs::gettext;
 use libblackbody::Thermogram::{self, Flir};
+use uom::si::f32::ThermodynamicTemperature;
+use uom::si::thermodynamic_temperature::{degree_celsius, kelvin};
 
 use crate::domain::units::TempUnit;
 
@@ -16,10 +18,11 @@ pub fn get_make_dependent_params(
                 gettext("Object distance"),
                 format!("{:.2}", t.camera_info.object_distance),
             ));
-            params.push((
-                gettext("Reflected temperature"),
-                unit.format(t.camera_info.reflected_apparent_temperature - 273.15),
-            ));
+            // flyr reports the reflected apparent temperature in kelvin.
+            let reflected = ThermodynamicTemperature::new::<kelvin>(
+                t.camera_info.reflected_apparent_temperature,
+            );
+            params.push((gettext("Reflected temperature"), unit.format(reflected)));
             params.push((
                 gettext("Relative humidity"),
                 format!("{:.0}%", t.camera_info.relative_humidity),
@@ -32,12 +35,13 @@ pub fn get_make_dependent_params(
                 gettext("Transmission"),
                 format!("{:.2}", t.ir_image_info().transmission()),
             ));
-            params.push((
-                gettext("Background temperature"),
-                unit.format(t.ir_image_info().background_temperature()),
-            ));
+            // serendip reports the background temperature in celsius.
+            let background = ThermodynamicTemperature::new::<degree_celsius>(
+                t.ir_image_info().background_temperature(),
+            );
+            params.push((gettext("Background temperature"), unit.format(background)));
         }
         Thermogram::Tiff(_) | Thermogram::Png(_) => {}
     };
-    return params;
+    params
 }

@@ -20,6 +20,7 @@ imgref = "1"
 libblackbody = { path = "libblackbody", version = "0.6.0" }
 log = "0.4"
 rgb = "0.8"
+uom = "0.38"
 
 [dependencies.cairo-rs]
 version = "0.22"

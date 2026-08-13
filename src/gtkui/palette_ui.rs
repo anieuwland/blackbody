@@ -7,6 +7,9 @@ use cairo::LinearGradient;
 use gettextrs::gettext;
 use gtk4::prelude::*;
 use gtk4::{Button, DrawingArea, FlowBox, Label, Orientation, SelectionMode};
+use uom::si::f32::TemperatureInterval;
+use uom::si::temperature_interval;
+use uom::si::thermodynamic_temperature::kelvin;
 
 use super::app_window::AppState;
 use super::palettes::PALETTES;
@@ -158,7 +161,12 @@ impl AppState {
                 return false;
             }
             let position = 1.0 - y as f32 / h as f32;
-            let temp = that.min_temp.get() + position * (that.max_temp.get() - that.min_temp.get());
+            let (min, max) = (that.min_temp.get(), that.max_temp.get());
+            // uom has no temperature − temperature; span the range as an interval.
+            let span = TemperatureInterval::new::<temperature_interval::kelvin>(
+                max.get::<kelvin>() - min.get::<kelvin>(),
+            );
+            let temp = min + span * position;
             tooltip.set_text(Some(&that.temp_unit.get().format(temp)));
             true
         });

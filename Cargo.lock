@@ -157,6 +157,7 @@ dependencies = [
  "libblackbody",
  "log",
  "rgb",
+ "uom",
 ]
 
 [[package]]

@@ -6,9 +6,9 @@
 //!    you used in the previous step (without the subdir packages).
 //! 3. Registering a thumbnailer for is2 files by placing the below thumbnailer
 //!    entry in /usr/local/share/thumbnailers/mkis2thumb.thumbnailer or
-//!   ~/.local/share/thumbnailers/mkis2thumb.thumbnailer.
+//!    ~/.local/share/thumbnailers/mkis2thumb.thumbnailer.
 //! 4. Building this binary using `cargo build --release`. It should appear in
-//!   `target/release/`.
+//!    `target/release/`.
 //! 5. Installing it with
 //!    `sudo install -m 755 target/release/mkis2thumb /usr/local/bin/mkis2thumb`.
 //!    Be aware it has to be in `/usr` as the thumbnailer is sandboxed. It does

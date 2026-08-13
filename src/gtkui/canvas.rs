@@ -15,6 +15,7 @@ use gtk4::prelude::*;
 use gtk4::{EventControllerMotion, EventControllerScroll, EventControllerScrollFlags, Tooltip};
 use imgref::ImgVec;
 use rgb::RGB8;
+use uom::si::f32::ThermodynamicTemperature;
 
 use super::app_window::AppState;
 use libblackbody::{Measurement, Thermogram, ThermogramTrait};
@@ -375,8 +376,8 @@ fn grab_cursor() -> Option<gtk4::gdk::Cursor> {
 
 fn render_for_mode(
     thermogram: &Thermogram,
-    min: f32,
-    max: f32,
+    min: ThermodynamicTemperature,
+    max: ThermodynamicTemperature,
     palette: &[[f32; 3]],
     thermal_mode: bool,
     pip_mode: bool,

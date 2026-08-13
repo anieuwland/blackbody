@@ -64,17 +64,16 @@ impl AppState {
             sidebar.remove(&child);
         }
 
-        if let Some(t) = thermogram {
-            if let Some(group) = file_group(t) {
-                sidebar.append(&group);
-            }
-            sidebar.append(&image_group(t));
-            sidebar.append(&camera_group(t));
-            sidebar.append(&capture_group(&t, self.temp_unit.get()));
-        } else {
+        let Some(t) = thermogram else {
             sidebar.append(&no_info_page());
             return;
+        };
+        if let Some(group) = file_group(t) {
+            sidebar.append(&group);
         }
+        sidebar.append(&image_group(t));
+        sidebar.append(&camera_group(t));
+        sidebar.append(&capture_group(t, self.temp_unit.get()));
     }
 
     pub(super) fn populate_measurements_sidebar(&self, thermogram: Option<&Thermogram>) {
@@ -83,23 +82,18 @@ impl AppState {
             sidebar.remove(&child);
         }
 
-        if let Some(t) = thermogram {
-            let measurements = t.measurements();
-            if measurements.is_empty() {
-                sidebar.append(&no_measurements_page());
-                return;
-            }
-            sidebar.append(&self.overlay_switch_group());
-
-            let group = PreferencesGroup::new();
-            for m in measurements {
-                group.add(&measurement_row(t, &m, self.temp_unit.get()));
-            }
-            sidebar.append(&group);
-        } else {
+        let measurements = thermogram.map(|t| t.measurements()).unwrap_or_default();
+        let (Some(t), false) = (thermogram, measurements.is_empty()) else {
             sidebar.append(&no_measurements_page());
             return;
+        };
+        sidebar.append(&self.overlay_switch_group());
+
+        let group = PreferencesGroup::new();
+        for m in measurements {
+            group.add(&measurement_row(t, &m, self.temp_unit.get()));
         }
+        sidebar.append(&group);
     }
 
     /// The "Show in image" switch controlling the measurement overlay.
@@ -188,19 +182,19 @@ fn image_group(thermogram: &Thermogram) -> PreferencesGroup {
         Thermogram::Fluke(_) => "Fluke is2",
     };
     add_row(&group, &gettext("Format"), format_str);
-    if let Some(path) = thermogram.path() {
-        if let Ok(meta) = std::fs::metadata(path) {
-            add_row(&group, &gettext("File size"), &format_file_size(meta.len()));
-            if let Ok(t) = meta.created() {
-                if let Some(s) = format_system_time(t) {
-                    add_row(&group, &gettext("Created"), &s);
-                }
-            }
-            if let Ok(t) = meta.modified() {
-                if let Some(s) = format_system_time(t) {
-                    add_row(&group, &gettext("Modified"), &s);
-                }
-            }
+    if let Some(path) = thermogram.path()
+        && let Ok(meta) = std::fs::metadata(path)
+    {
+        add_row(&group, &gettext("File size"), &format_file_size(meta.len()));
+        if let Ok(t) = meta.created()
+            && let Some(s) = format_system_time(t)
+        {
+            add_row(&group, &gettext("Created"), &s);
+        }
+        if let Ok(t) = meta.modified()
+            && let Some(s) = format_system_time(t)
+        {
+            add_row(&group, &gettext("Modified"), &s);
         }
     }
     group

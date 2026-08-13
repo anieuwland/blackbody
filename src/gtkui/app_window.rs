@@ -16,6 +16,9 @@ use gtk4::prelude::*;
 use gtk4::{Builder, Button, EventControllerKey, Picture};
 use libadwaita as adw;
 
+use uom::si::f32::ThermodynamicTemperature;
+use uom::si::thermodynamic_temperature::kelvin;
+
 use super::dialogs::tr;
 use super::palettes::PALETTES;
 use super::ui::Ui;
@@ -62,9 +65,9 @@ pub struct AppState {
     /// for the current single-file context, to avoid stacking toasts on
     /// repeated key presses.
     nav_hint_shown: Cell<bool>,
-    pub(super) min_temp: Cell<f32>,
-    pub(super) max_temp: Cell<f32>,
-    /// Display unit for temperatures; the data itself stays in Celsius.
+    pub(super) min_temp: Cell<ThermodynamicTemperature>,
+    pub(super) max_temp: Cell<ThermodynamicTemperature>,
+    /// Display unit for temperatures; the data itself stays typed (`uom`).
     pub(super) temp_unit: Cell<TempUnit>,
     pub(super) active_palette: RefCell<Vec<[f32; 3]>>,
 }
@@ -89,8 +92,8 @@ impl AppState {
             dir_files: RefCell::new(Vec::new()),
             dir_idx: Cell::new(0),
             nav_hint_shown: Cell::new(false),
-            min_temp: Cell::new(0.0),
-            max_temp: Cell::new(0.0),
+            min_temp: Cell::new(ThermodynamicTemperature::new::<kelvin>(0.0)),
+            max_temp: Cell::new(ThermodynamicTemperature::new::<kelvin>(0.0)),
             temp_unit: Cell::new(TempUnit::default()),
             active_palette: RefCell::new(PALETTES[3].to_vec()), // grayscale until thermogram loaded
         });

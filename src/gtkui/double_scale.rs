@@ -54,9 +54,12 @@ mod imp {
         /// Last pointer x, for aiming scroll-wheel nudges. NaN before the
         /// first motion event.
         pub(super) pointer_x: Cell<f64>,
-        pub(super) on_value_changed: RefCell<Option<Box<dyn Fn(&super::DoubleScale)>>>,
-        pub(super) on_drag_changed: RefCell<Option<Box<dyn Fn(&super::DoubleScale)>>>,
+        pub(super) on_value_changed: RefCell<Option<Callback>>,
+        pub(super) on_drag_changed: RefCell<Option<Callback>>,
     }
+
+    /// Boxed notification callback receiving the scale that changed.
+    pub(super) type Callback = Box<dyn Fn(&super::DoubleScale)>;
 
     impl Default for DoubleScale {
         fn default() -> Self {
@@ -334,10 +337,10 @@ impl DoubleScale {
             self.set_value_interactive(handle, quantize(self.value_at(x)));
         }
         self.set_state_flags(gtk4::StateFlags::ACTIVE, false);
-        if self.gets_focus_on_click() {
-            if let Some(trough) = imp.trough.get() {
-                trough.slider(handle).grab_focus();
-            }
+        if self.gets_focus_on_click()
+            && let Some(trough) = imp.trough.get()
+        {
+            trough.slider(handle).grab_focus();
         }
         self.notify_drag();
     }

@@ -44,10 +44,10 @@ impl AppState {
             .build();
         let that = this.clone();
         dialog.select_folder(Some(&this.ui.window), gio::Cancellable::NONE, move |result| {
-            if let Ok(folder) = result {
-                if let Some(path) = folder.path() {
-                    that.open_directory(&path);
-                }
+            if let Ok(folder) = result
+                && let Some(path) = folder.path()
+            {
+                that.open_directory(&path);
             }
         });
     }
@@ -126,11 +126,11 @@ impl AppState {
 
         let that = this.clone();
         dialog.save(Some(&this.ui.window), gio::Cancellable::NONE, move |result| {
-            if let Ok(file) = result {
-                if let Some(mut path) = file.path() {
-                    path.set_extension("png");
-                    that.save_render_to(path);
-                }
+            if let Ok(file) = result
+                && let Some(mut path) = file.path()
+            {
+                path.set_extension("png");
+                that.save_render_to(path);
             }
         });
     }
