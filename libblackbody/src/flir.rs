@@ -6,6 +6,7 @@ use rgb::{FromSlice, RGB8};
 use std::path::{Path, PathBuf};
 use uom::si::{f32::ThermodynamicTemperature, thermodynamic_temperature::kelvin};
 
+use crate::pip::{PipGeometry, PipRect};
 use crate::{Measurement, ThermVec, ThermogramTrait, thermal::into_therm_vec};
 
 /// This is the struct and `ThermogramTrait` implementation for FLIR thermograms, using
@@ -103,48 +104,42 @@ impl ThermogramTrait for FlirThermogram {
         self.thermogram.measurements.iter().map(Into::into).collect()
     }
 
-    fn has_pip(&self) -> bool {
-        self.thermogram.pip_info.is_some() && self.thermogram.embedded_image.is_some()
-    }
+    /// The embedded crop (`x1..x2`, `y1..y2`), scaled by the real-to-IR ratio and centered
+    /// on the visual light image, shifted by the stored offsets.
+    fn pip_geometry(&self) -> Option<PipGeometry> {
+        let pip = self.thermogram.pip_info.as_ref()?;
+        let thermal = self.thermal();
+        let (ir_w, ir_h) = (thermal.width() as i64, thermal.height() as i64);
 
-    /// Composite the thermal render onto the visual light image using the embedded PiP geometry.
-    /// Palette colors in 0.0–1.0 RGB.
-    fn picture_in_picture(
-        &self,
-        min_temp: ThermodynamicTemperature,
-        max_temp: ThermodynamicTemperature,
-        palette: &[[f32; 3]],
-    ) -> Option<ImgVec<RGB8>> {
-        let to_u8 = |f: f32| (f * 255.0) as u8;
-        let colors = palette.iter().map(|c| [to_u8(c[0]), to_u8(c[1]), to_u8(c[2])]).collect();
-        let normalization = flyr::units::Normalization::Explicit {
-            min: min_temp.get::<kelvin>(),
-            max: max_temp.get::<kelvin>(),
-        };
-        let rgba = self
-            .thermogram
-            .picture_in_picture(&flyr::units::Palette::Custom(colors), &normalization)
-            .ok()?;
-
-        // The composite has the orientation-corrected visual light dimensions.
-        let ei = self.thermogram.embedded_image.as_ref()?;
-        let orientation = self.thermogram.orientation.unwrap_or(1);
-        let (w, h) = if (5..=8).contains(&orientation) {
-            (ei.height as usize, ei.width as usize)
-        } else {
-            (ei.width as usize, ei.height as usize)
-        };
-        let (expected, length) = (w * h * 4, rgba.len());
-        if expected != length {
-            warn!(
-                "PiP composite did not contain expected amount of bytes: expected {expected}, got {length}"
-            );
+        let x1 = i64::from(pip.x1).clamp(0, ir_w);
+        let y1 = i64::from(pip.y1).clamp(0, ir_h);
+        let x2 = i64::from(pip.x2).clamp(0, ir_w);
+        let y2 = i64::from(pip.y2).clamp(0, ir_h);
+        if x2 <= x1 || y2 <= y1 {
+            warn!("PiP crop region is empty");
             return None;
         }
+        let (src_w, src_h) = ((x2 - x1) as u32, (y2 - y1) as u32);
 
-        // as_rgba reinterprets the bytes in place; dropping alpha is then a single pass.
-        let pixels: Vec<RGB8> = rgba.as_rgba().iter().map(|p| p.rgb()).collect();
-        Some(Img::new(pixels, w, h))
+        // From the embedded image record rather than `visual()`, which decodes the whole JPEG.
+        let ei = self.thermogram.embedded_image.as_ref()?;
+        let orientation = self.thermogram.orientation.unwrap_or(1);
+        let (opt_w, opt_h) = if (5..=8).contains(&orientation) {
+            (i64::from(ei.height), i64::from(ei.width))
+        } else {
+            (i64::from(ei.width), i64::from(ei.height))
+        };
+
+        let ratio = opt_w as f32 / ir_w as f32 / pip.real_to_ir;
+        let dst_w = (src_w as f32 * ratio).round() as u32;
+        let dst_h = (src_h as f32 * ratio).round() as u32;
+        let dst_x = opt_w / 2 - i64::from(dst_w) / 2 + i64::from(pip.offset_x);
+        let dst_y = opt_h / 2 - i64::from(dst_h) / 2 + i64::from(pip.offset_y);
+
+        Some(PipGeometry {
+            source: PipRect { x: x1, y: y1, width: src_w, height: src_h },
+            destination: PipRect { x: dst_x, y: dst_y, width: dst_w, height: dst_h },
+        })
     }
 
     fn embedded_render_range(&self) -> Option<[ThermodynamicTemperature; 2]> {
@@ -184,6 +179,35 @@ mod tests {
             .expect("pip composite");
         // Visual is 640x480 vs 120x90 thermal; RGB channels last.
         assert_eq!([img.width(), img.height()], [640, 480]);
+    }
+
+    /// Sample stores crop 22..96 × 16..72, ratio 1.3134, offsets (9, -1); on its 120×90 thermal
+    /// and 640×480 visual that scales by 640/120/1.3134 ≈ 4.06 and centers at (179, 126).
+    #[test]
+    fn pip_geometry_translates_stored_form() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_e5_2-pip.jpg");
+        let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
+        let geometry = t.pip_geometry().expect("geometry present");
+
+        assert_eq!(geometry.source, PipRect { x: 22, y: 16, width: 74, height: 56 });
+        assert_eq!(geometry.destination, PipRect { x: 179, y: 126, width: 300, height: 227 });
+    }
+
+    /// Pixels inside the destination must differ from the plain visual, pixels outside must not.
+    #[test]
+    fn pip_overlays_thermal_inside_destination_only() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_e5_2-pip.jpg");
+        let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
+        let img = t
+            .picture_in_picture(t.min_temp(), t.max_temp(), &crate::palettes::TURBO)
+            .expect("pip composite");
+        let visual = t.visual().expect("visual");
+
+        // Destination on this sample: x 179, y 126, 300 × 227 (see geometry test)
+        let inside = (179usize + 150, 126usize + 113);
+        let outside = (10usize, 10usize);
+        assert_ne!(img[inside], visual[inside]);
+        assert_eq!(img[outside], visual[outside]);
     }
 
     #[test]

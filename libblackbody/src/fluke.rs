@@ -1,9 +1,10 @@
-use imgref::{Img, ImgVec};
-use rgb::{ComponentBytes, FromSlice, RGB8};
+use imgref::ImgVec;
+use rgb::RGB8;
 use serendip::Thermogram as Serendip;
 use std::path::{Path, PathBuf};
 use uom::si::{f32::ThermodynamicTemperature, thermodynamic_temperature::kelvin};
 
+use crate::pip::{PipGeometry, PipRect};
 use crate::{Measurement, ThermVec, ThermogramTrait, thermal::into_therm_vec};
 
 /// This is the struct and `ThermogramTrait` implementation for Fluke thermograms, using
@@ -79,47 +80,24 @@ impl ThermogramTrait for FlukeThermogram {
         self.thermogram.markers().iter().map(Into::into).collect()
     }
 
-    fn has_pip(&self) -> bool {
-        let has_frame = match &self.thermogram {
-            Serendip::Zip(t) => t.visual_bytes().is_some(),
-            Serendip::Blob(_) => false,
-        };
-        self.thermogram.ir_footprint().is_some() && has_frame
-    }
-
-    /// Composite the thermal render onto the visual light frame using the file's
-    /// embedded IR footprint geometry. Palette colors in 0.0–1.0 RGB.
-    fn picture_in_picture(
-        &self,
-        min_temp: ThermodynamicTemperature,
-        max_temp: ThermodynamicTemperature,
-        palette: &[[f32; 3]],
-    ) -> Option<ImgVec<RGB8>> {
+    /// The whole thermal render lands on the file's IR footprint; only zip-style files store one.
+    fn pip_geometry(&self) -> Option<PipGeometry> {
         let footprint = self.thermogram.ir_footprint()?;
-        let frame = self.thermogram.visual()?;
-
-        let thermal = self.render(min_temp, max_temp, palette);
-        let thermal = image::RgbImage::from_raw(
-            thermal.width() as u32,
-            thermal.height() as u32,
-            thermal.buf().as_bytes().to_vec(),
-        )?;
-        let scaled = image::imageops::resize(
-            &thermal,
-            footprint.width,
-            footprint.height,
-            image::imageops::FilterType::Triangle,
-        );
-
-        let mut base = image::RgbImage::from_raw(
-            frame.width() as u32,
-            frame.height() as u32,
-            frame.buf().as_bytes().to_vec(),
-        )?;
-        image::imageops::overlay(&mut base, &scaled, footprint.x.into(), footprint.y.into());
-
-        let (width, height) = (base.width() as usize, base.height() as usize);
-        Some(Img::new(base.into_raw().as_rgb().to_vec(), width, height))
+        let thermal = self.thermal();
+        Some(PipGeometry {
+            source: PipRect {
+                x: 0,
+                y: 0,
+                width: thermal.width() as u32,
+                height: thermal.height() as u32,
+            },
+            destination: PipRect {
+                x: i64::from(footprint.x),
+                y: i64::from(footprint.y),
+                width: footprint.width,
+                height: footprint.height,
+            },
+        })
     }
 }
 
@@ -132,9 +110,18 @@ mod tests {
         FlukeThermogram::from_file(Path::new(path)).expect("test thermogram")
     }
 
-    /// The composite has the full visual frame's shape (1280×960 on the
-    /// Ti400), not the thermal data's (320×240) or the display crop's
-    /// (640×480, which `visual()` returns).
+    /// Footprint values verified against the visual frame in serendip.
+    #[test]
+    fn pip_geometry_maps_whole_thermal_onto_footprint() {
+        let t = ti400_sample();
+        let geometry = t.pip_geometry().expect("geometry present");
+
+        assert_eq!(geometry.source, PipRect { x: 0, y: 0, width: 320, height: 240 });
+        assert_eq!(geometry.destination, PipRect { x: 399, y: 252, width: 462, height: 346 });
+    }
+
+    /// The composite takes the full visual frame's shape, not the thermal's (320×240) or the
+    /// display crop's (640×480, which `visual()` returns).
     #[test]
     fn pip_composite_has_visual_frame_shape() {
         let t = ti400_sample();
@@ -145,8 +132,7 @@ mod tests {
         assert_eq!([img.width(), img.height()], [1280, 960]);
     }
 
-    /// The thermal render must actually land inside the footprint: pixels
-    /// there differ from the plain visual frame, pixels outside it don't.
+    /// Pixels inside the footprint must differ from the plain visual frame, pixels outside must not.
     #[test]
     fn pip_overlays_thermal_inside_footprint_only() {
         let t = ti400_sample();

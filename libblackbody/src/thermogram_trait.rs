@@ -12,6 +12,7 @@ use uom::si::f32::ThermodynamicTemperature;
 use uom::si::thermodynamic_temperature::{centikelvin, kelvin};
 
 use crate::palettes;
+use crate::pip::{self, PipGeometry};
 use crate::thermal::ThermVec;
 use crate::{
     Error, FlirThermogram, FlukeThermogram, Measurement, PngThermogram, Thermogram, TiffThermogram,
@@ -52,20 +53,30 @@ pub trait ThermogramTrait {
         Vec::new()
     }
 
-    /// Whether the file has picture-in-picture geometry and an embedded visual image.
-    fn has_pip(&self) -> bool {
+    /// The file's embedded picture-in-picture geometry. Implementing this is all a format
+    /// needs for PiP support; `picture_in_picture` composites with it.
+    fn pip_geometry(&self) -> Option<PipGeometry> {
         // Override in implementing format if available.
-        false
+        None
     }
 
-    /// Thermal render composited onto the visual light image, if the file has PiP geometry.
+    /// Whether the file has picture-in-picture geometry and an embedded visual image.
+    fn has_pip(&self) -> bool {
+        self.pip_geometry().is_some() && self.has_visual()
+    }
+
+    /// Thermal render (see `render` for range and palette semantics) composited onto the visual
+    /// light image per `pip_geometry`. The result has the visual light image's dimensions.
     fn picture_in_picture(
         &self,
-        _min_temp: ThermodynamicTemperature,
-        _max_temp: ThermodynamicTemperature,
-        _palette: &[[f32; 3]],
+        min_temp: ThermodynamicTemperature,
+        max_temp: ThermodynamicTemperature,
+        palette: &[[f32; 3]],
     ) -> Option<ImgVec<RGB8>> {
-        None
+        let geometry = self.pip_geometry()?;
+        let visual = self.visual()?;
+        let render = self.render(min_temp, max_temp, palette);
+        pip::composite(&visual, &render, &geometry)
     }
 
     /// Render the thermogram with the given color palette and using the given minimum and maximum

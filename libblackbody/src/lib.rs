@@ -58,6 +58,7 @@ pub mod measurements;
 #[cfg(feature = "ndarray")]
 pub mod ndarray_ext;
 pub mod palettes;
+pub mod pip;
 pub mod png;
 pub mod thermal;
 pub mod thermogram;
@@ -70,6 +71,7 @@ pub use crate::fluke::FlukeThermogram;
 pub use crate::measurements::Measurement;
 #[cfg(feature = "ndarray")]
 pub use crate::ndarray_ext::ThermogramNdarrayExt;
+pub use crate::pip::{PipGeometry, PipRect};
 pub use crate::png::PngThermogram;
 pub use crate::thermal::ThermVec;
 pub use crate::thermogram::Thermogram;

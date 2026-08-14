@@ -1,8 +1,9 @@
 # Unreleased
 
-New:
 * Picture-in-picture composites for Fluke zip-style is2 files (Ti400, Ti401P,
   TiS75+): `has_pip` and `picture_in_picture` now work on `FlukeThermogram`
+* PiP is now a single shared compositor (`pip::composite`); formats implement
+  only `pip_geometry`.
 
 # 0.6.0 (2026-08-13)
 
