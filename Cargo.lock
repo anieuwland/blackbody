@@ -549,9 +549,7 @@ dependencies = [
 
 [[package]]
 name = "flyr"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c0c383dac14077f07c4a8c46b58f5c93d92180473aef753fa145542978662fc"
+version = "0.8.1"
 dependencies = [
  "binrw",
  "image",

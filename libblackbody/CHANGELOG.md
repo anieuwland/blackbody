@@ -4,6 +4,9 @@
   TiS75+): `has_pip` and `picture_in_picture` now work on `FlukeThermogram`
 * PiP is now a single shared compositor (`pip::composite`); formats implement
   only `pip_geometry`.
+* Support for FLIR files that store their data in the opposite byte order,
+  as written by cameras built on the FLIR Tau core (DJI Zenmuse XT, XTR, and
+  some XT2 files). These previously failed to open.
 
 # 0.6.0 (2026-08-13)
 
