@@ -43,7 +43,7 @@ with an exe inside that can be ran.
 |----------------|-------------:|------------:|-------------:|------------------:|-----------:|------:|
 | FLIR JPEG, FFF |          ✅  |         ✅  |          ✅  |               ✅  |        ✅  |       | 
 | Fluke is2      |          ✅  |         ✅  |          ✅  |               ✅  |        ✅  |       |
-| HTI / ToolTop  |          ✅  |         ✅  |              |                   |            |       |
+| HTI / ToolTop  |          ✅  |         ✅  |              |                   |            |    ✅ |
 | PNG, TIFF      |          ✅  |             |              |                   |            |    ✅ |
 
 ### libblackbody

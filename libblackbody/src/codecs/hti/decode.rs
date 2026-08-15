@@ -6,7 +6,8 @@ use uom::si::thermodynamic_temperature::degree_celsius;
 use crate::{ThermVec, thermal::into_therm_vec};
 
 /// The decoded contents of an HTI/ToolTop JPEG.
-pub struct Hti {
+#[derive(Clone, Debug)]
+pub struct HtiThermogram {
     pub file_path: PathBuf,
     /// The raw metadata block, including its leading `u32` size field.
     pub metadata: Vec<u8>,
@@ -19,14 +20,14 @@ pub struct Hti {
 }
 
 /// Decode an HTI/ToolTop JPEG, returning `None` if any section is missing or malformed.
-pub fn decode_hti(bytes: &[u8]) -> Option<Hti> {
+pub fn decode_hti(bytes: &[u8]) -> Option<HtiThermogram> {
     // Structure:
     // 1. JPEG #1. Skip until end of file.
     // 2. JPEG #2: Visible light image.
     // 3. Thermal header: 4 bytes, 2 u16s meaning width * height
     // 4. Thermal data: width * height * 2 bytes; interpret as i16 decicelsius
     // 5. Thermal header again.
-    // 6. Grayscale render: width * height u8 color. Skip.
+    // 6. Grayscale render: width * height u8 grayscale intensity. Skip.
     // 7. Metadata
 
     // TODO Find start of #2 in better way
@@ -41,7 +42,7 @@ pub fn decode_hti(bytes: &[u8]) -> Option<Hti> {
         height as usize,
     );
 
-    Some(Hti {
+    Some(HtiThermogram {
         file_path: "".into(),
         metadata: metadata.to_vec(),
         thermal,
