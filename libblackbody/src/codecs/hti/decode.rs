@@ -6,6 +6,9 @@ use std::{
 use log::warn;
 use uom::si::thermodynamic_temperature::degree_celsius;
 
+use flyr::camera_metadata::CameraMetadata;
+
+use crate::codecs::hti::metadata::Metadata;
 use crate::{ThermVec, thermal::into_therm_vec};
 
 /// The decoded contents of an HTI/ToolTop JPEG.
@@ -14,6 +17,10 @@ pub struct HtiThermogram {
     pub file_path: PathBuf,
     /// The raw metadata block, including its leading `u32` size field.
     pub metadata: Vec<u8>,
+    /// The metadata block's parsed fields, or `None` if it could not be interpreted.
+    pub info: Option<Metadata>,
+    /// Camera make/model and capture time, derived from [`Self::info`].
+    pub camera_metadata: Option<CameraMetadata>,
     /// Temperatures as stored in the file: deci-degrees Celsius, one per pixel.
     pub thermal: Vec<i16>,
     /// The same temperatures converted to a [`ThermVec`].
@@ -53,6 +60,10 @@ pub fn decode_hti(bytes: &[u8], file_path: Option<&Path>) -> Option<HtiThermogra
     let (thermal, width, height, bytes) = decode_thermal_data(bytes)?;
     let bytes = seek_to_metadata(bytes)?;
     let metadata = decode_metadata(bytes)?;
+    let info = Metadata::parse(metadata);
+    if info.is_none() {
+        warn!("Failed parsing the HTI metadata block; continuing without camera information");
+    }
     let thermal_buffer = into_therm_vec::<degree_celsius>(
         thermal.iter().map(|t| f32::from(*t).div(10.0)),
         width as usize,
@@ -62,6 +73,8 @@ pub fn decode_hti(bytes: &[u8], file_path: Option<&Path>) -> Option<HtiThermogra
     Some(HtiThermogram {
         file_path: file_path.map(Path::to_path_buf).unwrap_or_default(),
         metadata: metadata.to_vec(),
+        camera_metadata: info.as_ref().map(camera_metadata),
+        info,
         thermal,
         thermal_buffer,
         visual: visual.to_vec(),
@@ -170,10 +183,23 @@ fn seek_to_metadata(bytes: &[u8]) -> Option<&[u8]> {
     Some(bytes)
 }
 
-/// Return the metadata block; its fields are not parsed yet.
+/// Return the raw metadata block; see [`Metadata::parse`] for its fields.
 fn decode_metadata(bytes: &[u8]) -> Option<&[u8]> {
-    // TODO Implement decoding
     Some(bytes)
+}
+
+/// HTI stores no make, lens or GPS information, so only model and capture time are filled in.
+fn camera_metadata(info: &Metadata) -> CameraMetadata {
+    CameraMetadata {
+        make: Some("HTI".to_string()),
+        model: Some(info.model.clone()),
+        focal_length: None,
+        date_time: info.exif_date_time(),
+        gps_latitude: None,
+        gps_longitude: None,
+        gps_altitude: None,
+        gps_img_direction: None,
+    }
 }
 
 #[cfg(test)]
@@ -243,5 +269,46 @@ mod tests {
         assert_eq!(hti.metadata.len(), 112);
         assert_eq!(u32::from_le_bytes(hti.metadata[..4].try_into().unwrap()), 112);
         assert!(hti.metadata[4..24].starts_with(b"HT-04D\0"));
+
+        let info = hti.info.as_ref().expect("metadata parses");
+        assert_eq!(info.model, "HT-04D");
+        assert_eq!(info.firmware, "2.5.1");
+        assert_eq!(info.date_time, "2024/11/21-01:06:39");
+        assert_eq!(info.emissivity, 0.95);
+        assert_eq!((info.center.x, info.center.y), (120, 160));
+        assert_eq!(info.max.temperature, 261);
+        assert_eq!(info.min.temperature, 138);
+    }
+
+    /// The trait methods the metadata feeds, checked against a real sample not a synthetic block.
+    #[rstest]
+    fn exposes_metadata_through_the_trait() {
+        use crate::{Measurement, ThermogramTrait};
+
+        let hti = decode_hti(&read("hti_ht-04d_1.jpg"), None).expect("decodes");
+
+        let camera = hti.camera_metadata().expect("camera metadata");
+        assert_eq!(camera.model.as_deref(), Some("HT-04D"));
+        assert_eq!(camera.date_time.as_deref(), Some("2024:11:21 01:06:39"));
+
+        // Narrower than the raw extremes (13.3 to 27.9 C): the camera samples a 3x3 neighbourhood.
+        let [min, max] = hti.embedded_render_range().expect("render range");
+        assert!((min.get::<degree_celsius>() - 13.8).abs() < 0.01);
+        assert!((max.get::<degree_celsius>() - 26.1).abs() < 0.01);
+
+        // The visible image is 240x320, so spots halve into the 120x160 thermal grid.
+        let measurements = hti.measurements();
+        assert_eq!(measurements.len(), 3);
+        let labels: Vec<_> = measurements
+            .iter()
+            .map(|m| match m {
+                Measurement::Spot { label, .. } => label.as_str(),
+                other => panic!("expected spots, got {other:?}"),
+            })
+            .collect();
+        assert_eq!(labels, ["Center", "Max", "Min"]);
+        assert!(matches!(measurements[0], Measurement::Spot { x: 60, y: 80, .. }));
+        assert!(matches!(measurements[1], Measurement::Spot { x: 59, y: 99, .. }));
+        assert!(matches!(measurements[2], Measurement::Spot { x: 117, y: 118, .. }));
     }
 }
