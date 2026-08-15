@@ -41,7 +41,8 @@ pub fn get_make_dependent_params(
             );
             params.push((gettext("Background temperature"), unit.format(background)));
         }
-        Thermogram::Tiff(_) | Thermogram::Png(_) => {}
+        // HTI's metadata block is not parsed yet, so no capture parameters are available.
+        Thermogram::Tiff(_) | Thermogram::Png(_) | Thermogram::Hti(_) => {}
     };
     params
 }

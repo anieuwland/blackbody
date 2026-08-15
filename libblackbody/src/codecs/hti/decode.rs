@@ -1,4 +1,7 @@
-use std::{ops::Div, path::PathBuf};
+use std::{
+    ops::Div,
+    path::{Path, PathBuf},
+};
 
 use log::warn;
 use uom::si::thermodynamic_temperature::degree_celsius;
@@ -19,8 +22,22 @@ pub struct HtiThermogram {
     pub visual: Vec<u8>,
 }
 
+impl HtiThermogram {
+    /// Read an HTI/ToolTop file referenced by a path.
+    ///
+    /// # Arguments
+    /// * `file_path` - The path to the file to read.
+    ///
+    /// # Returns
+    /// In case of success, `Some<HtiThermogram>` is returned, otherwise `None`.
+    pub fn from_file(file_path: &Path) -> Option<HtiThermogram> {
+        let bytes = std::fs::read(file_path).ok()?;
+        decode_hti(&bytes, Some(file_path))
+    }
+}
+
 /// Decode an HTI/ToolTop JPEG, returning `None` if any section is missing or malformed.
-pub fn decode_hti(bytes: &[u8]) -> Option<HtiThermogram> {
+pub fn decode_hti(bytes: &[u8], file_path: Option<&Path>) -> Option<HtiThermogram> {
     // Structure:
     // 1. JPEG #1. Skip until end of file.
     // 2. JPEG #2: Visible light image.
@@ -43,7 +60,7 @@ pub fn decode_hti(bytes: &[u8]) -> Option<HtiThermogram> {
     );
 
     Some(HtiThermogram {
-        file_path: "".into(),
+        file_path: file_path.map(Path::to_path_buf).unwrap_or_default(),
         metadata: metadata.to_vec(),
         thermal,
         thermal_buffer,
@@ -205,7 +222,7 @@ mod tests {
 
     #[rstest]
     fn decodes_the_hti_sample() {
-        let hti = decode_hti(&read("hti_ht-04d_1.jpg")).expect("decodes");
+        let hti = decode_hti(&read("hti_ht-04d_1.jpg"), None).expect("decodes");
 
         assert_eq!(hti.thermal.len(), 120 * 160);
         assert_eq!((hti.thermal_buffer.width(), hti.thermal_buffer.height()), (120, 160));

@@ -66,6 +66,7 @@ pub mod thermogram;
 pub mod thermogram_trait;
 pub mod tiff;
 
+pub use crate::codecs::hti::decode::HtiThermogram;
 pub use crate::error::Error;
 pub use crate::flir::FlirThermogram;
 pub use crate::fluke::FlukeThermogram;

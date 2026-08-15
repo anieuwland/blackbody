@@ -15,7 +15,8 @@ use crate::palettes;
 use crate::pip::{self, PipGeometry};
 use crate::thermal::ThermVec;
 use crate::{
-    Error, FlirThermogram, FlukeThermogram, Measurement, PngThermogram, Thermogram, TiffThermogram,
+    Error, FlirThermogram, FlukeThermogram, HtiThermogram, Measurement, PngThermogram, Thermogram,
+    TiffThermogram,
 };
 
 /// All supported thermogram formats implement this trait.

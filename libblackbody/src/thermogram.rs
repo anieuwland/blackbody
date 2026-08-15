@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
+use crate::codecs::hti::decode::is_hti_jpeg;
 use crate::*;
 
 /// The wrapper enum through which most processing of thermograms is recommend to
@@ -20,6 +21,7 @@ pub enum Thermogram {
     Tiff(pub TiffThermogram),
     Png(pub PngThermogram),
     Fluke(pub FlukeThermogram),
+    Hti(pub HtiThermogram),
 }
 
 impl Thermogram {
@@ -65,6 +67,17 @@ impl Thermogram {
         let mut magic = [0u8; 4];
         file.read_exact(&mut magic)?;
 
+        // HTI/ToolTop files are JPEGs without a magic number of their own, so they would be
+        // claimed by the FLIR branch below. Detection walks the whole trailer layout, which
+        // needs the entire file, so only read it back for candidate JPEGs.
+        if magic[..3] == [255, 216, 255]
+            && std::fs::read(path).is_ok_and(|bytes| is_hti_jpeg(&bytes))
+        {
+            return HtiThermogram::from_file(path)
+                .map(Thermogram::Hti)
+                .ok_or_else(|| Error::Decode("corrupt or unsupported HTI file".into()));
+        }
+
         // TODO JPG: Other magic numbers
         // FLIR: either a JPEG containing FLIR APP1 segments, or a raw FFF/AFF stream.
         if magic[..3] == [255, 216, 255] || magic == *b"FFF\0" || magic == *b"AFF\0" {
@@ -102,6 +115,25 @@ mod tests {
     fn missing_file_is_io_error() {
         let r = Thermogram::from_file(Path::new("/nonexistent/no.jpg"));
         assert!(matches!(r, Err(Error::Io(_))));
+    }
+
+    /// HTI files share the JPEG magic number with FLIR, so `from_file` has to tell them apart
+    /// on the trailer layout alone. Both directions matter: an HTI file must not fall through
+    /// to the FLIR branch, and a FLIR file must not be claimed by the HTI branch.
+    #[test]
+    fn jpeg_variants_route_to_the_right_decoder() {
+        let dir = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/");
+
+        let hti = Thermogram::from_file(&Path::new(dir).join("hti_ht-04d_1.jpg"))
+            .expect("HTI test thermogram");
+        assert!(matches!(hti, Thermogram::Hti(_)));
+        assert_eq!(hti.identifier(), "hti_ht-04d_1.jpg");
+        assert_eq!(hti.thermal_shape(), [160, 120]);
+        assert!(hti.has_visual());
+
+        let flir = Thermogram::from_file(&Path::new(dir).join("flir_e5_2-pip.jpg"))
+            .expect("FLIR test thermogram");
+        assert!(matches!(flir, Thermogram::Flir(_)));
     }
 
     #[test]
