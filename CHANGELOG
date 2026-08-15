@@ -4,6 +4,8 @@ CHANGELOG
 # Unreleased
 * Thermograms from DJI drones with a FLIR Tau camera (Zenmuse XT, XTR, and
   some XT2 files) now open; they used to fail to load
+* HTI / ToolTop files now open, although measurements and metadata don't load
+  yet
 
 # 2.2.0 (2026-08-13)
 * Fluke thermogram support: opens is2 files, both older binary and newer

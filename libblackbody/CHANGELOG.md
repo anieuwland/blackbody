@@ -7,6 +7,8 @@
 * Support for FLIR files that store their data in the opposite byte order,
   as written by cameras built on the FLIR Tau core (DJI Zenmuse XT, XTR, and
   some XT2 files). These previously failed to open.
+* HTI / ToolTop files now open, although measurements and metadata don't load
+  yet
 
 # 0.6.0 (2026-08-13)
 

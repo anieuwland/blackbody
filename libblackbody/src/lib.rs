@@ -50,6 +50,7 @@
 //! # Issue tracking
 //! Issue tracking happens in the [Blackbody repository](https://github.com/anieuwland/blackbody/issues).
 
+pub mod codecs;
 pub mod error;
 pub mod fake;
 pub mod flir;
