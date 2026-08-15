@@ -42,7 +42,7 @@ with an exe inside that can be ran.
 | File format    | Temperatures | Visual data | Measurements | Embedded settings | PiP / MSX  |
 |----------------|-------------:|------------:|-------------:|------------------:|-----------:|
 | FLIR JPEG, FFF |         ✅   |          ✅ |          ✅  |          ✅       |        ✅  |
-| Fluke is2      | ✅           | ✅          | ✅           | ✅                |         📋 |
+| Fluke is2      | ✅           | ✅          | ✅           | ✅                |         ✅ |
 | PNG, TIFF      | ✅           |             |              |                   |            |
 
 ### libblackbody
