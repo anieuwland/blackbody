@@ -8,6 +8,7 @@ use log::warn;
 use rgb::{FromSlice, RGB8};
 use uom::si::f32::ThermodynamicTemperature;
 
+use crate::capture::CaptureParameters;
 use crate::codecs::hti::metadata::Spot;
 use crate::{Measurement, ThermVec, ThermogramTrait, codecs::hti::decode::HtiThermogram};
 
@@ -42,6 +43,14 @@ impl ThermogramTrait for HtiThermogram {
 
     fn camera_metadata(&self) -> Option<&CameraMetadata> {
         self.camera_metadata.as_ref()
+    }
+
+    /// The metadata block records emissivity and nothing else.
+    fn capture_parameters(&self) -> CaptureParameters {
+        CaptureParameters {
+            emissivity: self.info.as_ref().map(|info| info.emissivity),
+            ..Default::default()
+        }
     }
 
     /// The camera's min and max spots: 3x3-averaged, so narrower than the raw thermal extremes.

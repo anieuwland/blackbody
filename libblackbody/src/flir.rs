@@ -4,8 +4,13 @@ use imgref::{Img, ImgVec};
 use log::warn;
 use rgb::{FromSlice, RGB8};
 use std::path::{Path, PathBuf};
-use uom::si::{f32::ThermodynamicTemperature, thermodynamic_temperature::kelvin};
+use uom::si::{
+    f32::{Length, ThermodynamicTemperature},
+    length::meter,
+    thermodynamic_temperature::kelvin,
+};
 
+use crate::capture::CaptureParameters;
 use crate::pip::{PipGeometry, PipRect};
 use crate::{Measurement, ThermVec, ThermogramTrait, thermal::into_therm_vec};
 
@@ -98,6 +103,21 @@ impl ThermogramTrait for FlirThermogram {
         self.thermogram.camera_metadata.as_ref()
     }
 
+    /// FLIR records the full atmospheric model.
+    fn capture_parameters(&self) -> CaptureParameters {
+        let info = &self.thermogram.camera_info;
+        let temperature = |k: f32| Some(ThermodynamicTemperature::new::<kelvin>(k));
+        CaptureParameters {
+            emissivity: Some(info.emissivity),
+            reflected_temperature: temperature(info.reflected_apparent_temperature),
+            atmospheric_temperature: temperature(info.atmospheric_temperature),
+            transmissivity: Some(info.ir_window_transmission),
+            ir_window_temperature: temperature(info.ir_window_temperature),
+            relative_humidity: Some(info.relative_humidity),
+            distance: Some(Length::new::<meter>(info.object_distance)),
+        }
+    }
+
     /// Measurements (spots, areas, lines, …) embedded in the file.
     /// Coordinates are in thermal-image pixels.
     fn measurements(&self) -> Vec<Measurement> {
@@ -168,6 +188,26 @@ mod tests {
     use uom::si::{f32::TemperatureInterval, temperature_interval};
 
     use super::*;
+
+    /// Reading the sample's 20 °C values back in both units pins that no double conversion happens.
+    #[test]
+    fn capture_parameters_are_read_in_kelvin() {
+        use uom::si::length::meter;
+        use uom::si::thermodynamic_temperature::degree_celsius;
+
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_one_g2_1.jpg");
+        let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
+        let params = t.capture_parameters();
+
+        assert_eq!(params.emissivity, Some(0.95));
+        assert_eq!(params.transmissivity, Some(1.0));
+        assert_eq!(params.relative_humidity, Some(0.5)); // A fraction, not a percentage
+
+        let reflected = params.reflected_temperature.expect("records one");
+        assert!((reflected.get::<kelvin>() - 293.15).abs() < 0.01);
+        assert!((reflected.get::<degree_celsius>() - 20.0).abs() < 0.01);
+        assert!((params.distance.expect("records one").get::<meter>() - 1.0).abs() < 0.01);
+    }
 
     #[test]
     fn pip_composite_has_visual_shape() {

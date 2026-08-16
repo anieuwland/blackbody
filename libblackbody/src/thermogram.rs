@@ -155,6 +155,7 @@ mod tests {
         assert!(matches!(flir, Thermogram::Flir(_)));
         assert!(flir.camera_metadata().is_some());
         assert!(flir.has_pip());
+        assert_eq!(flir.capture_parameters().emissivity, Some(0.95));
 
         let path = std::env::temp_dir().join("blackbody_enum_dispatch_pin_test.png");
         image::ImageBuffer::<image::Luma<u16>, _>::from_raw(2, 2, vec![27315u16; 4])
@@ -168,6 +169,7 @@ mod tests {
         assert!(png.camera_metadata().is_none());
         assert!(png.measurements().is_empty());
         assert!(!png.has_pip());
+        assert!(!png.has_capture_parameters());
         assert!(
             png.picture_in_picture(
                 into_temp::<degree_celsius>(0.0),

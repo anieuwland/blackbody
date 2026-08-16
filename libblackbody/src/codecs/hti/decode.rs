@@ -291,6 +291,12 @@ mod tests {
         assert_eq!(camera.model.as_deref(), Some("HT-04D"));
         assert_eq!(camera.date_time.as_deref(), Some("2024:11:21 01:06:39"));
 
+        let params = hti.capture_parameters();
+        assert_eq!(params.emissivity, Some(0.95));
+        assert_eq!(params.reflected_temperature, None);
+        assert_eq!(params.transmissivity, None);
+        assert!(hti.has_capture_parameters());
+
         // Narrower than the raw extremes (13.3 to 27.9 C): the camera samples a 3x3 neighbourhood.
         let [min, max] = hti.embedded_render_range().expect("render range");
         assert!((min.get::<degree_celsius>() - 13.8).abs() < 0.01);

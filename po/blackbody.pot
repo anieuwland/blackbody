@@ -475,28 +475,32 @@ msgstr ""
 msgid "Zoom"
 msgstr ""
 
-#: src/domain/capture_params.rs:11 src/domain/capture_params.rs:18
+#: src/domain/capture_params.rs:20
 msgid "Emissivity"
 msgstr ""
 
-#: src/domain/capture_params.rs:12
-msgid "Object distance"
-msgstr ""
-
-#: src/domain/capture_params.rs:13
+#: src/domain/capture_params.rs:23
 msgid "Reflected temperature"
 msgstr ""
 
-#: src/domain/capture_params.rs:14
-msgid "Relative humidity"
+#: src/domain/capture_params.rs:26
+msgid "Atmospheric temperature"
 msgstr ""
 
-#: src/domain/capture_params.rs:19
+#: src/domain/capture_params.rs:29
 msgid "Transmission"
 msgstr ""
 
-#: src/domain/capture_params.rs:20
-msgid "Background temperature"
+#: src/domain/capture_params.rs:32
+msgid "IR window temperature"
+msgstr ""
+
+#: src/domain/capture_params.rs:36
+msgid "Relative humidity"
+msgstr ""
+
+#: src/domain/capture_params.rs:39
+msgid "Object distance"
 msgstr ""
 
 #: src/gtkui/app_window.rs:201

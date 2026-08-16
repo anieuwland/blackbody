@@ -2,8 +2,12 @@ use imgref::ImgVec;
 use rgb::RGB8;
 use serendip::Thermogram as Serendip;
 use std::path::{Path, PathBuf};
-use uom::si::{f32::ThermodynamicTemperature, thermodynamic_temperature::kelvin};
+use uom::si::{
+    f32::ThermodynamicTemperature,
+    thermodynamic_temperature::{degree_celsius, kelvin},
+};
 
+use crate::capture::CaptureParameters;
 use crate::pip::{PipGeometry, PipRect};
 use crate::{Measurement, ThermVec, ThermogramTrait, thermal::into_therm_vec};
 
@@ -68,6 +72,22 @@ impl ThermogramTrait for FlukeThermogram {
         })
     }
 
+    fn capture_parameters(&self) -> CaptureParameters {
+        let info = self.thermogram.ir_image_info();
+        let transmissivity = match &self.thermogram {
+            Serendip::Zip(_) => Some(info.transmission()),
+            Serendip::Blob(_) => None,
+        };
+        CaptureParameters {
+            emissivity: Some(info.emissivity()),
+            reflected_temperature: Some(ThermodynamicTemperature::new::<degree_celsius>(
+                info.background_temperature(),
+            )),
+            transmissivity,
+            ..Default::default()
+        }
+    }
+
     fn embedded_render_range(&self) -> Option<[ThermodynamicTemperature; 2]> {
         let scale = self.thermogram.embedded_render_range()?;
         Some([
@@ -108,6 +128,21 @@ mod tests {
     fn ti400_sample() -> FlukeThermogram {
         let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/fluke_ti400_1.is2");
         FlukeThermogram::from_file(Path::new(path)).expect("test thermogram")
+    }
+
+    #[test]
+    fn capture_parameters_convert_from_celsius() {
+        let params = ti400_sample().capture_parameters();
+        assert_eq!(params.emissivity, Some(0.95));
+        assert_eq!(params.transmissivity, Some(1.0));
+
+        let reflected = params.reflected_temperature.expect("records one");
+        assert!((reflected.get::<degree_celsius>() - 22.0).abs() < 0.01);
+        assert!((reflected.get::<kelvin>() - 295.15).abs() < 0.01);
+
+        assert_eq!(params.atmospheric_temperature, None);
+        assert_eq!(params.relative_humidity, None);
+        assert_eq!(params.distance, None);
     }
 
     /// Footprint values verified against the visual frame in serendip.

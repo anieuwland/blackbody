@@ -11,6 +11,7 @@ use tiff::encoder::*;
 use uom::si::f32::ThermodynamicTemperature;
 use uom::si::thermodynamic_temperature::{centikelvin, kelvin};
 
+use crate::capture::CaptureParameters;
 use crate::palettes;
 use crate::pip::{self, PipGeometry};
 use crate::thermal::ThermVec;
@@ -46,6 +47,12 @@ pub trait ThermogramTrait {
     fn camera_metadata(&self) -> Option<&CameraMetadata> {
         // Override in implementing format if available.
         None
+    }
+
+    /// The capture parameters the camera measured with, as far as the format records them.
+    fn capture_parameters(&self) -> CaptureParameters {
+        // Override in implementing format if available.
+        CaptureParameters::default()
     }
 
     /// Measurements embedded in the file, in thermal-image pixel coordinates.
@@ -201,6 +208,10 @@ pub trait ThermogramTrait {
         self.palette().is_some()
     }
 
+    fn has_capture_parameters(&self) -> bool {
+        !self.capture_parameters().is_empty()
+    }
+
     fn embedded_render_range(&self) -> Option<[ThermodynamicTemperature; 2]> {
         None
     }
@@ -267,5 +278,6 @@ mod tests {
         let t = fake();
         assert!(!t.has_visual() && !t.has_pip() && !t.has_palette());
         assert!(t.measurements().is_empty() && t.embedded_render_range().is_none());
+        assert!(!t.has_capture_parameters() && t.capture_parameters().is_empty());
     }
 }

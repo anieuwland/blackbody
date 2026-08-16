@@ -73,7 +73,6 @@ fn fit_visual(visual: ImgVec<RGB8>, thermal_dims: (usize, usize)) -> ImgVec<RGB8
         return visual;
     };
 
-    // Cropping first keeps the photo aligned with the thermal image instead of stretching it.
     // Aspect ratios are compared as a cross product to stay in integers.
     let (crop_width, crop_height) =
         if u64::from(width) * target_height as u64 > u64::from(height) * target_width as u64 {
@@ -126,7 +125,7 @@ fn build_metadata(
         center: spot_at(width / 2, height / 2, center.unwrap_or(min)),
         max: spot_at(max_x, max_y, max),
         min: spot_at(min_x, min_y, min),
-        emissivity: 1.0, // TODO Fetch a thermogram's emissivity
+        emissivity: thermogram.capture_parameters().emissivity.unwrap_or(1.0),
         palette: 0,
         unit: 0,
         mix: 0,
@@ -176,7 +175,6 @@ mod tests {
         let dest_dims = [destination.thermal().width(), destination.thermal().height()];
         assert_eq!(orig_dims, dest_dims);
 
-        // Rescaling to the format's fixed ratio means the aspect ratio survives, not the size.
         thermogram.visual().expect("source has visual");
         let dest_visual = destination.visual().expect("has visual");
         assert_eq!(
@@ -195,8 +193,15 @@ mod tests {
         let destination = decode::decode_hti(&hti, None).expect("decodes as hti");
 
         let info = destination.info.as_ref().expect("metadata block parses");
-        assert_eq!(info.emissivity, 1.0);
         assert_eq!(info.margins, Some([0, 0, 0, 0]));
+
+        let source = thermogram.capture_parameters().emissivity.expect("source records one");
+        assert!(
+            (info.emissivity - source).abs() <= 0.005,
+            "emissivity {} does not match the source's {source}",
+            info.emissivity
+        );
+        assert_eq!(destination.capture_parameters().emissivity, Some(info.emissivity));
 
         let expected_model = thermogram.camera_metadata().and_then(|m| m.model.clone());
         if let Some(model) = expected_model {
@@ -230,6 +235,22 @@ mod tests {
             "centre spot should be at {expected:?}, got {:?}",
             measurements[0]
         );
+    }
+
+    /// Sources carrying no emissivity still produce a valid block, at the neutral value.
+    #[rstest]
+    fn sources_without_emissivity_fall_back_to_neutral() {
+        let thermogram = read("flir_e5_2-pip.jpg");
+        let png = format!("{}/thermograms/hti-emissivity.png", env!("CARGO_MANIFEST_DIR"));
+        let png = Path::new(&png);
+        thermogram.export_thermal_png(&png.to_path_buf()).expect("exports a png");
+        let stripped = Thermogram::from_file(png).expect("reads back the png");
+        std::fs::remove_file(png).ok();
+
+        assert!(!stripped.has_capture_parameters());
+        let hti = encode_hti(&stripped).expect("encodes as hti");
+        let destination = decode::decode_hti(&hti, None).expect("decodes as hti");
+        assert_eq!(destination.info.as_ref().expect("metadata block").emissivity, 1.0);
     }
 
     /// Sources vary widely (FLIR E5 5.33x, Fluke 4x, FLIR One 2x), so this is a real resize.
