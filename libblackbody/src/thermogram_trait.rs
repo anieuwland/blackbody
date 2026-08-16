@@ -3,7 +3,6 @@ use std::fs::File;
 use std::path::PathBuf;
 
 use enum_dispatch::enum_dispatch;
-use flyr::camera_metadata::CameraMetadata;
 use image::{ColorType, save_buffer};
 use imgref::{Img, ImgVec};
 use rgb::{ComponentBytes, RGB8};
@@ -11,6 +10,7 @@ use tiff::encoder::*;
 use uom::si::f32::ThermodynamicTemperature;
 use uom::si::thermodynamic_temperature::{centikelvin, kelvin};
 
+use crate::camera::CameraMetadata;
 use crate::capture::CaptureParameters;
 use crate::palettes;
 use crate::pip::{self, PipGeometry};
@@ -43,10 +43,10 @@ pub trait ThermogramTrait {
         None
     }
 
-    /// Camera metadata (make, model, lens, GPS, …), if present.
-    fn camera_metadata(&self) -> Option<&CameraMetadata> {
+    /// Camera details (make, model, serial, lens, GPS, …), as far as the format records them.
+    fn camera_metadata(&self) -> CameraMetadata {
         // Override in implementing format if available.
-        None
+        CameraMetadata::default()
     }
 
     /// The capture parameters the camera measured with, as far as the format records them.
@@ -212,6 +212,10 @@ pub trait ThermogramTrait {
         !self.capture_parameters().is_empty()
     }
 
+    fn has_camera_metadata(&self) -> bool {
+        !self.camera_metadata().is_empty()
+    }
+
     fn embedded_render_range(&self) -> Option<[ThermodynamicTemperature; 2]> {
         None
     }
@@ -279,5 +283,6 @@ mod tests {
         assert!(!t.has_visual() && !t.has_pip() && !t.has_palette());
         assert!(t.measurements().is_empty() && t.embedded_render_range().is_none());
         assert!(!t.has_capture_parameters() && t.capture_parameters().is_empty());
+        assert!(!t.has_camera_metadata() && t.camera_metadata().is_empty());
     }
 }

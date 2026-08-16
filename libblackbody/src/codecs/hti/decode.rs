@@ -6,8 +6,7 @@ use std::{
 use log::warn;
 use uom::si::thermodynamic_temperature::degree_celsius;
 
-use flyr::camera_metadata::CameraMetadata;
-
+use crate::camera::CameraMetadata;
 use crate::codecs::hti::metadata::Metadata;
 use crate::{ThermVec, thermal::into_therm_vec};
 
@@ -20,7 +19,7 @@ pub struct HtiThermogram {
     /// The metadata block's parsed fields, or `None` if it could not be interpreted.
     pub info: Option<Metadata>,
     /// Camera make/model and capture time, derived from [`Self::info`].
-    pub camera_metadata: Option<CameraMetadata>,
+    pub camera_metadata: CameraMetadata,
     /// Temperatures as stored in the file: deci-degrees Celsius, one per pixel.
     pub thermal: Vec<i16>,
     /// The same temperatures converted to a [`ThermVec`].
@@ -73,7 +72,7 @@ pub fn decode_hti(bytes: &[u8], file_path: Option<&Path>) -> Option<HtiThermogra
     Some(HtiThermogram {
         file_path: file_path.map(Path::to_path_buf).unwrap_or_default(),
         metadata: metadata.to_vec(),
-        camera_metadata: info.as_ref().map(camera_metadata),
+        camera_metadata: info.as_ref().map(camera_metadata).unwrap_or_default(),
         info,
         thermal,
         thermal_buffer,
@@ -192,13 +191,9 @@ fn decode_metadata(bytes: &[u8]) -> Option<&[u8]> {
 fn camera_metadata(info: &Metadata) -> CameraMetadata {
     CameraMetadata {
         make: Some("HTI".to_string()),
-        model: Some(info.model.clone()),
-        focal_length: None,
+        model: Some(info.model.clone()).filter(|m| !m.is_empty()),
         date_time: info.exif_date_time(),
-        gps_latitude: None,
-        gps_longitude: None,
-        gps_altitude: None,
-        gps_img_direction: None,
+        ..Default::default()
     }
 }
 
@@ -287,7 +282,8 @@ mod tests {
 
         let hti = decode_hti(&read("hti_ht-04d_1.jpg"), None).expect("decodes");
 
-        let camera = hti.camera_metadata().expect("camera metadata");
+        let camera = hti.camera_metadata();
+        assert_eq!(camera.make.as_deref(), Some("HTI"));
         assert_eq!(camera.model.as_deref(), Some("HT-04D"));
         assert_eq!(camera.date_time.as_deref(), Some("2024:11:21 01:06:39"));
 

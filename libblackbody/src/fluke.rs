@@ -7,6 +7,7 @@ use uom::si::{
     thermodynamic_temperature::{degree_celsius, kelvin},
 };
 
+use crate::camera::CameraMetadata;
 use crate::capture::CaptureParameters;
 use crate::pip::{PipGeometry, PipRect};
 use crate::{Measurement, ThermVec, ThermogramTrait, thermal::into_therm_vec};
@@ -72,8 +73,21 @@ impl ThermogramTrait for FlukeThermogram {
         })
     }
 
+    /// Only zip files identify the camera; blob files leave the section unparsed.
+    fn camera_metadata(&self) -> CameraMetadata {
+        let Serendip::Zip(zip) = &self.thermogram else { return CameraMetadata::default() };
+        let text = |s: &String| Some(s.trim().to_string()).filter(|s| !s.is_empty());
+        CameraMetadata {
+            make: text(&zip.camera_info.manufacturer),
+            serial_number: text(&zip.camera_info.camera_serial),
+            ..Default::default()
+        }
+    }
+
+    /// serendip reports the background temperature in Celsius.
     fn capture_parameters(&self) -> CaptureParameters {
         let info = self.thermogram.ir_image_info();
+        // Blob files store no transmission; serendip substitutes 1.0 to run its correction.
         let transmissivity = match &self.thermogram {
             Serendip::Zip(_) => Some(info.transmission()),
             Serendip::Blob(_) => None,
@@ -130,6 +144,16 @@ mod tests {
         FlukeThermogram::from_file(Path::new(path)).expect("test thermogram")
     }
 
+    #[test]
+    fn camera_metadata_comes_from_the_camera_info_section() {
+        let info = ti400_sample().camera_metadata();
+        assert_eq!(info.make.as_deref(), Some("Fluke Thermography"));
+        assert_eq!(info.serial_number.as_deref(), Some("M13080110"));
+        assert_eq!(info.model, None);
+        assert_eq!(info.description().as_deref(), Some("Fluke Thermography"));
+    }
+
+    /// Reading the value back in both units pins that Celsius was not mistaken for kelvin.
     #[test]
     fn capture_parameters_convert_from_celsius() {
         let params = ti400_sample().capture_parameters();

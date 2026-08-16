@@ -1,13 +1,13 @@
 use std::io::Cursor;
 use std::path::PathBuf;
 
-use flyr::camera_metadata::CameraMetadata;
 use image::{DynamicImage, codecs::jpeg::JpegDecoder};
 use imgref::{Img, ImgVec};
 use log::warn;
 use rgb::{FromSlice, RGB8};
 use uom::si::f32::ThermodynamicTemperature;
 
+use crate::camera::CameraMetadata;
 use crate::capture::CaptureParameters;
 use crate::codecs::hti::metadata::Spot;
 use crate::{Measurement, ThermVec, ThermogramTrait, codecs::hti::decode::HtiThermogram};
@@ -41,8 +41,8 @@ impl ThermogramTrait for HtiThermogram {
         Some(&self.file_path)
     }
 
-    fn camera_metadata(&self) -> Option<&CameraMetadata> {
-        self.camera_metadata.as_ref()
+    fn camera_metadata(&self) -> CameraMetadata {
+        self.camera_metadata.clone()
     }
 
     /// The metadata block records emissivity and nothing else.

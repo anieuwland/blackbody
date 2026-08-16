@@ -203,22 +203,24 @@ fn image_group(thermogram: &Thermogram) -> PreferencesGroup {
 
 fn camera_group(thermogram: &Thermogram) -> PreferencesGroup {
     let group = PreferencesGroup::new();
-    if let Some(meta) = thermogram.camera_metadata() {
-        if let Some(v) = &meta.make {
-            add_row(&group, &gettext("Make"), v);
-        }
-        if let Some(v) = &meta.model {
-            add_row(&group, &gettext("Model"), v);
-        }
-        if let Some(v) = meta.focal_length {
-            add_row(&group, &gettext("Focal length"), &format!("{v:.1} mm"));
-        }
-        if let Some(v) = &meta.date_time {
-            add_row(&group, &gettext("Photographed"), &format_exif_datetime(v));
-        }
-        if let (Some(lat), Some(lon)) = (meta.gps_latitude, meta.gps_longitude) {
-            group.add(&location_row(lat, lon));
-        }
+    let info = thermogram.camera_metadata();
+    if let Some(v) = &info.make {
+        add_row(&group, &gettext("Make"), v);
+    }
+    if let Some(v) = &info.model {
+        add_row(&group, &gettext("Model"), v);
+    }
+    if let Some(v) = &info.serial_number {
+        add_row(&group, &gettext("Serial number"), v);
+    }
+    if let Some(v) = info.focal_length {
+        add_row(&group, &gettext("Focal length"), &format!("{v:.1} mm"));
+    }
+    if let Some(v) = &info.date_time {
+        add_row(&group, &gettext("Photographed"), &format_exif_datetime(v));
+    }
+    if let Some((lat, lon)) = info.coordinates() {
+        group.add(&location_row(lat, lon));
     }
     group
 }

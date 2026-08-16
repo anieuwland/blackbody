@@ -119,7 +119,7 @@ fn build_metadata(
     let center = thermal.pixels().nth((height / 2) * width + width / 2);
 
     Metadata {
-        model: thermogram.camera_metadata().and_then(|m| m.model.clone()).unwrap_or_default(),
+        model: thermogram.camera_metadata().model.unwrap_or_default(),
         firmware: String::new(),
         date_time: String::new(),
         center: spot_at(width / 2, height / 2, center.unwrap_or(min)),
@@ -203,13 +203,9 @@ mod tests {
         );
         assert_eq!(destination.capture_parameters().emissivity, Some(info.emissivity));
 
-        let expected_model = thermogram.camera_metadata().and_then(|m| m.model.clone());
-        if let Some(model) = expected_model {
+        if let Some(model) = thermogram.camera_metadata().model {
             assert_eq!(info.model, model);
-            assert_eq!(
-                destination.camera_metadata().and_then(|m| m.model.clone()).as_deref(),
-                Some(info.model.as_str())
-            );
+            assert_eq!(destination.camera_metadata().model.as_deref(), Some(info.model.as_str()));
         }
 
         let [min, max] = thermogram

@@ -697,19 +697,23 @@ msgstr ""
 msgid "Modified"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:201
+#: src/gtkui/sidebar.rs:208
 msgid "Make"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:202
+#: src/gtkui/sidebar.rs:211
 msgid "Model"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:203
+#: src/gtkui/sidebar.rs:214
+msgid "Serial number"
+msgstr ""
+
+#: src/gtkui/sidebar.rs:217
 msgid "Focal length"
 msgstr ""
 
-#: src/gtkui/sidebar.rs:204
+#: src/gtkui/sidebar.rs:220
 msgid "Photographed"
 msgstr ""
 

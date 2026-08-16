@@ -34,7 +34,7 @@
 //!
 //! # Interface of a thermogram
 //! See [`ThermogramTrait`] for the methods available on a thermogram: extracting thermal data,
-//! the embedded visual photo, camera metadata, capture parameters, measurements and their
+//! the embedded visual photo, camera info, capture parameters, measurements and their
 //! statistics, rendering with a palette, and exporting. A number of color palettes to render with are provided in
 //! the [`palettes`] module. Optionally, enable the (default-off) `ndarray` feature for
 //! [ndarray](https://docs.rs/ndarray) conversions via the `ThermogramNdarrayExt` extension
@@ -50,6 +50,7 @@
 //! # Issue tracking
 //! Issue tracking happens in the [Blackbody repository](https://github.com/anieuwland/blackbody/issues).
 
+pub mod camera;
 pub mod capture;
 pub mod codecs;
 pub mod error;
@@ -67,6 +68,7 @@ pub mod thermogram;
 pub mod thermogram_trait;
 pub mod tiff;
 
+pub use crate::camera::CameraMetadata;
 pub use crate::capture::CaptureParameters;
 pub use crate::codecs::hti::decode::HtiThermogram;
 pub use crate::error::Error;

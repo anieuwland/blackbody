@@ -1,4 +1,3 @@
-use flyr::camera_metadata::CameraMetadata;
 use flyr::thermogram::Thermogram as Flyr;
 use imgref::{Img, ImgVec};
 use log::warn;
@@ -10,6 +9,7 @@ use uom::si::{
     thermodynamic_temperature::kelvin,
 };
 
+use crate::camera::CameraMetadata;
 use crate::capture::CaptureParameters;
 use crate::pip::{PipGeometry, PipRect};
 use crate::{Measurement, ThermVec, ThermogramTrait, thermal::into_therm_vec};
@@ -99,8 +99,8 @@ impl ThermogramTrait for FlirThermogram {
             .map(|info| info.palette.iter().map(|[y, cb, cr]| ycc_to_rgb(*y, *cr, *cb)).collect())
     }
 
-    fn camera_metadata(&self) -> Option<&CameraMetadata> {
-        self.thermogram.camera_metadata.as_ref()
+    fn camera_metadata(&self) -> CameraMetadata {
+        self.thermogram.camera_metadata.as_ref().map(CameraMetadata::from).unwrap_or_default()
     }
 
     /// FLIR records the full atmospheric model.
@@ -188,6 +188,20 @@ mod tests {
     use uom::si::{f32::TemperatureInterval, temperature_interval};
 
     use super::*;
+
+    #[test]
+    fn camera_metadata_converts_from_flyr() {
+        let path = concat!(env!("CARGO_MANIFEST_DIR"), "/thermograms/flir_e5_2-pip.jpg");
+        let t = FlirThermogram::from_file(Path::new(path)).expect("test thermogram");
+        let info = t.camera_metadata();
+
+        assert!(t.has_camera_metadata());
+        assert_eq!(info.make.as_deref(), Some("FLIR Systems AB"));
+        assert_eq!(info.model.as_deref(), Some("FLIR E5"));
+        assert!(info.date_time.is_some());
+
+        assert_eq!(info.serial_number, None);
+    }
 
     /// Reading the sample's 20 °C values back in both units pins that no double conversion happens.
     #[test]
