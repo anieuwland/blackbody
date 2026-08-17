@@ -99,7 +99,9 @@ impl ThermogramTrait for TiffThermogram {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::codecs::fake::Fake;
+
+use super::*;
 
     /// A file with a TIFF magic number but corrupt contents must yield None,
     /// not panic — Thermogram::from_file routes it here on magic number alone.
@@ -122,7 +124,7 @@ mod tests {
     fn export_import_round_trip_preserves_kelvin() {
         use uom::si::thermodynamic_temperature::kelvin;
 
-        use crate::{fake::Fake, thermal::into_therm_vec};
+        use crate::{thermal::into_therm_vec};
 
         let temps = vec![0.0, 273.15, 300.0, 1000.5];
         let fake = Fake(into_therm_vec::<kelvin>(temps.clone(), 2, 2));

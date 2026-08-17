@@ -244,7 +244,7 @@ mod tests {
     use uom::si::thermodynamic_temperature::kelvin;
 
     use super::ThermogramTrait;
-    use crate::fake::Fake;
+    use crate::codecs::fake::Fake;
     use crate::thermal::into_therm_vec;
 
     /// 2×2 image; pixel (x, y) values in kelvin: (0,0)=0, (1,0)=10, (0,1)=20, (1,1)=30.

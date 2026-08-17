@@ -212,8 +212,9 @@ mod tests {
     use uom::si::thermodynamic_temperature::{degree_celsius, kelvin};
 
     use super::TempStats;
+    use crate::codecs::fake::Fake;
     use crate::thermal::into_therm_vec;
-    use crate::{FlirThermogram, Measurement, ThermogramTrait, fake::Fake};
+    use crate::{FlirThermogram, Measurement, ThermogramTrait};
 
     fn stats_in_kelvin(s: TempStats) -> (f32, f32, f32) {
         (s.min.get::<kelvin>(), s.max.get::<kelvin>(), s.avg.get::<kelvin>())

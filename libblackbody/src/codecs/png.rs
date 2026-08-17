@@ -52,7 +52,7 @@ mod tests {
     use uom::si::thermodynamic_temperature::kelvin;
 
     use super::*;
-    use crate::{fake::Fake, thermal::into_therm_vec};
+    use crate::{codecs::fake::Fake, thermal::into_therm_vec};
 
     /// Exporting to PNG (centikelvin u16) and reading it back must preserve temperatures
     /// exactly when they fall on centikelvin steps.
