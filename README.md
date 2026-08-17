@@ -44,6 +44,7 @@ with an exe inside that can be ran.
 | FLIR JPEG, FFF |          ✅  |         ✅  |          ✅  |               ✅  |        ✅  |       | 
 | Fluke is2      |          ✅  |         ✅  |          ✅  |               ✅  |        ✅  |       |
 | HTI / ToolTop  |          ✅  |         ✅  |          ✅  |               ✅  |            |    ✅ |
+| Infiray IRG    |          ✅  |         ✅  |              |                   |            |       |
 | PNG, TIFF      |          ✅  |             |              |                   |            |    ✅ |
 
 ### libblackbody

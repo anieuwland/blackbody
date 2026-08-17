@@ -39,6 +39,8 @@ mod tests {
     #[case::hti_ht_04d_1("infiray_c201_1.irg")]
     #[case::hti_ht_04d_1("vevor_sc240m_1.irg")]
     fn decodes_irg(#[case] name: &str) {
+        use std::path::PathBuf;
+
         let bytes = read(name);
         let irg = decode_irg(bytes.as_slice(), &PathBuf::from(name));
         assert!(irg.is_ok());
