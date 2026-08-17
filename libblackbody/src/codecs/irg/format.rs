@@ -19,6 +19,8 @@ pub enum IrgMagic {
     Caac,
     #[br(magic = b"\x04\xa0")]
     O4ao,
+    #[br(magic = b"\xb0\x0b")]
+    B00b,
 }
 
 impl IrgMagic {

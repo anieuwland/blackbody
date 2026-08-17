@@ -42,6 +42,11 @@ mod tests {
     #[case::hti_ht_04d_1("hti_ht-04d_1.irg")]
     #[case::hti_ht_04d_1("infiray_c201_1.irg")]
     #[case::hti_ht_04d_1("vevor_sc240m_1.irg")]
+    #[case::topdon_tc004_1("topdon_tc004_1.irg")]
+    #[case::topdon_tc004_2("topdon_tc004_2.irg")]
+    #[case::topdon_tc004_3("topdon_tc004_3.irg")]
+    #[case::topdon_tc004_4("topdon_tc004_4.irg")]
+    #[case::topdon_tc004_5("topdon_tc004_5.irg")]
     fn decodes_irg(#[case] name: &str) {
         let bytes = read(name);
         let irg = decode_irg(bytes.as_slice(), &PathBuf::from(name));
@@ -53,6 +58,8 @@ mod tests {
     #[case::hti_ht_04d_1("hti_ht-04d_1.irg", 286.5, 301.1)]
     #[case::infiray_c201_1("infiray_c201_1.irg", 299.0, 322.375)]
     #[case::vevor_sc240m_1("vevor_sc240m_1.irg", 292.5, 415.1)]
+    #[case::topdon_tc004_1("topdon_tc004_1.irg", 281.5, 296.6)]
+    #[case::topdon_tc004_5("topdon_tc004_5.irg", 255.2, 307.4)]
     fn decodes_thermal_extremes(#[case] name: &str, #[case] min: f32, #[case] max: f32) {
         let thermal = decode(name).thermal;
         let (decoded_min, decoded_max) = thermal
