@@ -1,12 +1,13 @@
-//! Thumbnailer for Fluke is2 files. Install by
+//! Thumbnailer for Fluke is2 and InfiRay irg files. Install by
 //!
-//! 1. Registering the image/x-fluke-is2 mime type. To do so, place below xml
-//!    file in /usr/share/local/packages or ~/.local/share/mime/packages.
+//! 1. Registering the image/x-fluke-is2 and image/x-infiray-irg mime types.
+//!    To do so, place the below xml files in /usr/share/local/packages or
+//!    ~/.local/share/mime/packages.
 //! 2. Executing `update-mime-database <path>` where path is mime directory
 //!    you used in the previous step (without the subdir packages).
-//! 3. Registering a thumbnailer for is2 files by placing the below thumbnailer
-//!    entry in /usr/local/share/thumbnailers/mkis2thumb.thumbnailer or
-//!    ~/.local/share/thumbnailers/mkis2thumb.thumbnailer.
+//! 3. Registering a thumbnailer for is2 and irg files by placing the below
+//!    thumbnailer entry in /usr/local/share/thumbnailers/mkis2thumb.thumbnailer
+//!    or ~/.local/share/thumbnailers/mkis2thumb.thumbnailer.
 //! 4. Building this binary using `cargo build --release`. It should appear in
 //!    `target/release/`.
 //! 5. Installing it with
@@ -28,12 +29,23 @@
 //! </mime-info>
 //! ```
 //!
+//! ```xml
+//! <!-- ~/.local/share/mime/packages/infiray-irg.xml -->
+//! <?xml version="1.0" encoding="UTF-8"?>
+//! <mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+//!   <mime-type type="image/x-infiray-irg">
+//!     <glob pattern="*.irg"/>
+//!     <comment>InfiRay Thermal Image File</comment>
+//!   </mime-type>
+//! </mime-info>
+//! ```
+//!
 //! ```
 //! # ~/.local/share/thumbnailers/mkis2thumb.thumbnailer
 //! [Thumbnailer Entry]
 //! TryExec=/usr/local/bin/mkis2thumb
 //! Exec=/usr/local/bin/mkis2thumb %i %o -s %s
-//! MimeType=image/x-fluke-is2;
+//! MimeType=image/x-fluke-is2;image/x-infiray-irg;
 //! ```
 
 use std::process::ExitCode;
@@ -44,7 +56,7 @@ use libblackbody::{Thermogram, ThermogramTrait};
 use rgb::ComponentBytes;
 
 #[derive(Parser)]
-#[command(version, about = "Generate Fluke is2 thermogram thumbnails")]
+#[command(version, about = "Generate Fluke is2 and InfiRay irg thermogram thumbnails")]
 struct Arguments {
     input: std::path::PathBuf,
     output: std::path::PathBuf,
