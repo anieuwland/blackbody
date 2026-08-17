@@ -39,9 +39,6 @@ impl ThermogramTrait for PngThermogram {
     fn visual(&self) -> Option<ImgVec<RGB8>> {
         None
     }
-    fn identifier(&self) -> &str {
-        self.file_path.file_name().and_then(|n| n.to_str()).unwrap_or("<thermogram>")
-    }
     fn path(&self) -> Option<&PathBuf> {
         Some(&self.file_path)
     }

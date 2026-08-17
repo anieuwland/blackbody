@@ -84,10 +84,6 @@ impl ThermogramTrait for FlirThermogram {
         self.thermogram.embedded_image.is_some()
     }
 
-    fn identifier(&self) -> &str {
-        self.file_path.file_name().and_then(|n| n.to_str()).unwrap_or("<thermogram>")
-    }
-
     fn path(&self) -> Option<&PathBuf> {
         Some(&self.file_path)
     }

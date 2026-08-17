@@ -268,7 +268,7 @@ impl AppState {
             self.show_error_dialog(
                 &gettext("No thermograms found"),
                 &tr(
-                    "The folder contains no supported image files (JPEG, TIFF, PNG, IS2 or FFF).\n\nFolder: {}",
+                    "The folder contains no supported image files (JPEG, TIFF, PNG, IS2, FFF or IRG).\n\nFolder: {}",
                     &[dir.to_str().unwrap_or("<invalid path>")],
                 ),
             );
@@ -535,7 +535,7 @@ fn scan_dir_files(dir: &Path) -> Vec<PathBuf> {
         .map(|e| e.path())
         .filter(|p| {
             let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("").to_lowercase();
-            matches!(ext.as_str(), "jpg" | "jpeg" | "tif" | "tiff" | "png" | "is2" | "fff")
+            matches!(ext.as_str(), "jpg" | "jpeg" | "tif" | "tiff" | "png" | "is2" | "fff" | "irg")
         })
         .collect();
     files.sort();

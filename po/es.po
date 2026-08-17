@@ -573,12 +573,13 @@ msgstr "No se encontraron termogramas"
 #: src/gtkui/app_window.rs:272
 #, rust-format
 msgid ""
-"The folder contains no supported image files (JPEG, TIFF, PNG, IS2 or FFF).\n"
+"The folder contains no supported image files (JPEG, TIFF, PNG, IS2, FFF or "
+"IRG).\n"
 "\n"
 "Folder: {}"
 msgstr ""
-"La carpeta no contiene archivos de imagen compatibles (JPEG, TIFF, PNG, IS2 "
-"o FFF).\n"
+"La carpeta no contiene archivos de imagen compatibles (JPEG, TIFF, PNG, IS2, "
+"FFF o IRG).\n"
 "\n"
 "Carpeta: {}"
 

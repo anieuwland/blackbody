@@ -579,12 +579,13 @@ msgstr "Geen thermogrammen gevonden"
 #: src/gtkui/app_window.rs:272
 #, rust-format
 msgid ""
-"The folder contains no supported image files (JPEG, TIFF, PNG, IS2 or FFF).\n"
+"The folder contains no supported image files (JPEG, TIFF, PNG, IS2, FFF or "
+"IRG).\n"
 "\n"
 "Folder: {}"
 msgstr ""
-"De map bevat geen ondersteunde afbeeldingsbestanden (JPEG, TIFF, PNG, IS2 of "
-"FFF).\n"
+"De map bevat geen ondersteunde afbeeldingsbestanden (JPEG, TIFF, PNG, IS2, "
+"FFF of IRG).\n"
 "\n"
 "Map: {}"
 

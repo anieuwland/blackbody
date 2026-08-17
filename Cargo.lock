@@ -1128,6 +1128,7 @@ dependencies = [
 name = "libblackbody"
 version = "0.7.0"
 dependencies = [
+ "binrw",
  "enum_dispatch",
  "flyr",
  "image",

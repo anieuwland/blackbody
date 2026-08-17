@@ -18,10 +18,11 @@ use crate::*;
 #[enum_dispatch(ThermogramTrait)]
 pub enum Thermogram {
     Flir(pub FlirThermogram),
-    Tiff(pub TiffThermogram),
-    Png(pub PngThermogram),
     Fluke(pub FlukeThermogram),
     Hti(pub HtiThermogram),
+    Irg(pub IrgThermogram),
+    Png(pub PngThermogram),
+    Tiff(pub TiffThermogram),
 }
 
 impl Thermogram {
@@ -61,6 +62,16 @@ impl Thermogram {
             return FlukeThermogram::from_file(path)
                 .map(Thermogram::Fluke)
                 .ok_or_else(|| Error::Decode("corrupt or unsupported Fluke IS2 file".into()));
+        }
+
+        let is_irg = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .is_some_and(|e| e.eq_ignore_ascii_case("irg"));
+        if is_irg {
+            return IrgThermogram::from_file(path)
+                .map(Thermogram::Irg)
+                .ok_or_else(|| Error::Decode("corrupt or unsupported IRG file".into()));
         }
 
         let mut file = File::open(path)?;

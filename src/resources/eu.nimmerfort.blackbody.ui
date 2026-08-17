@@ -86,7 +86,7 @@
   </menu>
 
   <object class="GtkFileFilter" id="filter_thermograms">
-    <property name="name" translatable="yes">Thermograms (FLIR, Fluke, images)</property>
+    <property name="name" translatable="yes">Thermograms (FLIR, Fluke, IRG, images)</property>
     <mime-types>
       <mime-type>image/jpeg</mime-type>
       <mime-type>image/tiff</mime-type>
@@ -96,6 +96,7 @@
     <suffixes>
       <suffix>is2</suffix>
       <suffix>fff</suffix>
+      <suffix>irg</suffix>
     </suffixes>
   </object>
   <object class="GtkFileFilter" id="filter_flir">
@@ -111,6 +112,12 @@
     <property name="name" translatable="yes">Fluke (is2)</property>
     <suffixes>
       <suffix>is2</suffix>
+    </suffixes>
+  </object>
+  <object class="GtkFileFilter" id="filter_irg">
+    <property name="name" translatable="yes">Infiray (irg)</property>
+    <suffixes>
+      <suffix>irg</suffix>
     </suffixes>
   </object>
   <object class="GtkFileFilter" id="filter_tiff">

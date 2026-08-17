@@ -16,8 +16,8 @@ use crate::palettes;
 use crate::pip::{self, PipGeometry};
 use crate::thermal::ThermVec;
 use crate::{
-    Error, FlirThermogram, FlukeThermogram, HtiThermogram, Measurement, PngThermogram, Thermogram,
-    TiffThermogram,
+    Error, FlirThermogram, FlukeThermogram, HtiThermogram, IrgThermogram, Measurement,
+    PngThermogram, Thermogram, TiffThermogram,
 };
 
 /// All supported thermogram formats implement this trait.
@@ -32,7 +32,9 @@ pub trait ThermogramTrait {
 
     /// Provide the identifier for this thermogram, which is typically the file path. It can also be
     /// a randomly generated uuid or similar, however, if there is no path associated with the data.
-    fn identifier(&self) -> &str;
+    fn identifier(&self) -> &str {
+        self.path().and_then(|p| p.file_name().and_then(|n| n.to_str())).unwrap_or("<thermogram>")
+    }
 
     /// Returns the file path, or `None` if not a file.
     fn path(&self) -> Option<&PathBuf>;

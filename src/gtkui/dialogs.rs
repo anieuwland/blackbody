@@ -19,6 +19,7 @@ impl AppState {
         filters.append(&this.ui.filter_thermograms);
         filters.append(&this.ui.filter_flir);
         filters.append(&this.ui.filter_fluke);
+        filters.append(&this.ui.filter_irg);
         filters.append(&this.ui.filter_tiff);
         filters.append(&this.ui.filter_png);
         filters.append(&this.ui.filter_all_files);

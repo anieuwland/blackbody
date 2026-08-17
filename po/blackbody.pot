@@ -523,7 +523,8 @@ msgstr ""
 #: src/gtkui/app_window.rs:272
 #, rust-format
 msgid ""
-"The folder contains no supported image files (JPEG, TIFF, PNG, IS2 or FFF).\n"
+"The folder contains no supported image files (JPEG, TIFF, PNG, IS2, FFF or "
+"IRG).\n"
 "\n"
 "Folder: {}"
 msgstr ""

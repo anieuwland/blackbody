@@ -9,6 +9,7 @@ repository = "https://github.com/anieuwland/blackbody/tree/main/libblackbody"
 exclude = ["thermograms/"]
 
 [dependencies]
+binrw = "0.15"
 enum_dispatch = "0.3"
 flyr = { path = "../../flyr-rs", version = "0.8.1" }
 # flyr = "0.8"

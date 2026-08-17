@@ -181,6 +181,7 @@ fn image_group(thermogram: &Thermogram) -> PreferencesGroup {
         Thermogram::Png(_) => "PNG (16-bit)",
         Thermogram::Fluke(_) => "Fluke is2",
         Thermogram::Hti(_) => "HTI JPEG",
+        Thermogram::Irg(_) => "IRG",
     };
     add_row(&group, &gettext("Format"), format_str);
     if let Some(path) = thermogram.path()

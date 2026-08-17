@@ -67,10 +67,12 @@ pub mod thermal;
 pub mod thermogram;
 pub mod thermogram_trait;
 pub mod tiff;
+pub mod visual;
 
 pub use crate::camera::CameraMetadata;
 pub use crate::capture::CaptureParameters;
 pub use crate::codecs::hti::decode::HtiThermogram;
+pub use crate::codecs::irg::format::IrgThermogram;
 pub use crate::error::Error;
 pub use crate::flir::FlirThermogram;
 pub use crate::fluke::FlukeThermogram;
