@@ -39,13 +39,13 @@ with an exe inside that can be ran.
 
 ## Supported file formats
 
-| File format    | Temperatures | Visual data | Measurements | Embedded settings | PiP / MSX  | Write |
-|----------------|-------------:|------------:|-------------:|------------------:|-----------:|------:|
-| FLIR JPEG, FFF |          ✅  |         ✅  |          ✅  |               ✅  |        ✅  |       | 
-| Fluke is2      |          ✅  |         ✅  |          ✅  |               ✅  |        ✅  |       |
-| HTI / ToolTop  |          ✅  |         ✅  |          ✅  |               ✅  |            |    ✅ |
-| Infiray IRG    |          ✅  |         ✅  |              |                   |            |       |
-| PNG, TIFF      |          ✅  |             |              |                   |            |    ✅ |
+| File format    | Temps | Visible | Measurements | Metadata | PiP / MSX  | Write |
+|----------------|------:|--------:|-------------:|---------:|-----------:|------:|
+| FLIR JPEG, FFF |   ✅  |     ✅  |          ✅  |      ✅  |        ✅  |       |
+| Fluke is2      |   ✅  |     ✅  |          ✅  |      ✅  |        ✅  |       |
+| HTI / ToolTop  |   ✅  |     ✅  |          ✅  |      ✅  |            |    ✅ |
+| Infiray IRG    |   ✅  |     ✅  |              |      ✅  |            |    ✅ |
+| PNG, TIFF      |   ✅  |         |              |          |            |    ✅ |
 
 ### libblackbody
 

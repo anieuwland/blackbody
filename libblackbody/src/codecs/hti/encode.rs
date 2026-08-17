@@ -7,6 +7,16 @@ use uom::si::thermodynamic_temperature::degree_celsius;
 use crate::codecs::hti::metadata::{Metadata, Spot, VISUAL_SCALE};
 use crate::{Thermogram, ThermogramTrait, palettes};
 
+/// Encode any thermogram to the HTI file format.
+///
+/// Warning, lossy conversion! HTI seems to assume visible images are exactly
+/// twice the size of thermal images, so this encoder scales the visible light
+/// image up or down to make that true. If there is no visible light image, a
+/// render is made and used instead.
+///
+/// Additionally, HTI doesn't store many capture parameters or camera metadata.
+/// It also only stores a fixed set of measurements. Custom measurements will
+/// not carry over.
 pub fn encode_hti(thermogram: &Thermogram) -> Result<Vec<u8>, ImageError> {
     let thermal_dims = (thermogram.thermal().width(), thermogram.thermal().height());
     let render = thermogram.render_defaults();
