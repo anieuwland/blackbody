@@ -51,12 +51,13 @@ pub struct RawIrgData {
     pub visual_length: u32,
     pub visual_height: u16,
     pub visual_width: u16,
+    // 10.000 == 1.0
     pub emissivity: u32,
     /// In 10 millikelvin
     pub reflected_temperature: u32,
     /// In 10 millikelvin
     pub ambient_temperature: u32,
-    /// In millimeters or 10 millimeters
+    /// In meters, but unclear in what unit
     pub object_distance: u32,
     #[br(pad_before = 4)]
     /// in 10.000 == 1.0
