@@ -24,6 +24,8 @@ pub fn decode_irg(bytes: &[u8], file_path: &Path) -> Result<IrgThermogram, Error
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use super::*;
     use rstest::*;
 
@@ -32,17 +34,33 @@ mod tests {
         std::fs::read(&path).expect("test thermogram")
     }
 
-    /// The HT-04D sample stores a 120x160 portrait thermal frame; its trailer is laid out as
-    /// temperature block, grayscale block and a metadata block.
+    fn decode(name: &str) -> IrgThermogram {
+        decode_irg(read(name).as_slice(), &PathBuf::from(name)).expect("decodes")
+    }
+
     #[rstest]
     #[case::hti_ht_04d_1("hti_ht-04d_1.irg")]
     #[case::hti_ht_04d_1("infiray_c201_1.irg")]
     #[case::hti_ht_04d_1("vevor_sc240m_1.irg")]
     fn decodes_irg(#[case] name: &str) {
-        use std::path::PathBuf;
-
         let bytes = read(name);
         let irg = decode_irg(bytes.as_slice(), &PathBuf::from(name));
         assert!(irg.is_ok());
+    }
+
+    /// Pin the actual temperatures, not just that decoding succeeded.
+    #[rstest]
+    #[case::hti_ht_04d_1("hti_ht-04d_1.irg", 286.5, 301.1)]
+    #[case::infiray_c201_1("infiray_c201_1.irg", 299.0, 322.375)]
+    #[case::vevor_sc240m_1("vevor_sc240m_1.irg", 292.5, 415.1)]
+    fn decodes_thermal_extremes(#[case] name: &str, #[case] min: f32, #[case] max: f32) {
+        let thermal = decode(name).thermal;
+        let (decoded_min, decoded_max) = thermal
+            .pixels()
+            .map(|p| p.get::<kelvin>())
+            .fold((f32::MAX, f32::MIN), |(lo, hi), t| (lo.min(t), hi.max(t)));
+
+        assert!((decoded_min - min).abs() < 0.01, "min was {decoded_min}, expected {min}");
+        assert!((decoded_max - max).abs() < 0.01, "max was {decoded_max}, expected {max}");
     }
 }
