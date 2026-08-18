@@ -1,10 +1,10 @@
-use image::DynamicImage;
+use image::{DynamicImage, EncodableLayout};
 use imgref::ImgVec;
 use rgb::RGB8;
 use std::path::{Path, PathBuf};
 use uom::si::thermodynamic_temperature::centikelvin;
 
-use crate::{ThermVec, thermal::into_therm_vec, thermogram_trait::ThermogramTrait};
+use crate::{Error, ThermVec, thermal::into_therm_vec, thermogram_trait::ThermogramTrait};
 
 /// 16-bit grayscale PNG thermogram.
 ///
@@ -30,6 +30,24 @@ impl PngThermogram {
         );
         Some(Self { thermal, file_path: file_path.to_path_buf() })
     }
+}
+
+pub fn encode_thermal_png<T: ThermogramTrait + ?Sized>(
+    thermogram: &T,
+) -> Result<Vec<u8>, crate::Error> {
+    let thermal = thermogram.thermal();
+    let width = thermal.width() as u32;
+    let height = thermal.height() as u32;
+
+    let pixels: Vec<u16> = thermal
+        .pixels()
+        .map(|c| c.get::<centikelvin>().round().clamp(0.0, 65535.0) as u16)
+        .collect();
+    let bs: Vec<u8> = image::ImageBuffer::<image::Luma<u16>, _>::from_raw(width, height, pixels)
+        .ok_or_else(|| Error::Encode("pixel buffer does not match dimensions".into()))?
+        .as_bytes()
+        .to_vec();
+    Ok(bs)
 }
 
 impl ThermogramTrait for PngThermogram {

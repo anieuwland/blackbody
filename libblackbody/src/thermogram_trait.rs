@@ -1,18 +1,17 @@
 use std::cmp::{Ordering, PartialOrd};
-use std::fs::File;
 use std::path::PathBuf;
 
 use enum_dispatch::enum_dispatch;
 use image::{ColorType, save_buffer};
 use imgref::{Img, ImgVec};
 use rgb::{ComponentBytes, RGB8};
-use tiff::encoder::*;
 use uom::si::f32::ThermodynamicTemperature;
-use uom::si::thermodynamic_temperature::{centikelvin, kelvin};
+use uom::si::thermodynamic_temperature::{kelvin};
 
 use crate::camera::CameraMetadata;
 use crate::capture::CaptureParameters;
-use crate::palettes;
+use crate::codecs::encode_format::EncodeFormat;
+use crate::{codecs, palettes};
 use crate::pip::{self, PipGeometry};
 use crate::thermal::ThermVec;
 use crate::{
@@ -137,24 +136,24 @@ pub trait ThermogramTrait {
         self.render(range[0], range[1], &palettes::TURBO)
     }
 
+    /// Encode this thermogram to the specified format, returned as bytes.
+    fn encode(&self, format: EncodeFormat) -> Result<Vec<u8>, Error> {
+        match format {
+            EncodeFormat::Hti => codecs::hti::encode::encode_hti(self),
+            EncodeFormat::Irg => codecs::irg::encode::encode_irg(self),
+            EncodeFormat::ThermalTiff => codecs::tiff::encode_thermal_tiff(self),
+            EncodeFormat::ThermalPng => codecs::png::encode_thermal_png(self),
+        }
+    }
+
     /// Export thermal data to a 16-bit grayscale PNG in centikelvin.
     ///
     /// # Arguments
     /// `path` - Where to save the thermogram export to. Regardless of the file extension, a png
     ///   file is created.
     fn export_thermal_png(&self, path: &PathBuf) -> Result<(), Error> {
-        let thermal = self.thermal();
-        let width = thermal.width() as u32;
-        let height = thermal.height() as u32;
-        // Round to the nearest centikelvin, otherwise the values truncate on export
-        let pixels: Vec<u16> = thermal
-            .pixels()
-            .map(|c| c.get::<centikelvin>().round().clamp(0.0, 65535.0) as u16)
-            .collect();
-        image::ImageBuffer::<image::Luma<u16>, _>::from_raw(width, height, pixels)
-            .ok_or_else(|| Error::Encode("pixel buffer does not match dimensions".into()))?
-            .save(path)
-            .map_err(|e| Error::Encode(e.to_string()))
+        let bytes = self.encode(EncodeFormat::ThermalPng)?;
+        std::fs::write(path, bytes).map_err(|e| Error::Io(e))
     }
 
     /// Export thermal data to a 32-bit float tiff file in kelvin.
@@ -163,15 +162,8 @@ pub trait ThermogramTrait {
     /// `path` - Where to save the thermogram export to. Regardless of the file extension, a tiff
     ///   file is created.
     fn export_thermal(&self, path: &PathBuf) -> Result<(), Error> {
-        let thermal = self.thermal();
-        let width = self.thermal_shape()[1] as u32;
-        let height = self.thermal_shape()[0] as u32;
-        let thermal = thermal.pixels().map(|t| t.get::<kelvin>()).collect::<Vec<f32>>();
-
-        let mut file = File::create(path)?;
-        let mut tiff = TiffEncoder::new(&mut file).map_err(|e| Error::Encode(e.to_string()))?;
-        tiff.write_image::<colortype::Gray32Float>(width, height, &thermal)
-            .map_err(|e| Error::Encode(e.to_string()))
+        let bytes = self.encode(EncodeFormat::ThermalTiff)?;
+        std::fs::write(path, bytes).map_err(Error::Io)
     }
 
     /// Save render to file.

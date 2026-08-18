@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 
+use crate::codecs::encode_format::EncodeFormat;
 use crate::codecs::hti::decode::is_hti_jpeg;
 use crate::*;
 
@@ -111,6 +112,12 @@ impl Thermogram {
         }
 
         Err(Error::UnrecognizedFormat(magic))
+    }
+
+    /// Writes the current thermogram to file at the given path in the specified format.
+    pub fn to_file(&self, path: &Path, format: EncodeFormat) -> Result<(), Error> {
+        let bytes = self.encode(format)?;
+        std::fs::write(path, bytes).map_err(Error::Io)
     }
 }
 

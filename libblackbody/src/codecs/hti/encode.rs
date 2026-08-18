@@ -1,11 +1,11 @@
-use image::{ExtendedColorType, ImageError, RgbImage, codecs::jpeg::JpegEncoder, imageops};
+use image::{ExtendedColorType, RgbImage, codecs::jpeg::JpegEncoder, imageops};
 use imgref::{Img, ImgVec};
 use rgb::{ComponentBytes, FromSlice, RGB8};
 use uom::si::f32::ThermodynamicTemperature;
 use uom::si::thermodynamic_temperature::degree_celsius;
 
 use crate::codecs::hti::metadata::{Metadata, Spot, VISUAL_SCALE};
-use crate::{Thermogram, ThermogramTrait, palettes};
+use crate::{Error, ThermogramTrait, palettes};
 
 /// Encode any thermogram to the HTI file format.
 ///
@@ -17,7 +17,7 @@ use crate::{Thermogram, ThermogramTrait, palettes};
 /// Additionally, HTI doesn't store many capture parameters or camera metadata.
 /// It also only stores a fixed set of measurements. Custom measurements will
 /// not carry over.
-pub fn encode_hti(thermogram: &Thermogram) -> Result<Vec<u8>, ImageError> {
+pub fn encode_hti<T: ThermogramTrait + ?Sized>(thermogram: &T) -> Result<Vec<u8>, Error> {
     let thermal_dims = (thermogram.thermal().width(), thermogram.thermal().height());
     let render = thermogram.render_defaults();
     let visual = thermogram.visual().unwrap_or_else(|| render.clone());
@@ -107,8 +107,8 @@ fn fit_visual(visual: ImgVec<RGB8>, thermal_dims: (usize, usize)) -> ImgVec<RGB8
 }
 
 /// Build a metadata block, leaving fields the source format does not carry at neutral values.
-fn build_metadata(
-    thermogram: &Thermogram,
+fn build_metadata<T: ThermogramTrait + ?Sized>(
+    thermogram: &T,
     min: ThermodynamicTemperature,
     max: ThermodynamicTemperature,
 ) -> Metadata {
@@ -143,16 +143,13 @@ fn build_metadata(
     }
 }
 
-fn encode_jpeg(image: ImgVec<RGB8>) -> Result<Vec<u8>, ImageError> {
+fn encode_jpeg(image: ImgVec<RGB8>) -> Result<Vec<u8>, Error> {
     let mut out: Vec<u8> = Vec::new();
     let bytes: Vec<_> = image.pixels().flat_map(|p| [p.r, p.g, p.b]).collect();
 
-    JpegEncoder::new_with_quality(&mut out, 95).encode(
-        &bytes,
-        image.width() as u32,
-        image.height() as u32,
-        ExtendedColorType::Rgb8,
-    )?;
+    JpegEncoder::new_with_quality(&mut out, 95)
+        .encode(&bytes, image.width() as u32, image.height() as u32, ExtendedColorType::Rgb8)
+        .map_err(|e| Error::Encode(e.to_string()))?;
     Ok(out)
 }
 
@@ -162,7 +159,7 @@ mod tests {
 
     use super::super::decode;
     use super::*;
-    use crate::Measurement;
+    use crate::{Measurement, Thermogram};
     use rstest::*;
 
     fn read(name: &str) -> Thermogram {

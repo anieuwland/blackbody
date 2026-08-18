@@ -5,13 +5,13 @@ use uom::si::f32::ThermodynamicTemperature;
 use uom::si::length::meter;
 use uom::si::thermodynamic_temperature::kelvin;
 
-use crate::{Thermogram, ThermogramTrait, palettes};
+use crate::{Error, ThermogramTrait, palettes};
 
 /// Encode any thermogram to the InfiRay IRG file format.
 ///
 /// This is a partially lossy format. Thermal and visible data is compeltely
 /// carried over, but not all capture parameters and camera metadata do.
-pub fn encode_irg(thermogram: &Thermogram) -> Result<Vec<u8>, ImageError> {
+pub fn encode_irg<T: ThermogramTrait + ?Sized>(thermogram: &T) -> Result<Vec<u8>, Error> {
     let (width, height) = (thermogram.thermal().width(), thermogram.thermal().height());
     let visual = thermogram.visual().unwrap_or_else(|| thermogram.render_defaults());
     let (width_v, height_v) = (visual.width() as u16, visual.height() as u16);
@@ -77,7 +77,7 @@ fn temperature_bs(temperature: Option<ThermodynamicTemperature>) -> [u8; 4] {
     ((temperature * 10000f32) as u32).to_le_bytes()
 }
 
-fn encode_jpeg(image: ImgVec<RGB8>) -> Result<Vec<u8>, ImageError> {
+fn encode_jpeg(image: ImgVec<RGB8>) -> Result<Vec<u8>, Error> {
     let mut out: Vec<u8> = Vec::new();
     let bytes: Vec<_> = image.pixels().flat_map(|p| [p.r, p.g, p.b]).collect();
 
@@ -86,7 +86,7 @@ fn encode_jpeg(image: ImgVec<RGB8>) -> Result<Vec<u8>, ImageError> {
         image.width() as u32,
         image.height() as u32,
         ExtendedColorType::Rgb8,
-    )?;
+    ).map_err(|e| Error::Encode(e.to_string()))?;
     Ok(out)
 }
 
@@ -96,7 +96,8 @@ mod tests {
 
     use super::super::decode::decode_irg;
     use super::*;
-    use crate::codecs::irg::format::IrgMagic;
+    use crate::Thermogram;
+use crate::codecs::irg::format::IrgMagic;
     use rstest::*;
 
     fn read(name: &str) -> Thermogram {

@@ -1,11 +1,13 @@
 use imgref::ImgVec;
 use rgb::RGB8;
+use tiff::encoder::{TiffEncoder, colortype};
 use std::fs::File;
+use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use tiff::decoder::DecodingResult;
 use uom::si::thermodynamic_temperature::{centikelvin, kelvin};
 
-use crate::ThermVec;
+use crate::{Error, ThermVec};
 use crate::thermal::into_therm_vec;
 use crate::thermogram_trait::ThermogramTrait;
 
@@ -77,6 +79,21 @@ impl TiffThermogram {
             }
         }
     }
+}
+
+pub fn encode_thermal_tiff<T: ThermogramTrait + ?Sized>(
+    thermogram: &T,
+) -> Result<Vec<u8>, Error> {
+    let thermal = thermogram.thermal();
+    let width = thermogram.thermal_shape()[1] as u32;
+    let height = thermogram.thermal_shape()[0] as u32;
+    let thermal = thermal.pixels().map(|t| t.get::<kelvin>()).collect::<Vec<f32>>();
+
+    let mut cursor = Cursor::new(Vec::with_capacity((width * height) as usize));
+    let mut tiff = TiffEncoder::new(&mut cursor).map_err(|e| Error::Encode(e.to_string()))?;
+    let _ = tiff.write_image::<colortype::Gray32Float>(width, height, &thermal)
+        .map_err(|e| Error::Encode(e.to_string()))?;
+    Ok(cursor.into_inner())
 }
 
 impl ThermogramTrait for TiffThermogram {

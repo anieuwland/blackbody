@@ -1,6 +1,6 @@
 [package]
 name = "libblackbody"
-description = "Decode thermograms regardless of format - FLIR, Fluke, TIFF, PNG - providing a standard interface for all."
+description = "Decode and encode thermograms regardless of format - FLIR, Fluke, IRG, HTI, TIFF, PNG - providing a standard interface for all."
 version = "0.7.0"
 license = "EUPL-1.2"
 authors = [ "Arthur Nieuwland <anieuwland@nimmerfort.eu>",]
