@@ -1,15 +1,14 @@
 use imgref::ImgVec;
 use rgb::RGB8;
-use tiff::encoder::{TiffEncoder, colortype};
-use std::fs::File;
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use tiff::decoder::DecodingResult;
+use tiff::encoder::{TiffEncoder, colortype};
 use uom::si::thermodynamic_temperature::{centikelvin, kelvin};
 
-use crate::{Error, ThermVec};
 use crate::thermal::into_therm_vec;
 use crate::thermogram_trait::ThermogramTrait;
+use crate::{Error, ThermVec};
 
 /// This is the struct and `ThermogramTrait` implementation for TIFF thermograms, through the use
 /// `image-rs/tiff`.
@@ -25,11 +24,17 @@ use crate::thermogram_trait::ThermogramTrait;
 /// thermogram formats.
 #[derive(Clone, Debug)]
 pub struct TiffThermogram {
-    pub file_path: PathBuf,
+    pub file_path: Option<PathBuf>,
     thermal: ThermVec,
 }
 
 impl TiffThermogram {
+    /// Whether the buffer starts with a TIFF magic number, little- or big-endian. A candidate
+    /// check, not a guarantee.
+    pub fn matches_magic(bytes: &[u8]) -> bool {
+        bytes.starts_with(b"II*\0") || bytes.starts_with(b"MM\0*")
+    }
+
     /// Read a Tiff file referenced by a path.
     ///
     /// # Arguments
@@ -38,15 +43,25 @@ impl TiffThermogram {
     /// # Returns
     /// In case of success, `Some<TiffThermogram>` is returned, otherwise `None`.
     pub fn from_file(file_path: &Path) -> Option<Self> {
-        let thermal = Self::read_thermal(file_path)?;
-        Some(Self { thermal, file_path: file_path.to_path_buf() })
+        let bytes = std::fs::read(file_path).ok()?;
+        let mut thermogram = Self::from_bytes(&bytes)?;
+        thermogram.file_path = Some(file_path.to_path_buf());
+        Some(thermogram)
+    }
+
+    /// Decode a TIFF thermogram from an in-memory buffer.
+    ///
+    /// # Returns
+    /// In case of success, `Some<TiffThermogram>` is returned, otherwise `None`.
+    pub fn from_bytes(bytes: &[u8]) -> Option<Self> {
+        let thermal = Self::read_thermal(bytes)?;
+        Some(Self { thermal, file_path: None })
     }
 
     /// Decodes the first image in the TIFF. Any decode failure (corrupt file,
     /// unexpected sample count) yields `None` rather than a panic.
-    fn read_thermal(file_path: &Path) -> Option<ThermVec> {
-        let file = File::open(file_path).ok()?;
-        let mut tiff = tiff::decoder::Decoder::new(file).ok()?;
+    fn read_thermal(bytes: &[u8]) -> Option<ThermVec> {
+        let mut tiff = tiff::decoder::Decoder::new(Cursor::new(bytes)).ok()?;
         let (width, height) = tiff.dimensions().ok()?;
         let (width, height) = (width as usize, height as usize);
 
@@ -106,7 +121,7 @@ impl ThermogramTrait for TiffThermogram {
     }
 
     fn path(&self) -> Option<&PathBuf> {
-        Some(&self.file_path)
+        self.file_path.as_ref()
     }
 
     fn palette(&self) -> Option<Vec<[f32; 3]>> {

@@ -108,7 +108,7 @@ use crate::codecs::irg::format::IrgMagic;
     fn encode_and_decode(name: &str) -> (Thermogram, Vec<u8>, crate::IrgThermogram) {
         let thermogram = read(name);
         let irg = encode_irg(&thermogram).expect("encodes as irg");
-        let decoded = decode_irg(&irg, Path::new(name)).expect("decodes as irg");
+        let decoded = decode_irg(&irg).expect("decodes as irg");
         (thermogram, irg, decoded)
     }
 
@@ -171,7 +171,7 @@ use crate::codecs::irg::format::IrgMagic;
         assert!(thermogram.visual().is_none());
 
         let irg = encode_irg(&thermogram).expect("encodes as irg");
-        let destination = decode_irg(&irg, Path::new("render.irg")).expect("decodes as irg");
+        let destination = decode_irg(&irg).expect("decodes as irg");
 
         let visual = destination.visual().expect("falls back to a render");
         let thermal = destination.thermal();

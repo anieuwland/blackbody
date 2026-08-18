@@ -1,4 +1,4 @@
-use std::{io::Cursor, path::Path};
+use std::io::Cursor;
 
 use binrw::{Error, prelude::*};
 use uom::si::thermodynamic_temperature::kelvin;
@@ -8,7 +8,7 @@ use crate::{
     thermal::into_therm_vec,
 };
 
-pub fn decode_irg(bytes: &[u8], file_path: &Path) -> Result<IrgThermogram, Error> {
+pub fn decode_irg(bytes: &[u8]) -> Result<IrgThermogram, Error> {
     let mut cursor = Cursor::new(&bytes);
     let raw_data = cursor.read_le::<RawIrgData>()?;
 
@@ -19,13 +19,11 @@ pub fn decode_irg(bytes: &[u8], file_path: &Path) -> Result<IrgThermogram, Error
     let thermal_height = raw_data.thermal_height as usize;
     let thermal = into_therm_vec::<kelvin>(thermal, thermal_width, thermal_height);
 
-    Ok(IrgThermogram { file_path: file_path.to_path_buf(), thermal, raw_data })
+    Ok(IrgThermogram { file_path: None, thermal, raw_data })
 }
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use super::*;
     use rstest::*;
 
@@ -35,7 +33,7 @@ mod tests {
     }
 
     fn decode(name: &str) -> IrgThermogram {
-        decode_irg(read(name).as_slice(), &PathBuf::from(name)).expect("decodes")
+        decode_irg(read(name).as_slice()).expect("decodes")
     }
 
     #[rstest]
@@ -49,7 +47,7 @@ mod tests {
     #[case::topdon_tc004_5("topdon_tc004_5.irg")]
     fn decodes_irg(#[case] name: &str) {
         let bytes = read(name);
-        let irg = decode_irg(bytes.as_slice(), &PathBuf::from(name));
+        let irg = decode_irg(bytes.as_slice());
         assert!(irg.is_ok());
     }
 

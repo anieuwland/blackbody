@@ -17,7 +17,7 @@ use crate::{Measurement, ThermVec, ThermogramTrait, thermal::into_therm_vec};
 #[derive(Clone, Debug)]
 pub struct FlukeThermogram {
     pub thermogram: Serendip,
-    pub file_path: PathBuf,
+    pub file_path: Option<PathBuf>,
     thermal: ThermVec,
 }
 
@@ -30,15 +30,29 @@ impl FlukeThermogram {
     /// # Returns
     /// In case of success, `Some<FlukeThermogram>` is returned, otherwise `None`.
     pub fn from_file(file_path: &Path) -> Option<FlukeThermogram> {
-        FlukeThermogram::read_thermal(file_path)
+        let bytes = std::fs::read(file_path).ok()?;
+        let mut thermogram = FlukeThermogram::from_bytes(&bytes)?;
+        thermogram.file_path = Some(file_path.to_path_buf());
+        Some(thermogram)
     }
 
-    fn read_thermal(file_path: &Path) -> Option<FlukeThermogram> {
-        let thermogram = Serendip::new_from_path(file_path).ok()?;
+    /// Whether the buffer starts like a Fluke is2 file: the blob format's magic number, or a
+    /// zip archive (shared with any zip-based format). A candidate check, not a guarantee.
+    pub fn matches_magic(bytes: &[u8]) -> bool {
+        bytes.starts_with(serendip::parsing::blob::BLOB_FILE_MAGIC_BYTES)
+            || bytes.starts_with(b"PK\x03\x04")
+    }
+
+    /// Decode a Fluke is2 thermogram from an in-memory buffer.
+    ///
+    /// # Returns
+    /// In case of success, `Some<FlukeThermogram>` is returned, otherwise `None`.
+    pub fn from_bytes(bytes: &[u8]) -> Option<FlukeThermogram> {
+        let thermogram = Serendip::new_from_bytes(bytes).ok()?;
         let thermal = thermogram.kelvin()?;
         let thermal = into_therm_vec::<kelvin>(thermal.pixels(), thermal.width(), thermal.height());
 
-        Some(FlukeThermogram { thermogram, file_path: file_path.to_path_buf(), thermal })
+        Some(FlukeThermogram { thermogram, file_path: None, thermal })
     }
 }
 
@@ -59,7 +73,7 @@ impl ThermogramTrait for FlukeThermogram {
     }
 
     fn path(&self) -> Option<&PathBuf> {
-        Some(&self.file_path)
+        self.file_path.as_ref()
     }
 
     /// Palette in RGB, normalized to 0.0–1.0. Alpha is discarded.

@@ -1,5 +1,7 @@
 # Unreleased
 
+* Decode from memory with `Thermogram::from_bytes`; every format struct also
+  gained a `from_bytes` constructor and a `matches_magic` check.
 * Picture-in-picture composites for Fluke zip-style is2 files (Ti400, Ti401P,
   TiS75+): `has_pip` and `picture_in_picture` now work on `FlukeThermogram`
 * PiP is now a single shared compositor (`pip::composite`); formats implement
@@ -7,8 +9,9 @@
 * Support for FLIR files that store their data in the opposite byte order,
   as written by cameras built on the FLIR Tau core (DJI Zenmuse XT, XTR, and
   some XT2 files). These previously failed to open.
-* HTI / ToolTop files now open, although measurements and metadata don't load
-  yet
+* HTI / ToolTop files now open, including the visible light image and 
+  measurements and metadata.
+* IRG files now open, including metadata and the visible light image.
 
 # 0.6.0 (2026-08-13)
 

@@ -1,3 +1,4 @@
+use std::io::Cursor;
 use std::path::PathBuf;
 
 use binrw::{NullString, prelude::*};
@@ -6,9 +7,17 @@ use crate::ThermVec;
 
 #[derive(Clone, Debug)]
 pub struct IrgThermogram {
-    pub file_path: PathBuf,
+    pub file_path: Option<PathBuf>,
     pub thermal: ThermVec,
     pub raw_data: RawIrgData,
+}
+
+impl IrgThermogram {
+    /// Whether the buffer starts with one of the [`IrgMagic`] numbers. Only two bytes, so a
+    /// candidate check, not a guarantee.
+    pub fn matches_magic(bytes: &[u8]) -> bool {
+        IrgMagic::read_le(&mut Cursor::new(bytes)).is_ok()
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, BinRead)]
@@ -92,5 +101,21 @@ impl IrgAppendix {
             Self::Jpeg(bytes) if !bytes.is_empty() => Some(bytes.as_slice()),
             _ => None,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// `matches_magic` parses [`IrgMagic`] itself, so new variants are picked up automatically.
+    #[test]
+    fn matches_magic_accepts_all_variants_and_rejects_others() {
+        for magic in [b"\xba\xab", b"\xca\xac", b"\x04\xa0", b"\xb0\x0b"] {
+            assert!(IrgThermogram::matches_magic(magic));
+        }
+        assert!(!IrgThermogram::matches_magic(b"\xff\xd8\xff"));
+        assert!(!IrgThermogram::matches_magic(b"\xba"));
+        assert!(!IrgThermogram::matches_magic(&[]));
     }
 }

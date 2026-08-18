@@ -177,7 +177,7 @@ mod tests {
         let hti = encode_hti(&thermogram).expect("encoded {name} as hti");
         assert!(decode::is_hti_jpeg(&hti));
 
-        let destination = decode::decode_hti(&hti, None).expect("decodable {name} as hti");
+        let destination = decode::decode_hti(&hti).expect("decodable {name} as hti");
         let orig_dims = [thermogram.thermal().width(), thermogram.thermal().height()];
         let dest_dims = [destination.thermal().width(), destination.thermal().height()];
         assert_eq!(orig_dims, dest_dims);
@@ -197,7 +197,7 @@ mod tests {
     fn round_trip_preserves_metadata(#[case] name: &str) {
         let thermogram = read(name);
         let hti = encode_hti(&thermogram).expect("encodes as hti");
-        let destination = decode::decode_hti(&hti, None).expect("decodes as hti");
+        let destination = decode::decode_hti(&hti).expect("decodes as hti");
 
         let info = destination.info.as_ref().expect("metadata block parses");
         assert_eq!(info.margins, Some([0, 0, 0, 0]));
@@ -252,7 +252,7 @@ mod tests {
 
         assert!(!stripped.has_capture_parameters());
         let hti = encode_hti(&stripped).expect("encodes as hti");
-        let destination = decode::decode_hti(&hti, None).expect("decodes as hti");
+        let destination = decode::decode_hti(&hti).expect("decodes as hti");
         assert_eq!(destination.info.as_ref().expect("metadata block").emissivity, 1.0);
     }
 
@@ -264,7 +264,7 @@ mod tests {
     fn visual_is_written_at_twice_the_thermal_resolution(#[case] name: &str) {
         let thermogram = read(name);
         let hti = encode_hti(&thermogram).expect("encodes as hti");
-        let destination = decode::decode_hti(&hti, None).expect("decodes as hti");
+        let destination = decode::decode_hti(&hti).expect("decodes as hti");
 
         let thermal = destination.thermal();
         let visual = destination.visual().expect("has visual");

@@ -12,7 +12,13 @@ use crate::{
 impl IrgThermogram {
     pub fn from_file(file_path: &Path) -> Option<IrgThermogram> {
         let bytes = std::fs::read(file_path).ok()?;
-        decode_irg(bytes.as_slice(), &PathBuf::from(file_path)).ok()
+        let mut thermogram = IrgThermogram::from_bytes(&bytes)?;
+        thermogram.file_path = Some(file_path.to_path_buf());
+        Some(thermogram)
+    }
+
+    pub fn from_bytes(bytes: &[u8]) -> Option<IrgThermogram> {
+        decode_irg(bytes).ok()
     }
 }
 
@@ -26,6 +32,6 @@ impl ThermogramTrait for IrgThermogram {
     }
 
     fn path(&self) -> Option<&PathBuf> {
-        Some(&self.file_path)
+        self.file_path.as_ref()
     }
 }

@@ -24,7 +24,7 @@ use crate::{Measurement, ThermVec, ThermogramTrait, thermal::into_therm_vec};
 #[derive(Clone, Debug)]
 pub struct FlirThermogram {
     pub thermogram: Flyr,
-    pub file_path: PathBuf,
+    pub file_path: Option<PathBuf>,
     thermal: ThermVec,
 }
 
@@ -37,11 +37,26 @@ impl FlirThermogram {
     /// # Returns
     /// In case of success, `Some<FlirThermogram>` is returned, otherwise `None`.
     pub fn from_file(file_path: &Path) -> Option<FlirThermogram> {
-        FlirThermogram::read_thermal(file_path)
+        let bytes = std::fs::read(file_path).ok()?;
+        let mut thermogram = FlirThermogram::from_bytes(&bytes)?;
+        thermogram.file_path = Some(file_path.to_path_buf());
+        Some(thermogram)
     }
 
-    fn read_thermal(file_path: &Path) -> Option<FlirThermogram> {
-        let thermogram = Flyr::new_from_path(file_path).ok()?;
+    /// Whether the buffer starts like a FLIR file: a JPEG (which may carry FLIR APP1
+    /// segments) or a raw FFF/AFF stream. A candidate check, not a guarantee.
+    pub fn matches_magic(bytes: &[u8]) -> bool {
+        bytes.starts_with(&[0xFF, 0xD8, 0xFF])
+            || bytes.starts_with(b"FFF\0")
+            || bytes.starts_with(b"AFF\0")
+    }
+
+    /// Decode a FLIR thermogram from an in-memory buffer.
+    ///
+    /// # Returns
+    /// In case of success, `Some<FlirThermogram>` is returned, otherwise `None`.
+    pub fn from_bytes(bytes: &[u8]) -> Option<FlirThermogram> {
+        let thermogram = Flyr::new_from_bytes(bytes).ok()?;
         let thermal = thermogram.kelvin();
         let (width, height) = (thermogram.width(), thermogram.height());
 
@@ -54,7 +69,7 @@ impl FlirThermogram {
         }
         let thermal = into_therm_vec::<kelvin>(thermal, width, height);
 
-        Some(FlirThermogram { thermogram, file_path: file_path.to_path_buf(), thermal })
+        Some(FlirThermogram { thermogram, file_path: None, thermal })
     }
 }
 
@@ -85,7 +100,7 @@ impl ThermogramTrait for FlirThermogram {
     }
 
     fn path(&self) -> Option<&PathBuf> {
-        Some(&self.file_path)
+        self.file_path.as_ref()
     }
 
     fn palette(&self) -> Option<Vec<[f32; 3]>> {

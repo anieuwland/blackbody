@@ -13,7 +13,7 @@ use crate::{ThermVec, thermal::into_therm_vec};
 /// The decoded contents of an HTI/ToolTop JPEG.
 #[derive(Clone, Debug)]
 pub struct HtiThermogram {
-    pub file_path: PathBuf,
+    pub file_path: Option<PathBuf>,
     /// The raw metadata block, including its leading `u32` size field.
     pub metadata: Vec<u8>,
     /// The metadata block's parsed fields, or `None` if it could not be interpreted.
@@ -38,12 +38,22 @@ impl HtiThermogram {
     /// In case of success, `Some<HtiThermogram>` is returned, otherwise `None`.
     pub fn from_file(file_path: &Path) -> Option<HtiThermogram> {
         let bytes = std::fs::read(file_path).ok()?;
-        decode_hti(&bytes, Some(file_path))
+        let mut thermogram = decode_hti(&bytes)?;
+        thermogram.file_path = Some(file_path.to_path_buf());
+        Some(thermogram)
+    }
+
+    /// Decode an HTI/ToolTop thermogram from an in-memory buffer.
+    ///
+    /// # Returns
+    /// In case of success, `Some<HtiThermogram>` is returned, otherwise `None`.
+    pub fn from_bytes(bytes: &[u8]) -> Option<HtiThermogram> {
+        decode_hti(bytes)
     }
 }
 
 /// Decode an HTI/ToolTop JPEG, returning `None` if any section is missing or malformed.
-pub fn decode_hti(bytes: &[u8], file_path: Option<&Path>) -> Option<HtiThermogram> {
+pub fn decode_hti(bytes: &[u8]) -> Option<HtiThermogram> {
     // Structure:
     // 1. JPEG #1. Skip until end of file.
     // 2. JPEG #2: Visible light image.
@@ -70,7 +80,7 @@ pub fn decode_hti(bytes: &[u8], file_path: Option<&Path>) -> Option<HtiThermogra
     );
 
     Some(HtiThermogram {
-        file_path: file_path.map(Path::to_path_buf).unwrap_or_default(),
+        file_path: None,
         metadata: metadata.to_vec(),
         camera_metadata: info.as_ref().map(camera_metadata).unwrap_or_default(),
         info,
@@ -243,7 +253,7 @@ mod tests {
 
     #[rstest]
     fn decodes_the_hti_sample() {
-        let hti = decode_hti(&read("hti_ht-04d_1.jpg"), None).expect("decodes");
+        let hti = decode_hti(&read("hti_ht-04d_1.jpg")).expect("decodes");
 
         assert_eq!(hti.thermal.len(), 120 * 160);
         assert_eq!((hti.thermal_buffer.width(), hti.thermal_buffer.height()), (120, 160));
@@ -280,7 +290,7 @@ mod tests {
     fn exposes_metadata_through_the_trait() {
         use crate::{Measurement, ThermogramTrait};
 
-        let hti = decode_hti(&read("hti_ht-04d_1.jpg"), None).expect("decodes");
+        let hti = decode_hti(&read("hti_ht-04d_1.jpg")).expect("decodes");
 
         let camera = hti.camera_metadata();
         assert_eq!(camera.make.as_deref(), Some("HTI"));

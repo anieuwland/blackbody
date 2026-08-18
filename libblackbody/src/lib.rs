@@ -13,7 +13,8 @@
 //!
 //! # Usage
 //! Call `Thermogram::from_file` on your file to get a `Thermogram` object. It can be used
-//! according to the specification of `ThermogramTrait`.
+//! according to the specification of `ThermogramTrait`. For data already in memory — from
+//! a network stream, archive, or similar — use `Thermogram::from_bytes` instead.
 //!
 //! ```rust
 //! use libblackbody::Thermogram;

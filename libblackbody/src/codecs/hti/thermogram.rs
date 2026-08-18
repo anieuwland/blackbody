@@ -20,7 +20,7 @@ impl ThermogramTrait for HtiThermogram {
     }
 
     fn path(&self) -> Option<&PathBuf> {
-        Some(&self.file_path)
+        self.file_path.as_ref()
     }
 
     fn camera_metadata(&self) -> CameraMetadata {

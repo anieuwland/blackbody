@@ -11,13 +11,26 @@ use crate::{Error, ThermVec, thermal::into_therm_vec, thermogram_trait::Thermogr
 /// Values are interpreted as centikelvin (same convention as TIFF U16).
 #[derive(Clone, Debug)]
 pub struct PngThermogram {
-    pub file_path: PathBuf,
+    pub file_path: Option<PathBuf>,
     thermal: ThermVec,
 }
 
 impl PngThermogram {
+    /// Whether the buffer starts with the PNG magic number. A candidate check; whether the
+    /// image is a decodable 16-bit grayscale one is only known after `from_bytes`.
+    pub fn matches_magic(bytes: &[u8]) -> bool {
+        bytes.starts_with(b"\x89PNG")
+    }
+
     pub fn from_file(file_path: &Path) -> Option<Self> {
-        let img = image::open(file_path).ok()?;
+        let bytes = std::fs::read(file_path).ok()?;
+        let mut thermogram = Self::from_bytes(&bytes)?;
+        thermogram.file_path = Some(file_path.to_path_buf());
+        Some(thermogram)
+    }
+
+    pub fn from_bytes(bytes: &[u8]) -> Option<Self> {
+        let img = image::load_from_memory(bytes).ok()?;
         let buf = match img {
             DynamicImage::ImageLuma16(b) => b,
             _ => return None,
@@ -28,7 +41,7 @@ impl PngThermogram {
             width as usize,
             height as usize,
         );
-        Some(Self { thermal, file_path: file_path.to_path_buf() })
+        Some(Self { thermal, file_path: None })
     }
 }
 
@@ -58,7 +71,7 @@ impl ThermogramTrait for PngThermogram {
         None
     }
     fn path(&self) -> Option<&PathBuf> {
-        Some(&self.file_path)
+        self.file_path.as_ref()
     }
     fn palette(&self) -> Option<Vec<[f32; 3]>> {
         None
