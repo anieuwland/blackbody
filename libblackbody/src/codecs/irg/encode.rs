@@ -7,7 +7,7 @@ use uom::si::thermodynamic_temperature::kelvin;
 
 use crate::{Thermogram, ThermogramTrait, palettes};
 
-/// Encode any thermogram to the HTI file format.
+/// Encode any thermogram to the InfiRay IRG file format.
 ///
 /// This is a partially lossy format. Thermal and visible data is compeltely
 /// carried over, but not all capture parameters and camera metadata do.
